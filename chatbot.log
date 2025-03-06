@@ -35,3 +35,7 @@
 [2025-03-04 15:24:31,998] WARNING Not Found: /
 [2025-03-04 15:26:20,050] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\processed.py changed, reloading.
 [2025-03-04 15:26:20,902] INFO Watching for file changes with StatReloader
+[2025-03-04 15:39:09,531] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-04 15:39:10,698] INFO Watching for file changes with StatReloader
+[2025-03-04 15:40:33,187] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-04 15:40:34,185] INFO Watching for file changes with StatReloader
