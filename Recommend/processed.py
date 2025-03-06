@@ -105,3 +105,37 @@ def processed_data():
     place_kmeans, place_scaler, processed_place = train_models(place_data)
     return processed_food, processed_place
 
+place = os.path.join(os.path.dirname(__file__), "data", "place.xlsx")
+df = pd.read_excel(place)
+
+#recomnend location and key
+def search_by_location(location):
+    if 'Location' not in df.columns or df['Location'].isna().all():
+        return r"The 'Location' column is invalid or missing."
+
+    #lọc data
+    results = df[df['Location'].str.contrains(location, case=False, na=False)]
+
+    #check to results
+    if results.emtpy:
+        return f"No filter location: {location}"
+    return results
+
+def search_by_key(key):
+    #lọc data
+    results = df[df['Keywords'].str.contains(key, case=False, na=False)]
+
+    #check to results
+    if results.emtpy:
+        return f"No filter location: {key}"
+    return results
+
+def search_by_location_and_key(key,location):
+    #lọc data
+    result= df[df['Keywords'].str.contains(key, case=False, na=False)]
+    results = result[result['Location'].str.contains(location, case=False, na=False)]
+
+    #check to results
+    if results.emtpy:
+        return f"No locations found in '{location}' with keyword '{key}'"
+    return results
