@@ -39,3 +39,53 @@
 [2025-03-04 15:39:10,698] INFO Watching for file changes with StatReloader
 [2025-03-04 15:40:33,187] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
 [2025-03-04 15:40:34,185] INFO Watching for file changes with StatReloader
+[2025-03-06 15:04:19,833] INFO Watching for file changes with StatReloader
+[2025-03-06 15:04:47,637] INFO Watching for file changes with StatReloader
+[2025-03-06 15:45:14,907] INFO Watching for file changes with StatReloader
+[2025-03-06 15:58:13,344] ERROR Internal Server Error: /recommend/rcm-travel/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 511, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 426, in finalize_response
+    % type(response)
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'coroutine'>`
+[2025-03-06 15:59:29,792] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-06 15:59:31,175] INFO Watching for file changes with StatReloader
+[2025-03-06 16:00:01,938] INFO HTTP Request: POST http://localhost:8080/indentity/receive-data/travel "HTTP/1.1 403 "
+[2025-03-06 16:00:01,939] WARNING Forbidden: /recommend/rcm-travel/
+[2025-03-06 16:02:21,394] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\processed.py changed, reloading.
+[2025-03-06 16:02:22,443] INFO Watching for file changes with StatReloader
+[2025-03-06 16:02:51,970] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-06 16:02:53,002] INFO Watching for file changes with StatReloader
+[2025-03-06 16:04:43,128] INFO HTTP Request: POST http://localhost:8080/indentity/receive-data/travel "HTTP/1.1 403 "
+[2025-03-06 16:06:41,708] INFO HTTP Request: POST http://localhost:8080/indentity/receive-data/travel "HTTP/1.1 403 "
+[2025-03-06 16:09:02,846] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\processed.py changed, reloading.
+[2025-03-06 16:09:03,858] INFO Watching for file changes with StatReloader
+[2025-03-06 16:09:11,089] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-06 16:09:12,604] INFO Watching for file changes with StatReloader
+[2025-03-06 16:10:39,389] INFO HTTP Request: POST http://localhost:8080/indentity/receive-data/travel "HTTP/1.1 403 "
+[2025-03-06 16:10:39,391] ERROR Bad Gateway: /recommend/rcm-travel/
+[2025-03-06 16:14:08,263] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-06 16:14:09,458] INFO Watching for file changes with StatReloader
+[2025-03-06 16:17:22,878] INFO HTTP Request: POST http://localhost:8080/indentity/receive-data/travel "HTTP/1.1 403 "
+[2025-03-06 16:17:22,880] ERROR Bad Gateway: /recommend/rcm-travel/
+[2025-03-06 16:29:28,651] INFO Watching for file changes with StatReloader
+[2025-03-07 13:43:28,954] INFO Watching for file changes with StatReloader
+[2025-03-11 15:04:57,720] INFO Watching for file changes with StatReloader
+[2025-03-11 15:05:56,076] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\flight.py changed, reloading.
+[2025-03-11 15:05:56,901] INFO Watching for file changes with StatReloader
+[2025-03-11 15:06:04,985] INFO Watching for file changes with StatReloader
+[2025-03-11 15:35:31,083] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\flight.py changed, reloading.
+[2025-03-11 15:35:32,456] INFO Watching for file changes with StatReloader
