@@ -76,22 +76,32 @@ def recommend_trip(location, food_df, place_df):
     filtered_place = place_df[place_df['Location'].str.contains(location, case=False, na=False)]
 
     if filtered_food.empty or filtered_place.empty:
-        return {"Message": "No suitable locations found."}
+        return [], []
 
     # Sort by rating descending
     filtered_food = filtered_food.sort_values(by='Rating', ascending=False)
     filtered_place = filtered_place.sort_values(by='Rating', ascending=False)
 
-    unique_foods = filtered_food.drop_duplicates(subset=['Food Name']).head(3)
-    unique_places = filtered_place.drop_duplicates(subset=['Place Name']).head(2)
+    # Get all recommendations
+    food_recommendations = [{
+        "id": str(idx + 1),
+        "name": row['Food Name'],
+        "rating": float(row['Rating']),
+        "description": row['Description'],
+        "image": row['Image'],
+        "location": row['Location'],
+        "type": "FOOD"
+    } for idx, row in filtered_food.iterrows()]
 
-    food_recommendations = []
-    for i, row in unique_foods.iterrows():
-        food_recommendations.append(f"{row['Food Name']}\n\nRating: {row['Rating']}\n\nDescription: {row['Description']}\n")
-
-    place_recommendations = []
-    for i, row in unique_places.iterrows():
-        place_recommendations.append(f"{row['Place Name']}\n\nRating: {row['Rating']}\n\nDescription: {row['Description']}\n")
+    place_recommendations = [{
+        "id": str(idx + 1),
+        "name": row['Place Name'],
+        "rating": float(row['Rating']),
+        "description": row['Description'],
+        "image": row['Image'],
+        "location": row['Location'],
+        "type": "PLACE"
+    } for idx, row in filtered_place.iterrows()]
 
     return food_recommendations, place_recommendations
 
@@ -111,31 +121,49 @@ df = pd.read_excel(place)
 #recomnend location and key
 def search_by_location(location):
     if 'Location' not in df.columns or df['Location'].isna().all():
-        return r"The 'Location' column is invalid or missing."
+        return []
 
-    #lọc data
-    results = df[df['Location'].str.contrains(location, case=False, na=False)]
-
-    #check to results
-    if results.emtpy:
-        return f"No filter location: {location}"
-    return results
+    results = df[df['Location'].str.contains(location, case=False, na=False)]
+    
+    if results.empty:
+        return []
+        
+    return [{
+        "name": row['Place Name'],
+        "rating": float(row['Rating']),
+        "description": row['Description'],
+        "image": row['Image'],
+        "location": row['Location'],
+        "keywords": row['Keywords']
+    } for _, row in results.iterrows()]
 
 def search_by_key(key):
-    #lọc data
     results = df[df['Keywords'].str.contains(key, case=False, na=False)]
+    
+    if results.empty:
+        return []
+        
+    return [{
+        "name": row['Place Name'],
+        "rating": float(row['Rating']),
+        "description": row['Description'],
+        "image": row['Image'],
+        "location": row['Location'],
+        "keywords": row['Keywords']
+    } for _, row in results.iterrows()]
 
-    #check to results
-    if results.emtpy:
-        return f"No filter location: {key}"
-    return results
-
-def search_by_location_and_key(key,location):
-    #lọc data
-    result= df[df['Keywords'].str.contains(key, case=False, na=False)]
+def search_by_location_and_key(key, location):
+    result = df[df['Keywords'].str.contains(key, case=False, na=False)]
     results = result[result['Location'].str.contains(location, case=False, na=False)]
-
-    #check to results
-    if results.emtpy:
-        return f"No locations found in '{location}' with keyword '{key}'"
-    return results
+    
+    if results.empty:
+        return []
+        
+    return [{
+        "name": row['Place Name'],
+        "rating": float(row['Rating']),
+        "description": row['Description'],
+        "image": row['Image'],
+        "location": row['Location'],
+        "keywords": row['Keywords']
+    } for _, row in results.iterrows()]
