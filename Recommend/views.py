@@ -11,6 +11,7 @@ from .flight import search_flight_service
 from .hotel import generate_hotel_search_url, fetch_and_process_json
 from .processed import processed_data, recommend_trip, search_by_location, search_by_key, search_by_location_and_key
 from django.middleware.csrf import get_token
+from django.db import connection
 
 @method_decorator(csrf_exempt, name="dispatch")
 class RCMTravelDay(APIView):
@@ -84,3 +85,4 @@ class RCMHotel(APIView):
             return Response({"data": fetch_and_process_json(search_url), "csrf_token": get_token(request)}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

@@ -81,8 +81,17 @@ WSGI_APPLICATION = 'FinTrip.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'mssql',
+        'NAME': 'Fintrip',
+        'HOST': 'localhost',
+        'PORT': '1444',
+        'USER': 'sa',  # Để trống nếu dùng Windows Authentication
+        'PASSWORD': '123456',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'TrustServerCertificate': 'yes',
+            'Encrypt': 'no',
+        },
     }
 }
 
