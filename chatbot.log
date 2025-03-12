@@ -89,3 +89,406 @@ AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse`
 [2025-03-11 15:06:04,985] INFO Watching for file changes with StatReloader
 [2025-03-11 15:35:31,083] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\flight.py changed, reloading.
 [2025-03-11 15:35:32,456] INFO Watching for file changes with StatReloader
+[2025-03-11 15:50:54,230] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-11 15:50:55,173] INFO Watching for file changes with StatReloader
+[2025-03-11 15:56:14,835] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-11 15:56:15,775] INFO Watching for file changes with StatReloader
+[2025-03-11 15:58:02,917] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-11 15:58:03,985] INFO Watching for file changes with StatReloader
+[2025-03-11 15:58:05,207] WARNING Not Found: /
+[2025-03-11 15:58:06,086] WARNING Not Found: /
+[2025-03-11 15:58:06,190] WARNING Not Found: /favicon.ico
+[2025-03-11 15:58:11,167] WARNING Not Found: /recommend
+[2025-03-11 15:58:11,382] WARNING Not Found: /recommend
+[2025-03-11 15:58:37,246] WARNING Bad Request: /recommend/rcm-travel/
+[2025-03-11 15:58:37,444] WARNING Bad Request: /recommend/rcm-travel/
+[2025-03-11 15:58:53,768] WARNING Bad Request: /recommend/rcm-location-key/
+[2025-03-11 15:58:53,961] WARNING Bad Request: /recommend/rcm-location-key/
+[2025-03-11 16:04:27,761] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-11 16:04:28,731] INFO Watching for file changes with StatReloader
+[2025-03-11 16:04:39,735] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-11 16:04:40,582] INFO Watching for file changes with StatReloader
+[2025-03-11 16:06:47,042] WARNING Not Found: /
+[2025-03-11 16:06:48,050] WARNING Not Found: /
+[2025-03-11 16:06:53,087] WARNING Method Not Allowed: /recommend/rcm-flight/
+[2025-03-11 16:06:53,451] WARNING Method Not Allowed: /recommend/rcm-flight/
+[2025-03-11 16:07:04,565] ERROR Internal Server Error: /recommend/rcm-location-key/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 60, in get
+    return render(request, "search.html", {"error": "Vui lòng nhập địa điểm và từ khóa"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: search.html
+[2025-03-11 16:07:04,857] ERROR Internal Server Error: /recommend/rcm-location-key/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 60, in get
+    return render(request, "search.html", {"error": "Vui lòng nhập địa điểm và từ khóa"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: search.html
+[2025-03-11 16:07:09,198] ERROR Internal Server Error: /recommend/rcm-travel/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 26, in get
+    return render(request, "travel_day.html", {"error": "Vui lòng nhập địa điểm"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: travel_day.html
+[2025-03-11 16:07:09,486] ERROR Internal Server Error: /recommend/rcm-travel/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 26, in get
+    return render(request, "travel_day.html", {"error": "Vui lòng nhập địa điểm"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: travel_day.html
+[2025-03-11 16:07:11,563] WARNING Method Not Allowed: /recommend/rcm-flight/
+[2025-03-11 16:07:11,759] WARNING Method Not Allowed: /recommend/rcm-flight/
+[2025-03-11 16:07:24,804] ERROR Internal Server Error: /recommend/rcm-location-key/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 60, in get
+    return render(request, "search.html", {"error": "Vui lòng nhập địa điểm và từ khóa"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: search.html
+[2025-03-11 16:07:25,083] ERROR Internal Server Error: /recommend/rcm-location-key/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 60, in get
+    return render(request, "search.html", {"error": "Vui lòng nhập địa điểm và từ khóa"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: search.html
+[2025-03-11 16:08:13,805] INFO Watching for file changes with StatReloader
+[2025-03-11 16:08:17,763] ERROR Internal Server Error: /recommend/rcm-location-key/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 60, in get
+    return render(request, "search.html", {"error": "Vui lòng nhập địa điểm và từ khóa"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: search.html
+[2025-03-11 16:08:18,075] ERROR Internal Server Error: /recommend/rcm-location-key/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 60, in get
+    return render(request, "search.html", {"error": "Vui lòng nhập địa điểm và từ khóa"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: search.html
+[2025-03-11 16:08:39,428] INFO Watching for file changes with StatReloader
+[2025-03-11 16:08:42,114] ERROR Internal Server Error: /recommend/rcm-location-key/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 60, in get
+    return render(request, "search.html", {"error": "Vui lòng nhập địa điểm và từ khóa"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: search.html
+[2025-03-11 16:08:42,431] ERROR Internal Server Error: /recommend/rcm-location-key/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 60, in get
+    return render(request, "search.html", {"error": "Vui lòng nhập địa điểm và từ khóa"})
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: search.html
+[2025-03-11 16:11:05,552] INFO Watching for file changes with StatReloader
+[2025-03-11 16:11:07,347] WARNING Not Found: /
+[2025-03-11 16:11:08,422] WARNING Not Found: /
+[2025-03-11 16:11:26,690] ERROR Internal Server Error: /recommend/rcm-flight/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 95, in get
+    return render(request, "flights.html")  # Hiển thị giao diện tìm chuyến bay
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: flights.html
+[2025-03-11 16:11:26,967] ERROR Internal Server Error: /recommend/rcm-flight/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\generic\base.py", line 70, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\utils\decorators.py", line 43, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\FinTrip\Recommand\FinTrip\fintrip\Recommend\views.py", line 95, in get
+    return render(request, "flights.html")  # Hiển thị giao diện tìm chuyến bay
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "D:\FinTrip\Recommand\FinTrip\.venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: flights.html
+[2025-03-11 16:12:02,679] INFO Watching for file changes with StatReloader
