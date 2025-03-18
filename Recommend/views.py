@@ -8,14 +8,8 @@ from rest_framework import status
 
 from .flight import search_flight_service
 from .hotel import process_hotel_data_from_csv
-# Import necessary modules
-from .processed import (
-    load_data, recommend_trip, search_by_location, search_by_key, search_by_location_and_key
-)
+from .processed import load_data, recommend_one_day_trip, FOOD_FILE, PLACE_FILE
 
-# Paths to data files
-FOOD_FILE = "data/food.csv"
-PLACE_FILE = "data/place.csv"
 
 def validate_request(data, *required_fields):
     """Validate if all required fields are present in the request."""
@@ -27,25 +21,34 @@ def validate_request(data, *required_fields):
 @csrf_exempt
 @require_POST
 def recommend_travel_day(request):
-    """API to recommend foods and places based on the provided location."""
+    """
+    API gợi ý 3 địa điểm ăn uống + 3 điểm tham quan cho 1 ngày dựa trên tên tỉnh (province).
+    """
     try:
         data = json.loads(request.body)
         is_valid, error_message = validate_request(data, "location")
         if not is_valid:
-            return JsonResponse({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": error_message}, status=400)
 
-        # Load and process data
+        # Load và xử lý dữ liệu từ CSV
         food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
-        recommendations = recommend_trip(data.get("location").strip(), food_df, place_df)
+
+        # Gọi hàm recommendation theo province
+        recommendations = recommend_one_day_trip(data["location"].strip(), food_df, place_df)
 
         return JsonResponse({
             "recommendations": recommendations,
-            "location": data.get("location").strip(),
+            "location": data["location"].strip(),
             "timestamp": datetime.now().isoformat(),
             "csrf_token": get_token(request)
-        }, status=status.HTTP_200_OK)
+        }, status=200)
+
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # In ra chi tiết lỗi để debug (nên tắt chi tiết lỗi khi deploy production)
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
 
 @csrf_exempt
 @require_POST
@@ -72,24 +75,34 @@ def search_location_and_keywords(request):
         return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 @csrf_exempt
+@require_POST
 def rcm_flight(request):
     """Endpoint to search for flights."""
     if request.method == 'POST':
         try:
+            if request.content_type != "application/json":
+                return JsonResponse({"error": "Invalid content type. JSON required!"}, status=400)
+
             data = json.loads(request.body)
             origin = data.get("origin", "").strip()
             destination = data.get("destination", "").strip()
             departure_date = data.get("departure_date", "").strip()
-            return_date = data.get("return_date", "").strip() or None
 
             if not origin or not destination or not departure_date:
                 return JsonResponse({"error": "Missing required input fields!"}, status=400)
 
+            if any(len(value) > 50 for value in [origin, destination, departure_date]):
+                return JsonResponse({"error": "Input values are too long!"}, status=400)
+
+            if any(char in origin + destination for char in "<>""'{}[]()|&;"):
+                return JsonResponse({"error": "Invalid characters in input!"}, status=400)
+
             # Call flight search service
-            result = search_flight_service(origin, destination, departure_date, return_date)
+            result = search_flight_service(origin, destination, departure_date)
             return JsonResponse(result, safe=False, status=200 if "error" not in result else 500)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format!"}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Method not allowed!"}, status=405)
@@ -100,7 +113,7 @@ def rcm_flight(request):
 def rcm_hotel(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
-        search_term = data.get("search_term", "").strip()
+        search_term = data.get("province", "").strip()
 
         if not search_term:
             return JsonResponse({"error": "Please provide a province or a nearby place.", "status": 400}, status=400)
