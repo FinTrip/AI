@@ -1,22 +1,21 @@
-import os.path
+import os
 import pandas as pd
-import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score
 
-# Load food and place data
+# Verify the existence of a file
+def verify_file_path(path):
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"File not found: {path}")
+
+# Load food and place datasets
 def load_data(food_path, place_path):
-    food_df = pd.read_excel(food_path)
-    place_df = pd.read_excel(place_path)
+    verify_file_path(food_path)
+    verify_file_path(place_path)
 
-    # Standardize column names
-    food_df.columns = food_df.columns.str.strip()
-    place_df.columns = place_df.columns.str.strip()
-
-    # Print columns to verify
-    print("Food DataFrame Columns:", food_df.columns)
-    print("Place DataFrame Columns:", place_df.columns)
+    food_df = pd.read_csv(food_path)
+    place_df = pd.read_csv(place_path)
 
     # Rename columns to English
     food_df.rename(columns={
@@ -29,141 +28,70 @@ def load_data(food_path, place_path):
         'Đánh giá': 'Rating', 'Ảnh': 'Image', 'Từ Khóa': 'Keywords'
     }, inplace=True)
 
-    # Ensure 'Location' is the second column
-    for df in [food_df, place_df]:
-        if 'Location' in df.columns and df.columns.get_loc('Location') != 1:
-            cols = df.columns.tolist()
-            cols.insert(1, cols.pop(cols.index('Location')))
-            df = df[cols]
-
-    # Ensure 'Rating' column exists and handle format issues
+    # Process and clean ratings
     for df, name in [(food_df, 'Food'), (place_df, 'Place')]:
-        if 'Rating' not in df.columns:
-            print(f"Column 'Rating' does not exist in {name} dataset.")
-            df['Rating'] = np.nan  # Add missing column with NaN values
-
-        df.dropna(subset=['Rating'], inplace=True)
-        df['Rating'] = df['Rating'].astype(str).str.replace(',', '.').str.extract(r'(\d+\.?\d*)').astype(float)
-
-        # Drop empty rows
-        df.dropna(how='all', inplace=True)
+        if 'Rating' in df.columns:
+            df['Rating'] = pd.to_numeric(
+                df['Rating'].astype(str).str.replace(',', '.'),
+                errors='coerce'
+            )
+            df.dropna(subset=['Rating'], inplace=True)
+        else:
+            df['Rating'] = float('nan')
 
     return food_df, place_df
 
-# Train KMeans model
-def train_models(df, n_clusters=5, max_iter=100):
+# Perform clustering on a dataset
+def perform_clustering(df, n_clusters=5):
     if df.empty:
-        raise ValueError("Dataset is empty after preprocessing.")
+        raise ValueError("The dataset provided for clustering is empty.")
 
     features = df[['Rating']]
     scaler = StandardScaler()
     scaled_features = scaler.fit_transform(features)
 
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10, max_iter=max_iter)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10, max_iter=300)
     df['Cluster'] = kmeans.fit_predict(scaled_features)
 
-    silhouette_avg = silhouette_score(scaled_features, df['Cluster'])
-    inertia = kmeans.inertia_
-    print(f"Silhouette Score: {silhouette_avg:.4f}")
-    print(f"Inertia: {inertia:.4f}")
+    return df, {
+        "silhouette_score": silhouette_score(scaled_features, df['Cluster']),
+        "inertia": kmeans.inertia_
+    }
 
-    return kmeans, scaler, df
-
-
-# Recommend food and places
+# Recommend foods and places based on location
 def recommend_trip(location, food_df, place_df):
     filtered_food = food_df[food_df['Location'].str.contains(location, case=False, na=False)]
     filtered_place = place_df[place_df['Location'].str.contains(location, case=False, na=False)]
 
     if filtered_food.empty or filtered_place.empty:
-        return [], []
+        return {"food": [], "places": []}
 
-    # Sort by rating descending
-    filtered_food = filtered_food.sort_values(by='Rating', ascending=False)
-    filtered_place = filtered_place.sort_values(by='Rating', ascending=False)
+    return {
+        "food": filtered_food.nlargest(5, 'Rating').to_dict('records'),
+        "places": filtered_place.nlargest(5, 'Rating').to_dict('records')
+    }
 
-    # Get all recommendations
-    food_recommendations = [{
-        "id": str(idx + 1),
-        "name": row['Food Name'],
-        "rating": float(row['Rating']),
-        "description": row['Description'],
-        "image": row['Image'],
-        "location": row['Location'],
-        "type": "FOOD"
-    } for idx, row in filtered_food.iterrows()]
-
-    place_recommendations = [{
-        "id": str(idx + 1),
-        "name": row['Place Name'],
-        "rating": float(row['Rating']),
-        "description": row['Description'],
-        "image": row['Image'],
-        "location": row['Location'],
-        "type": "PLACE"
-    } for idx, row in filtered_place.iterrows()]
-
-    return food_recommendations, place_recommendations
-
-def processed_data():
-    food = os.path.join(os.path.dirname(__file__), "data", "food.xlsx")
-    place = os.path.join(os.path.dirname(__file__), "data", "place.xlsx")
-    food_data, place_data = load_data(food, place)
-
-# Train models
-    food_kmeans, food_scaler, processed_food = train_models(food_data)
-    place_kmeans, place_scaler, processed_place = train_models(place_data)
-    return processed_food, processed_place
-
-place = os.path.join(os.path.dirname(__file__), "data", "place.xlsx")
-df = pd.read_excel(place)
-
-#recomnend location and key
-def search_by_location(location):
+# Search functionalities
+def search_by_location(df, location):
     if 'Location' not in df.columns or df['Location'].isna().all():
         return []
 
     results = df[df['Location'].str.contains(location, case=False, na=False)]
-    
-    if results.empty:
-        return []
-        
-    return [{
-        "name": row['Place Name'],
-        "rating": float(row['Rating']),
-        "description": row['Description'],
-        "image": row['Image'],
-        "location": row['Location'],
-        "keywords": row['Keywords']
-    } for _, row in results.iterrows()]
+    return results.to_dict('records') if not results.empty else []
 
-def search_by_key(key):
+def search_by_key(df, key):
+    if 'Keywords' not in df.columns or df['Keywords'].isna().all():
+        return []
+
     results = df[df['Keywords'].str.contains(key, case=False, na=False)]
-    
-    if results.empty:
-        return []
-        
-    return [{
-        "name": row['Place Name'],
-        "rating": float(row['Rating']),
-        "description": row['Description'],
-        "image": row['Image'],
-        "location": row['Location'],
-        "keywords": row['Keywords']
-    } for _, row in results.iterrows()]
+    return results.to_dict('records') if not results.empty else []
 
-def search_by_location_and_key(key, location):
-    result = df[df['Keywords'].str.contains(key, case=False, na=False)]
-    results = result[result['Location'].str.contains(location, case=False, na=False)]
-    
-    if results.empty:
+def search_by_location_and_key(df, location, key):
+    if 'Keywords' not in df.columns or 'Location' not in df.columns:
         return []
-        
-    return [{
-        "name": row['Place Name'],
-        "rating": float(row['Rating']),
-        "description": row['Description'],
-        "image": row['Image'],
-        "location": row['Location'],
-        "keywords": row['Keywords']
-    } for _, row in results.iterrows()]
+
+    results = df[
+        df['Keywords'].str.contains(key, case=False, na=False) &
+        df['Location'].str.contains(location, case=False, na=False)
+    ]
+    return results.to_dict('records') if not results.empty else []
