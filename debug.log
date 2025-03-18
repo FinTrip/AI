@@ -180,3 +180,9 @@
 [2025-03-18 20:51:16,459] INFO Watching for file changes with StatReloader
 [2025-03-18 20:55:34,974] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
 [2025-03-18 20:55:35,869] INFO Watching for file changes with StatReloader
+[2025-03-18 21:53:26,765] INFO Watching for file changes with StatReloader
+[2025-03-18 21:53:32,922] WARNING Not Found: /
+[2025-03-18 21:53:34,050] WARNING Not Found: /
+[2025-03-18 21:53:34,140] WARNING Not Found: /favicon.ico
+[2025-03-18 21:53:37,943] WARNING Not Found: /recommend
+[2025-03-18 21:53:38,162] WARNING Not Found: /recommend
