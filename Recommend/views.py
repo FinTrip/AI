@@ -1,4 +1,4 @@
-import json
+import json,os
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
@@ -6,34 +6,31 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from rest_framework import status
 
+
 from .flight import search_flight_service
 from .hotel import process_hotel_data_from_csv
 from .processed import load_data, recommend_one_day_trip, FOOD_FILE, PLACE_FILE
 
 
 def validate_request(data, *required_fields):
-    """Validate if all required fields are present in the request."""
+    """Kiểm tra các trường bắt buộc trong request."""
     for field in required_fields:
         if not data.get(field, "").strip():
-            return False, f"Missing required field: {field}"
+            return False, f"Thiếu trường bắt buộc: {field}"
     return True, None
+
 
 @csrf_exempt
 @require_POST
 def recommend_travel_day(request):
-    """
-    API gợi ý 3 địa điểm ăn uống + 3 điểm tham quan cho 1 ngày dựa trên tên tỉnh (province).
-    """
+    """API gợi ý món ăn + địa điểm theo tỉnh."""
     try:
         data = json.loads(request.body)
-        is_valid, error_message = validate_request(data, "location")
-        if not is_valid:
-            return JsonResponse({"error": error_message}, status=400)
+        if not data.get("location"):
+            return JsonResponse({"error": "Thiếu trường bắt buộc: location"}, status=400)
 
-        # Load và xử lý dữ liệu từ CSV
         food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
 
-        # Gọi hàm recommendation theo province
         recommendations = recommend_one_day_trip(data["location"].strip(), food_df, place_df)
 
         return JsonResponse({
@@ -44,7 +41,6 @@ def recommend_travel_day(request):
         }, status=200)
 
     except Exception as e:
-        # In ra chi tiết lỗi để debug (nên tắt chi tiết lỗi khi deploy production)
         import traceback
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)

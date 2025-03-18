@@ -148,3 +148,16 @@
 [2025-03-18 16:30:20,479] ERROR Internal Server Error: /recommend/rcm-travel/
 [2025-03-18 16:30:59,726] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\processed.py changed, reloading.
 [2025-03-18 16:31:00,423] INFO Watching for file changes with StatReloader
+[2025-03-18 16:37:22,397] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\processed.py changed, reloading.
+[2025-03-18 16:37:23,133] INFO Watching for file changes with StatReloader
+[2025-03-18 16:37:53,428] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-18 16:37:55,769] INFO Watching for file changes with StatReloader
+[2025-03-18 16:44:07,491] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\processed.py changed, reloading.
+[2025-03-18 16:44:08,176] INFO Watching for file changes with StatReloader
+[2025-03-18 16:44:27,986] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-18 16:44:28,601] INFO Watching for file changes with StatReloader
+[2025-03-18 16:44:30,661] ERROR Internal Server Error: /recommend/rcm-travel/
+[2025-03-18 16:45:48,810] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-18 16:45:49,519] INFO Watching for file changes with StatReloader
+[2025-03-18 16:46:00,945] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-18 16:46:01,591] INFO Watching for file changes with StatReloader
