@@ -33,7 +33,7 @@ def get_access_token():
         return response.json().get("access_token")
     return None
 
-def process_flight_data(data, round_trip):
+def process_flight_data(data):
     """Process flight data returned by Amadeus API."""
     flight_results = []
     if "data" in data:
@@ -48,21 +48,19 @@ def process_flight_data(data, round_trip):
                 outbound_time = outbound["departure"]["at"]
                 outbound_flight_code = f"{outbound['carrierCode']}{outbound['number']}"
 
+                # Lấy thông tin loại vé & khoang nếu có, mặc định ESP & ECONOMY
+                traveler_pricing = flight.get("travelerPricings", [{}])
+                fare_basis = traveler_pricing[0].get("fareDetailsBySegment", [{}])[0].get("fareBasis", "ESP")
+                cabin = traveler_pricing[0].get("fareDetailsBySegment", [{}])[0].get("cabin", "ECONOMY")
+
                 flight_data = {
                     "outbound_flight_code": outbound_flight_code,
                     "outbound_time": outbound_time,
                     "total_price_vnd": f"{total_price_vnd:,.0f} VNĐ",
-                    "base_price_vnd": f"{base_price_vnd:,.0f} VNĐ"
+                    "base_price_vnd": f"{base_price_vnd:,.0f} VNĐ",
+                    "fare_basis": fare_basis,
+                    "cabin": cabin
                 }
-
-                if round_trip:
-                    inbound = itineraries[1]["segments"][0]
-                    inbound_time = inbound["departure"]["at"]
-                    inbound_flight_code = f"{inbound['carrierCode']}{inbound['number']}"
-                    flight_data.update({
-                        "inbound_flight_code": inbound_flight_code,
-                        "inbound_time": inbound_time
-                    })
 
                 flight_results.append(flight_data)
             except (KeyError, IndexError) as e:
@@ -70,7 +68,7 @@ def process_flight_data(data, round_trip):
 
     return flight_results
 
-def search_flight_service(origin_city, destination_city, departure_date, return_date=None):
+def search_flight_service(origin_city, destination_city, departure_date):
     """Search for flights using Amadeus API."""
     token = get_access_token()
     if not token:
@@ -93,10 +91,7 @@ def search_flight_service(origin_city, destination_city, departure_date, return_
         "max": 5
     }
 
-    if return_date:
-        params["returnDate"] = return_date
-
     response = requests.get(url, headers=header, params=params)
     if response.status_code == 200:
-        return process_flight_data(response.json(), bool(return_date))
+        return process_flight_data(response.json())
     return {"error": "Lỗi kết nối đến API Amadeus"}
