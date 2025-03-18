@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*(%krr^ut_2ont7$+y_1lxv)59!x1ijn9i78n9@v^md0eb-kix'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-*(%krr^ut_2ont7$+y_1lxv)59!x1ijn9i78n9@v^md0eb-kix')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # Đổi thành False khi deploy production.
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "your-production-domain.com"]
 
 
 # Application definition
@@ -81,16 +81,14 @@ WSGI_APPLICATION = 'FinTrip.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'Fintrip',
-        'HOST': 'localhost',
-        'PORT': '1444',
-        'USER': 'sa',  # Để trống nếu dùng Windows Authentication
+        'USER': 'root',
         'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '3306',
         'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'TrustServerCertificate': 'yes',
-            'Encrypt': 'no',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         },
     }
 }
@@ -120,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Ho_Chi_Minh'  # Đổi sang múi giờ Việt Nam.
 
 USE_I18N = True
 
@@ -128,13 +126,28 @@ USE_L10N = True
 
 USE_TZ = True
 
-CORS_ALLOW_ALL_ORIGINS = True
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.2/howto/static-files/
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS Settings
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
-
 CORS_ALLOW_CREDENTIALS = True
-
 CORS_ALLOWED_METHODS = [
     'DELETE',
     'GET',
@@ -143,7 +156,6 @@ CORS_ALLOWED_METHODS = [
     'POST',
     'PUT',
 ]
-
 CORS_ALLOWED_HEADERS = [
     'accept',
     'accept-encoding',
@@ -156,6 +168,7 @@ CORS_ALLOWED_HEADERS = [
     'x-requested-with',
 ]
 
+# REST framework settings
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -163,9 +176,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
     ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
 }
 
-# Cấu hình logging
+# Logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -181,10 +198,9 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'chatbot.log'),
-            'encoding': 'utf-8',
+            'filename': os.path.join(BASE_DIR, 'debug.log'),
             'formatter': 'verbose',
         },
         'console': {
@@ -195,15 +211,8 @@ LOGGING = {
     'loggers': {
         '': {  # Root logger
             'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
     },
 }
-
-# Cấu hình static files
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-

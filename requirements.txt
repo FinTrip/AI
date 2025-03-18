@@ -13,5 +13,4 @@ scikit-learn
 openpyxl
 httpx
 dotenv
-django-mssql-backend
-pyodbc
+Unidecode

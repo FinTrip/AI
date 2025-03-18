@@ -1,0 +1,74 @@
+[2025-03-17 16:37:48,770] INFO Watching for file changes with StatReloader
+[2025-03-17 16:38:35,000] INFO Watching for file changes with StatReloader
+[2025-03-17 16:39:42,079] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\hotel.py changed, reloading.
+[2025-03-17 16:39:43,015] INFO Watching for file changes with StatReloader
+[2025-03-17 16:40:48,092] INFO Watching for file changes with StatReloader
+[2025-03-17 16:41:16,215] INFO Watching for file changes with StatReloader
+[2025-03-17 16:43:27,410] INFO Watching for file changes with StatReloader
+[2025-03-17 16:45:26,801] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-17 16:45:27,732] INFO Watching for file changes with StatReloader
+[2025-03-17 16:47:51,047] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\processed.py changed, reloading.
+[2025-03-17 16:47:51,933] INFO Watching for file changes with StatReloader
+[2025-03-17 16:48:06,130] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-17 16:48:06,902] INFO Watching for file changes with StatReloader
+[2025-03-17 16:48:53,581] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-17 16:48:54,396] INFO Watching for file changes with StatReloader
+[2025-03-17 16:49:11,731] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-17 16:49:12,581] INFO Watching for file changes with StatReloader
+[2025-03-17 16:49:23,283] INFO Watching for file changes with StatReloader
+[2025-03-17 16:49:58,100] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-17 16:49:59,097] INFO Watching for file changes with StatReloader
+[2025-03-17 16:51:01,138] INFO Watching for file changes with StatReloader
+[2025-03-17 16:51:31,492] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-17 16:51:32,526] INFO Watching for file changes with StatReloader
+[2025-03-17 16:51:58,553] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-17 16:51:59,404] INFO Watching for file changes with StatReloader
+[2025-03-17 16:52:07,613] WARNING Not Found: /
+[2025-03-17 16:52:08,957] WARNING Not Found: /
+[2025-03-17 16:53:35,151] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-17 21:32:20,664] INFO Watching for file changes with StatReloader
+[2025-03-17 21:32:29,519] WARNING Not Found: /
+[2025-03-17 21:32:30,750] WARNING Not Found: /
+[2025-03-17 21:32:30,842] WARNING Not Found: /favicon.ico
+[2025-03-17 21:34:13,031] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-17 21:38:27,617] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-17 21:38:28,833] INFO Watching for file changes with StatReloader
+[2025-03-17 21:39:41,346] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\hotel.py changed, reloading.
+[2025-03-17 21:39:42,151] INFO Watching for file changes with StatReloader
+[2025-03-17 21:41:12,118] INFO Watching for file changes with StatReloader
+[2025-03-17 21:41:18,266] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-17 22:13:28,119] INFO Watching for file changes with StatReloader
+[2025-03-17 22:14:00,937] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-17 22:14:06,800] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-17 22:14:22,372] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-17 22:16:09,812] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-17 22:16:10,507] INFO Watching for file changes with StatReloader
+[2025-03-17 22:16:46,218] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\hotel.py changed, reloading.
+[2025-03-17 22:16:46,819] INFO Watching for file changes with StatReloader
+[2025-03-17 22:16:58,964] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-17 22:17:08,687] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-17 22:18:10,464] ERROR Internal Server Error: /recommend/rcm-hotel/
+[2025-03-17 22:18:20,117] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-17 22:18:39,151] ERROR Internal Server Error: /recommend/rcm-hotel/
+[2025-03-17 22:19:52,359] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\hotel.py changed, reloading.
+[2025-03-17 22:19:52,956] INFO Watching for file changes with StatReloader
+[2025-03-17 22:20:02,024] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-17 22:20:02,618] INFO Watching for file changes with StatReloader
+[2025-03-17 22:20:04,975] ERROR Internal Server Error: /recommend/rcm-hotel/
+[2025-03-17 22:20:07,048] ERROR Internal Server Error: /recommend/rcm-hotel/
+[2025-03-17 22:20:07,965] ERROR Internal Server Error: /recommend/rcm-hotel/
+[2025-03-17 22:20:09,183] ERROR Internal Server Error: /recommend/rcm-hotel/
+[2025-03-17 22:20:10,304] ERROR Internal Server Error: /recommend/rcm-hotel/
+[2025-03-17 22:20:11,306] ERROR Internal Server Error: /recommend/rcm-hotel/
+[2025-03-17 22:22:04,478] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\hotel.py changed, reloading.
+[2025-03-17 22:22:05,227] INFO Watching for file changes with StatReloader
+[2025-03-17 22:22:19,720] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-17 22:22:20,359] INFO Watching for file changes with StatReloader
+[2025-03-17 22:22:24,704] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-17 22:22:26,228] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-17 22:22:45,764] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-17 22:22:55,769] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-18 13:09:29,344] INFO Watching for file changes with StatReloader
+[2025-03-18 13:09:36,601] WARNING Not Found: /
+[2025-03-18 13:09:37,760] WARNING Not Found: /
+[2025-03-18 13:09:37,859] WARNING Not Found: /favicon.ico
