@@ -9,4 +9,5 @@ urlpatterns = [
     path('save-schedule/', views.save_schedule, name='save_schedule'),
     path('rcm-flight/', views.rcm_flight, name='rcm_flight'),
     path('rcm-hotel/', views.rcm_hotel, name='rcm_hotel'),
+    path('search-province/', views.search_province, name='search_province'),
 ]

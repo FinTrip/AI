@@ -1,4 +1,4 @@
-import json,os,re
+import json,os,re, traceback
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
@@ -10,7 +10,7 @@ import MySQLdb
 
 from .flight import search_flight_service
 from .hotel import process_hotel_data_from_csv
-from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE
+from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE, search_place
 
 MYSQL_HOST = settings.DATABASES['default']['HOST']
 MYSQL_USER = settings.DATABASES['default']['USER']
@@ -27,7 +27,6 @@ def validate_request(data, *required_fields):
     return True, None
 
 
-# ===================== recommend_travel_day =====================
 @csrf_exempt
 @require_POST
 def recommend_travel_day(request):
@@ -56,7 +55,6 @@ def recommend_travel_day(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-# ===================== recommend_travel_schedule =====================
 @csrf_exempt
 @require_POST
 def recommend_travel_schedule(request):
@@ -93,17 +91,14 @@ def recommend_travel_schedule(request):
         end_day = data.get("end_day", "").strip()
         province = data.get("province", "").strip()
 
+        # Kiểm tra trường bắt buộc
         if not start_day or not end_day or not province:
             return JsonResponse({"error": "Thiếu trường bắt buộc (start_day, end_day, province)"}, status=400)
 
-        # Kiểm tra định dạng ngày
+        # Kiểm tra định dạng ngày bằng regex
         date_pattern = r"^\d{4}-\d{2}-\d{2}$"
         if not re.match(date_pattern, start_day) or not re.match(date_pattern, end_day):
             return JsonResponse({"error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD."}, status=400)
-
-        # Province chỉ chứa chữ cái và khoảng trắng (sau khi chuẩn hóa, unidecode sẽ loại bỏ dấu)
-        if not re.match(r"^[a-zA-Z\s]+$", province):
-            return JsonResponse({"error": "Province chỉ được chứa chữ cái và khoảng trắng."}, status=400)
 
         fmt = "%Y-%m-%d"
         try:
@@ -148,7 +143,6 @@ def recommend_travel_schedule(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-# ===================== Endpoint: Save Schedule =====================
 @csrf_exempt
 @require_POST
 def save_schedule(request):
@@ -159,24 +153,6 @@ def save_schedule(request):
     {
       "user_id": 1,
       "schedule_name": "Lịch đi Quảng Nam",
-      "flight": {
-          "outbound_flight_code": "VN123",
-          "outbound_time": "2025-04-01T08:00:00",
-          "total_price_vnd": 5000000,
-          "base_price_vnd": 4500000,
-          "fare_basis": "Y",
-          "cabin": "Economy"
-      },
-      "hotel": {
-          "name": "Hotel ABC",
-          "link": "http://hotelabc.com",
-          "description": "Luxury hotel",
-          "price": 1200000,
-          "name_nearby_place": "City Center",
-          "hotel_class": "5-star",
-          "img_origin": ["img1.jpg", "img2.jpg"],
-          "location_rating": 4.8
-      },
       "days": [
         {
           "day_index": 1,
@@ -202,58 +178,30 @@ def save_schedule(request):
         // Các ngày khác...
       ]
     }
-
-    Ràng buộc:
-      - Nếu một số trường như food, place, title, address không có, lưu NULL hoặc để trống.
-      - Flight và hotel là tùy chọn; nếu không có, lưu giá trị NULL.
     """
     try:
         data = json.loads(request.body)
         user_id = data.get("user_id")
         schedule_name = data.get("schedule_name", "My Custom Schedule")
-        days_data = data.get("days")
-        flight_info = data.get("flight")  # dict hoặc None
-        hotel_info = data.get("hotel")  # dict hoặc None
-
-        if days_data is None or not isinstance(days_data, list):
-            return JsonResponse({"error": "Trường 'days' phải là danh sách."}, status=400)
-
-        # Validate cấu trúc của mỗi ngày
-        for day in days_data:
-            if not isinstance(day, dict):
-                return JsonResponse({"error": "Mỗi mục trong 'days' phải là đối tượng JSON."}, status=400)
-            if "day_index" in day:
-                try:
-                    int(day["day_index"])
-                except (ValueError, TypeError):
-                    return JsonResponse({"error": "'day_index' phải là số nguyên."}, status=400)
-            if "date_str" in day and day["date_str"]:
-                try:
-                    datetime.strptime(day["date_str"], "%Y-%m-%d")
-                except ValueError:
-                    return JsonResponse({"error": "'date_str' phải theo định dạng YYYY-MM-DD."}, status=400)
-            if "itinerary" in day and not isinstance(day["itinerary"], list):
-                return JsonResponse({"error": "'itinerary' phải là một danh sách."}, status=400)
+        days_data = data.get("days", [])
 
         # Kết nối đến MySQL sử dụng thông số từ settings.py
         db = MySQLdb.connect(
-            host=settings.DATABASES['default']['HOST'],
-            user=settings.DATABASES['default']['USER'],
-            passwd=settings.DATABASES['default']['PASSWORD'],
-            db=settings.DATABASES['default']['NAME'],
-            port=int(settings.DATABASES['default'].get('PORT', 3306)),
-            charset='utf8'
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            passwd=MYSQL_PASSWORD,
+            db=MYSQL_DB,
+            port=MYSQL_PORT,
+            charset=MYSQL_CHARSET
         )
         cursor = db.cursor()
 
-        # INSERT vào bảng schedule, lưu flight_info và hotel_info dưới dạng JSON
+        # INSERT vào bảng schedule
         sql_schedule = """
-            INSERT INTO schedule (user_id, name, flight_info, hotel_info, created_at)
-            VALUES (%s, %s, %s, %s, NOW())
+            INSERT INTO schedule (user_id, name, created_at)
+            VALUES (%s, %s, NOW())
         """
-        flight_json = json.dumps(flight_info) if flight_info else None
-        hotel_json = json.dumps(hotel_info) if hotel_info else None
-        cursor.execute(sql_schedule, [user_id, schedule_name, flight_json, hotel_json])
+        cursor.execute(sql_schedule, [user_id, schedule_name])
         schedule_id = cursor.lastrowid
 
         # Lưu từng ngày
@@ -267,7 +215,7 @@ def save_schedule(request):
             cursor.execute(sql_day, [schedule_id, day_index, date_str])
             day_id = cursor.lastrowid
 
-            # Lưu từng timeslot trong itinerary
+            # Lưu từng timeslot
             itinerary_list = day_info.get("itinerary", [])
             order_index = 0
             for item in itinerary_list:
@@ -308,137 +256,78 @@ def save_schedule(request):
         }, status=201)
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
-
-# ===================== Endpoint: Flight Search =====================
 @csrf_exempt
 @require_POST
 def rcm_flight(request):
-    """
-    Endpoint để tìm kiếm vé máy bay.
+    """Endpoint to search for flights."""
+    if request.method == 'POST':
+        try:
+            if request.content_type != "application/json":
+                return JsonResponse({"error": "Invalid content type. JSON required!"}, status=400)
 
-    Nếu dữ liệu gửi lên có trường "action": "select",
-    nghĩa là người dùng đã chọn vé phù hợp và muốn chuyển sang lịch trình.
+            data = json.loads(request.body)
+            origin = data.get("origin", "").strip()
+            destination = data.get("destination", "").strip()
+            departure_date = data.get("departure_date", "").strip()
 
-    Dữ liệu gửi lên (cho tìm kiếm):
-    {
-        "origin": "Hanoi",
-        "destination": "Ho Chi Minh",
-        "departure_date": "2025-04-01"
-    }
+            if not origin or not destination or not departure_date:
+                return JsonResponse({"error": "Missing required input fields!"}, status=400)
 
-    Dữ liệu gửi lên (cho lựa chọn):
-    {
-        "action": "select",
-        "flight": {
-            "outbound_flight_code": "VN123",
-            "outbound_time": "2025-04-01T08:00:00",
-            "total_price_vnd": 5000000,
-            "base_price_vnd": 4500000,
-            "fare_basis": "Y",
-            "cabin": "Economy"
-        }
-    }
-    """
-    try:
-        if request.content_type != "application/json":
-            return JsonResponse({"error": "Invalid content type. JSON required!"}, status=400)
+            if any(len(value) > 50 for value in [origin, destination, departure_date]):
+                return JsonResponse({"error": "Input values are too long!"}, status=400)
 
-        data = json.loads(request.body)
-        action = data.get("action", "").strip().lower()
+            if any(char in origin + destination for char in "<>""'{}[]()|&;"):
+                return JsonResponse({"error": "Invalid characters in input!"}, status=400)
 
-        if action == "select":
-            selected_flight = data.get("flight")
-            if not selected_flight:
-                return JsonResponse({"error": "Missing flight details for selection."}, status=400)
-            return JsonResponse({
-                "message": "Flight selected. Redirecting to schedule.",
-                "selected_flight": selected_flight,
-                "redirect_url": "/schedule/"  # Ví dụ URL chuyển tiếp
-            }, status=200)
-
-        origin = data.get("origin", "").strip()
-        destination = data.get("destination", "").strip()
-        departure_date = data.get("departure_date", "").strip()
-
-        if not origin or not destination or not departure_date:
-            return JsonResponse({"error": "Missing required input fields!"}, status=400)
-
-        if any(len(value) > 50 for value in [origin, destination, departure_date]):
-            return JsonResponse({"error": "Input values are too long!"}, status=400)
-
-        if any(char in origin + destination for char in "<>\"'{}[]()|&;"):
-            return JsonResponse({"error": "Invalid characters in input!"}, status=400)
-
-        # Giả sử search_flight_service được định nghĩa để trả về danh sách vé máy bay
-        result = search_flight_service(origin, destination, departure_date)
-        return JsonResponse(result, safe=False, status=200 if "error" not in result else 500)
-
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON format!"}, status=400)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+            # Call flight search service
+            result = search_flight_service(origin, destination, departure_date)
+            return JsonResponse(result, safe=False, status=200 if "error" not in result else 500)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format!"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Method not allowed!"}, status=405)
 
 
-# ===================== Endpoint: Hotel Search =====================
 @csrf_exempt
 @require_POST
 def rcm_hotel(request):
-    """
-    Endpoint để tìm kiếm khách sạn.
-
-    Nếu có trường "action": "select" trong request, nghĩa là người dùng đã chọn khách sạn phù hợp và muốn chuyển sang lịch trình.
-
-    Dữ liệu gửi lên (cho tìm kiếm):
-    {
-        "province": "Hanoi"
-    }
-
-    Dữ liệu gửi lên (cho lựa chọn):
-    {
-        "action": "select",
-        "hotel": {
-            "name": "Hotel ABC",
-            "link": "http://hotelabc.com",
-            "description": "Luxury hotel",
-            "price": 1200000,
-            "name_nearby_place": "City Center",
-            "hotel_class": "5-star",
-            "img_origin": ["img1.jpg", "img2.jpg"],
-            "location_rating": 4.8
-        }
-    }
-    """
     try:
         data = json.loads(request.body.decode('utf-8'))
-        action = data.get("action", "").strip().lower()
+        search_term = data.get("destinationInput", "").strip()
 
-        if action == "select":
-            selected_hotel = data.get("hotel")
-            if not selected_hotel:
-                return JsonResponse({"error": "Missing hotel details for selection."}, status=400)
-            return JsonResponse({
-                "message": "Hotel selected. Redirecting to schedule.",
-                "selected_hotel": selected_hotel,
-                "redirect_url": "/schedule/"  # Ví dụ URL chuyển tiếp
-            }, status=200)
-
-        search_term = data.get("province", "").strip()
         if not search_term:
-            return JsonResponse({"error": "Please provide a province or a nearby place.", "status": 400}, status=400)
+            return JsonResponse({"error": "Please provide a province.", "status": 400}, status=400)
 
-        # Giả sử process_hotel_data_from_csv được định nghĩa để trả về danh sách khách sạn từ CSV
         result = process_hotel_data_from_csv(search_term)
+
         return JsonResponse(
             {"hotels": result} if result else {"error": "No hotels found.", "status": 404},
             json_dumps_params={"ensure_ascii": False},
             status=200 if result else 404
         )
-
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON data.", "status": 400}, status=400)
     except Exception as e:
         return JsonResponse({"error": f"System error: {str(e)}", "status": 500}, status=500)
+
+@csrf_exempt
+@require_POST
+def search_province(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        province = data.get("destinationInput", "").strip()
+        if not province:
+            return JsonResponse({"error": "Please provide a province.", "status": 400}, status=400)
+        result = search_place(province)
+
+        return JsonResponse({
+            "result" : result,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token" : get_token(request)
+        }, status=200)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error:":str(e)}, status=500)
