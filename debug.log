@@ -186,3 +186,214 @@
 [2025-03-18 21:53:34,140] WARNING Not Found: /favicon.ico
 [2025-03-18 21:53:37,943] WARNING Not Found: /recommend
 [2025-03-18 21:53:38,162] WARNING Not Found: /recommend
+[2025-03-19 13:42:55,664] INFO Watching for file changes with StatReloader
+[2025-03-19 13:43:26,577] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-19 13:44:27,580] WARNING Not Found: /recommend/rcm-travel-schedule/
+[2025-03-19 13:44:48,793] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-19 13:44:49,558] INFO Watching for file changes with StatReloader
+[2025-03-19 13:44:51,774] WARNING Not Found: /recommend/rcm-travel-schedule/
+[2025-03-19 13:45:10,113] WARNING Bad Request: /recommend/travel-schedule/
+[2025-03-19 13:46:47,269] INFO Watching for file changes with StatReloader
+[2025-03-19 13:46:50,446] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-19 13:47:47,407] WARNING Bad Request: /recommend/travel-schedule/
+[2025-03-19 13:49:16,189] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-19 13:49:42,750] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 13:49:43,715] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 13:49:43,715] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 13:49:46,097] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=VCL&destinationLocationCode=HAN&departureDate=2025-04-04&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 13:49:54,560] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 13:49:55,642] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 13:49:55,643] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 13:49:57,911] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=VCL&destinationLocationCode=HAN&departureDate=2025-04-04&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 13:51:32,518] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-19 13:51:33,173] INFO Watching for file changes with StatReloader
+[2025-03-19 13:51:36,679] WARNING Bad Request: /recommend/travel-schedule/
+[2025-03-19 13:52:15,520] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-19 13:52:16,264] INFO Watching for file changes with StatReloader
+[2025-03-19 15:48:26,992] INFO Watching for file changes with StatReloader
+[2025-03-19 15:49:07,355] INFO Watching for file changes with StatReloader
+[2025-03-19 15:55:22,663] INFO Watching for file changes with StatReloader
+[2025-03-19 15:55:55,519] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 15:55:56,509] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 15:55:56,514] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 15:55:58,781] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=VCL&destinationLocationCode=HAN&departureDate=2025-04-04&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 20:27:42,158] INFO Watching for file changes with StatReloader
+[2025-03-19 20:55:31,320] WARNING Bad Request: /recommend/travel-schedule/
+[2025-03-19 21:20:11,200] WARNING Bad Request: /recommend/travel-schedule/
+[2025-03-19 21:20:12,646] WARNING Bad Request: /recommend/travel-schedule/
+[2025-03-19 21:20:26,957] INFO Watching for file changes with StatReloader
+[2025-03-19 21:31:54,760] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:31:56,202] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 21:31:56,208] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:31:58,315] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=VCL&destinationLocationCode=HAN&departureDate=2025-04-04&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 21:38:48,337] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:38:49,641] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:38:49,714] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 21:38:49,716] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:38:50,593] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 21:38:50,595] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:38:51,656] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:38:52,602] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 21:38:52,604] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:38:52,752] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=VCL&destinationLocationCode=HAN&departureDate=2025-03-21&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 21:38:53,387] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=VCL&destinationLocationCode=HAN&departureDate=2025-03-21&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 21:38:55,158] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=VCL&destinationLocationCode=HAN&departureDate=2025-03-21&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 21:46:05,375] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:46:06,873] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 21:46:06,874] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-19 21:46:07,529] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:46:08,450] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 21:46:08,451] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-19 21:46:11,454] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:46:12,513] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 409
+[2025-03-19 21:46:12,515] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-19 21:52:32,354] INFO Watching for file changes with StatReloader
+[2025-03-19 21:52:43,424] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:52:44,896] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 21:52:44,898] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:52:47,195] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=VCL&destinationLocationCode=HAN&departureDate=2025-04-04&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 21:53:18,121] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:53:19,103] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 21:53:19,106] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:53:21,580] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=DAD&destinationLocationCode=SGN&departureDate=2025-04-04&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 21:53:57,111] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:53:58,393] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:53:58,609] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 21:53:58,615] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:53:58,711] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:53:59,346] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 21:53:59,346] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:53:59,634] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 21:53:59,634] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 21:54:00,851] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-22&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 21:54:01,800] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-22&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 21:54:02,454] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-22&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 22:03:18,203] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:03:19,367] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 22:03:19,367] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:03:21,661] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-21&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 22:03:21,668] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-19 22:03:55,672] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-19 22:03:56,405] INFO Watching for file changes with StatReloader
+[2025-03-19 22:04:11,573] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:04:12,540] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 22:04:12,540] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-19 22:04:43,622] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:04:45,174] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 22:04:45,174] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:04:47,369] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-22&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 22:10:12,646] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:10:14,093] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 22:10:14,093] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:10:16,282] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-22&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 22:16:05,310] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-19 22:16:06,232] INFO Watching for file changes with StatReloader
+[2025-03-19 22:16:30,536] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-19 22:16:31,030] INFO Watching for file changes with StatReloader
+[2025-03-19 22:17:05,940] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:17:07,176] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 22:17:07,180] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:17:09,444] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-22&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-19 22:23:04,653] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:23:06,005] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-19 22:23:06,005] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-19 22:23:08,267] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-29&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-20 13:07:13,549] INFO Watching for file changes with StatReloader
+[2025-03-20 13:07:53,510] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:07:54,708] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:07:54,714] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:07:57,153] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-22&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-20 13:08:22,597] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:08:23,902] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:08:23,903] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-20 13:08:23,957] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-20 13:08:45,763] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:08:47,439] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:08:47,441] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-20 13:08:47,486] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-20 13:09:03,747] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:09:05,017] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:09:05,019] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-20 13:10:56,462] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:10:57,836] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:10:57,837] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-20 13:21:04,389] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-20 13:21:17,539] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-20 13:21:50,764] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:21:52,072] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:21:52,074] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:21:54,388] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=DAD&destinationLocationCode=SGN&departureDate=2025-04-04&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-20 13:22:39,830] WARNING Bad Request: /recommend/rcm-hotel/
+[2025-03-20 13:23:43,910] WARNING Bad Request: /recommend/rcm-flight/
+[2025-03-20 13:24:56,414] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:24:57,758] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:24:57,759] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-20 13:27:26,966] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:28,376] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:27:28,378] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-20 13:27:28,425] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-20 13:27:36,977] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:38,416] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:27:38,417] ERROR Internal Server Error: /recommend/rcm-flight/
+[2025-03-20 13:27:38,459] WARNING Not Found: /recommend/rcm-hotel/
+[2025-03-20 13:27:49,609] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:50,977] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:27:50,980] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:51,710] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:51,967] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:52,167] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:52,719] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:27:52,721] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:53,007] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:27:53,008] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:53,231] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:27:53,233] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:27:53,623] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=SGN&departureDate=2025-03-29&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-20 13:27:55,288] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=SGN&departureDate=2025-03-29&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-20 13:27:55,489] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=SGN&departureDate=2025-03-29&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-20 13:27:55,764] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=SGN&departureDate=2025-03-29&adults=1&max=5 HTTP/1.1" 200 None
+[2025-03-20 13:28:20,505] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\flight.py changed, reloading.
+[2025-03-20 13:28:21,232] INFO Watching for file changes with StatReloader
+[2025-03-20 13:28:26,233] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:28:27,415] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-20 13:28:27,417] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-20 13:28:29,730] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=SGN&departureDate=2025-03-29&adults=1&max=8 HTTP/1.1" 200 None
+[2025-03-25 14:11:34,620] INFO Watching for file changes with StatReloader
+[2025-03-25 14:12:21,719] INFO Watching for file changes with StatReloader
+[2025-03-25 14:12:59,197] ERROR Internal Server Error: /recommend/search-province/
+[2025-03-25 14:13:12,198] ERROR Internal Server Error: /recommend/search-province/
+[2025-03-25 14:14:33,664] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-25 14:14:34,543] INFO Watching for file changes with StatReloader
+[2025-03-25 14:55:42,827] INFO Watching for file changes with StatReloader
+[2025-03-25 14:55:49,358] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 14:55:50,256] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-25 14:55:50,259] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 14:55:52,657] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-29&adults=1&max=8 HTTP/1.1" 200 None
+[2025-03-25 15:10:47,817] WARNING Bad Request: /recommend/search-province/
+[2025-03-25 15:10:52,477] WARNING Bad Request: /recommend/search-province/
+[2025-03-25 15:10:53,458] WARNING Bad Request: /recommend/search-province/
+[2025-03-25 15:10:54,127] WARNING Bad Request: /recommend/search-province/
+[2025-03-25 15:10:55,510] WARNING Bad Request: /recommend/search-province/
+[2025-03-25 15:10:55,974] WARNING Bad Request: /recommend/search-province/
+[2025-03-25 15:10:56,324] WARNING Bad Request: /recommend/search-province/
+[2025-03-25 15:11:05,056] WARNING Bad Request: /recommend/search-province/
+[2025-03-25 15:11:05,667] WARNING Bad Request: /recommend/search-province/
+[2025-03-25 15:15:21,845] WARNING Bad Request: /recommend/rcm-flight/
+[2025-03-25 15:28:18,272] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 15:28:19,522] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-25 15:28:19,527] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 15:28:21,560] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-29&adults=1&max=8 HTTP/1.1" 200 None
+[2025-03-25 15:32:34,104] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 15:32:35,022] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-25 15:32:35,025] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 15:32:37,211] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-29&adults=1&max=8 HTTP/1.1" 200 None
+[2025-03-25 16:07:31,528] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 16:07:32,437] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-25 16:07:32,439] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 16:07:34,819] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-29&adults=1&max=8 HTTP/1.1" 200 None
+[2025-03-25 16:09:36,993] WARNING Method Not Allowed (GET): /recommend/search-province/
+[2025-03-25 16:12:01,726] WARNING Method Not Allowed (GET): /recommend/search-province/
+[2025-03-25 16:13:05,330] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 16:13:06,626] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-25 16:13:06,626] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-25 16:13:08,769] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-27&adults=1&max=8 HTTP/1.1" 200 None

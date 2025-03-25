@@ -258,3 +258,17 @@ def recommend_trip_schedule(start_day, end_day, province, food_df, place_df):
         "province": province,
         "schedule": schedule
     }
+
+
+def search_place(province):
+    food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+    normalized_province = normalize_text(province)
+    filtered_food = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)]
+    filtered_place = place_df[place_df['province'].str.contains(normalized_province, case=False, na=False)]
+    food_list = filtered_food[['title', 'rating', 'description', 'address', 'img']].to_dict(orient='records')
+    place_list = filtered_place[['title', 'rating', 'description', 'address', 'img']].to_dict(orient='records')
+    return {
+        "province": province,
+        "food": food_list,
+        "places": place_list
+    }
