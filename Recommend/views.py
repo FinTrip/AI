@@ -1,4 +1,4 @@
-import json,os,re, traceback
+import json, os, re, traceback
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
@@ -50,7 +50,6 @@ def recommend_travel_day(request):
         }, status=200)
 
     except Exception as e:
-        import traceback
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
@@ -66,7 +65,7 @@ def recommend_travel_schedule(request):
       - start_day < end_day.
       - start_day và end_day không được bé hơn ngày hiện tại.
       - Tổng số ngày không vượt quá 30 ngày.
-      - Province chỉ được chứa chữ cái và khoảng trắng.
+      - Province chỉ được chứa chữ cái (kể cả có dấu) và khoảng trắng.
     Nếu vi phạm, trả về JSON lỗi kèm script alert.
 
     Lịch trình:
@@ -91,21 +90,40 @@ def recommend_travel_schedule(request):
         end_day = data.get("end_day", "").strip()
         province = data.get("province", "").strip()
 
-        # Kiểm tra trường bắt buộc
+        # Kiểm tra các trường bắt buộc
         if not start_day or not end_day or not province:
-            return JsonResponse({"error": "Thiếu trường bắt buộc (start_day, end_day, province)"}, status=400)
+            return JsonResponse(
+                {"error": "Thiếu trường bắt buộc (start_day, end_day, province)"},
+                status=400
+            )
 
-        # Kiểm tra định dạng ngày bằng regex
+        # Province chỉ được chứa chữ cái (kể cả có dấu) và khoảng trắng
+        # Dùng dải Unicode để cho phép tiếng Việt có dấu: [\u00C0-\u1EF9]
+        # Thay thế hoặc bổ sung tùy nhu cầu (đây chỉ là ví dụ minh họa).
+        province_pattern = r"^[A-Za-z\u00C0-\u1EF9\s]+$"
+        if not re.match(province_pattern, province):
+            return JsonResponse({
+                "error": "Province chỉ được chứa chữ cái (kể cả có dấu) và khoảng trắng.",
+                "script": "<script>alert('Province chỉ được chứa chữ cái (kể cả có dấu) và khoảng trắng!');</script>"
+            }, status=400)
+
+        # Kiểm tra định dạng ngày
         date_pattern = r"^\d{4}-\d{2}-\d{2}$"
         if not re.match(date_pattern, start_day) or not re.match(date_pattern, end_day):
-            return JsonResponse({"error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD."}, status=400)
+            return JsonResponse({
+                "error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD.",
+                "script": "<script>alert('Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD!');</script>"
+            }, status=400)
 
         fmt = "%Y-%m-%d"
         try:
             start_dt = datetime.strptime(start_day, fmt)
             end_dt = datetime.strptime(end_day, fmt)
         except ValueError:
-            return JsonResponse({"error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD."}, status=400)
+            return JsonResponse({
+                "error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD.",
+                "script": "<script>alert('Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD!');</script>"
+            }, status=400)
 
         current_date = datetime.now().date()
         if start_dt.date() < current_date or end_dt.date() < current_date:
@@ -113,6 +131,7 @@ def recommend_travel_schedule(request):
                 "error": "Ngày bắt đầu và ngày kết thúc phải không bé hơn ngày hiện tại.",
                 "script": "<script>alert('Ngày bắt đầu và ngày kết thúc phải không bé hơn ngày hiện tại!');</script>"
             }, status=400)
+
         if start_dt >= end_dt:
             return JsonResponse({
                 "error": "Ngày bắt đầu phải bé hơn ngày kết thúc.",
@@ -126,7 +145,10 @@ def recommend_travel_schedule(request):
                 "script": "<script>alert('Tổng số ngày của lịch trình không được vượt quá 30 ngày!');</script>"
             }, status=400)
 
+        # Load dữ liệu từ CSV
         food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+
+        # Gọi hàm recommend_trip_schedule để tạo lịch trình
         schedule_result = recommend_trip_schedule(start_day, end_day, province, food_df, place_df)
         if "error" in schedule_result:
             return JsonResponse({"error": schedule_result["error"]}, status=400)
@@ -138,7 +160,6 @@ def recommend_travel_schedule(request):
         }, status=200)
 
     except Exception as e:
-        import traceback
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
@@ -185,7 +206,6 @@ def save_schedule(request):
         schedule_name = data.get("schedule_name", "My Custom Schedule")
         days_data = data.get("days", [])
 
-        # Kết nối đến MySQL sử dụng thông số từ settings.py
         db = MySQLdb.connect(
             host=MYSQL_HOST,
             user=MYSQL_USER,
@@ -258,6 +278,7 @@ def save_schedule(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+
 @csrf_exempt
 @require_POST
 def rcm_flight(request):
@@ -278,7 +299,7 @@ def rcm_flight(request):
             if any(len(value) > 50 for value in [origin, destination, departure_date]):
                 return JsonResponse({"error": "Input values are too long!"}, status=400)
 
-            if any(char in origin + destination for char in "<>""'{}[]()|&;"):
+            if any(char in origin + destination for char in "<>\"'{}[]()|&;"):
                 return JsonResponse({"error": "Invalid characters in input!"}, status=400)
 
             # Call flight search service
@@ -313,6 +334,7 @@ def rcm_hotel(request):
     except Exception as e:
         return JsonResponse({"error": f"System error: {str(e)}", "status": 500}, status=500)
 
+
 @csrf_exempt
 @require_POST
 def search_province(request):
@@ -324,10 +346,10 @@ def search_province(request):
         result = search_place(province)
 
         return JsonResponse({
-            "result" : result,
+            "result": result,
             "timestamp": datetime.now().isoformat(),
-            "csrf_token" : get_token(request)
+            "csrf_token": get_token(request)
         }, status=200)
     except Exception as e:
         traceback.print_exc()
-        return JsonResponse({"error:":str(e)}, status=500)
+        return JsonResponse({"error:": str(e)}, status=500)
