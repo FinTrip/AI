@@ -417,3 +417,42 @@
 [2025-03-25 21:13:50,961] WARNING Bad Request: /recommend/travel-schedule/
 [2025-03-25 21:22:28,284] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
 [2025-03-25 21:22:28,925] INFO Watching for file changes with StatReloader
+[2025-03-26 14:16:21,117] INFO Watching for file changes with StatReloader
+[2025-03-26 14:17:16,521] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-26 14:17:18,093] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-26 14:17:18,093] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-26 14:17:20,966] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=HAN&destinationLocationCode=DAD&departureDate=2025-03-28&adults=1&max=8 HTTP/1.1" 200 None
+[2025-03-27 20:52:08,570] INFO Watching for file changes with StatReloader
+[2025-03-27 20:52:39,229] ERROR Internal Server Error: /recommend/travel-schedule/
+[2025-03-27 20:53:30,707] INFO Watching for file changes with StatReloader
+[2025-03-27 20:57:57,442] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\processed.py changed, reloading.
+[2025-03-27 20:57:58,125] INFO Watching for file changes with StatReloader
+[2025-03-27 21:11:04,313] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-27 21:11:05,128] INFO Watching for file changes with StatReloader
+[2025-03-27 21:13:20,575] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-27 21:13:21,177] INFO Watching for file changes with StatReloader
+[2025-03-27 21:13:47,376] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-27 21:13:47,867] INFO Watching for file changes with StatReloader
+[2025-03-27 21:13:57,582] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-27 21:13:58,115] INFO Watching for file changes with StatReloader
+[2025-03-27 21:14:10,796] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-27 21:14:11,275] INFO Watching for file changes with StatReloader
+[2025-03-27 21:14:34,367] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-27 21:14:34,893] INFO Watching for file changes with StatReloader
+[2025-03-27 21:15:36,984] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-27 21:15:37,529] INFO Watching for file changes with StatReloader
+[2025-03-27 21:58:02,752] INFO Watching for file changes with StatReloader
+[2025-03-27 21:58:23,857] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\CheckException.py changed, reloading.
+[2025-03-27 21:58:24,395] INFO Watching for file changes with StatReloader
+[2025-03-27 21:58:58,054] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\CheckException.py changed, reloading.
+[2025-03-27 21:58:58,985] INFO Watching for file changes with StatReloader
+[2025-03-27 21:59:50,430] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-27 21:59:51,272] INFO Watching for file changes with StatReloader
+[2025-03-27 22:05:01,213] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-27 22:05:01,957] INFO Watching for file changes with StatReloader
+[2025-03-27 22:05:23,778] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-27 22:05:24,469] INFO Watching for file changes with StatReloader
+[2025-03-27 22:05:42,274] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-27 22:05:43,084] INFO Watching for file changes with StatReloader
+[2025-03-27 22:10:35,879] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-27 22:10:36,672] INFO Watching for file changes with StatReloader

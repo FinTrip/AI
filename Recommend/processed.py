@@ -10,90 +10,66 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score
 from sklearn.linear_model import LinearRegression
 
-# Đường dẫn đến file CSV (đảm bảo file CSV nằm trong thư mục "data" cùng với file processed.py)
+# Đường dẫn đến file dữ liệu
 FOOD_FILE = os.path.join(os.path.dirname(__file__), "data", "food.csv")
-PLACE_FILE = os.path.join(os.path.dirname(__file__), "data", "place.csv")
+PLACE_FILE = os.path.join(os.path.dirname(__file__), "data", "place2.xlsx")
 
-
+### **Hàm tiện ích**
 def normalize_text(text):
-    """
-    Chuẩn hóa văn bản: chuyển về chữ thường, loại bỏ khoảng trắng, bỏ dấu tiếng Việt.
-    """
+    """Chuẩn hóa văn bản: chuyển về chữ thường, loại bỏ khoảng trắng thừa, bỏ dấu tiếng Việt."""
     if isinstance(text, str):
         return unidecode.unidecode(text.lower().strip())
     return ""
 
-
 def safe_literal_eval(x):
-    """
-    Chuyển đổi chuỗi thành danh sách; nếu lỗi thì trả về danh sách rỗng.
-    """
+    """Chuyển chuỗi thành danh sách; trả về danh sách rỗng nếu lỗi."""
     try:
         return ast.literal_eval(x) if isinstance(x, str) else []
     except (ValueError, SyntaxError):
         return []
 
-
 def verify_file_path(path):
-    """
-    Kiểm tra file có tồn tại không.
-    """
+    """Kiểm tra xem file có tồn tại không; ném lỗi nếu không tìm thấy."""
     if not os.path.exists(path):
         raise FileNotFoundError(f"File not found: {path}")
 
-
+### **Hàm xử lý dữ liệu**
 def load_data(food_path, place_path):
     """
-    Đọc và xử lý dữ liệu từ CSV.
-    - Đổi tên cột của food.csv cho đồng nhất.
-    - Xử lý cột rating (chuyển thành số).
-    - Chuẩn hóa cột province.
+    Đọc và tiền xử lý dữ liệu từ file CSV (food) và Excel (place).
+    - Chuẩn hóa tên cột và dữ liệu.
+    - Xử lý cột rating thành dạng số.
+    - Chuẩn hóa tỉnh/thành phố.
     """
     verify_file_path(food_path)
     verify_file_path(place_path)
 
+    # Đọc dữ liệu
     food_df = pd.read_csv(food_path)
-    place_df = pd.read_csv(place_path)
+    place_df = pd.read_excel(place_path)
 
     # Đổi tên cột cho food_df
-    rename_food_columns = {
-        'Province': 'province',
-        'Title': 'title',
-        'Rating': 'rating',
-        'Address': 'address',
-        'Image': 'img'
-    }
-    food_df.rename(columns=rename_food_columns, inplace=True)
+    food_df.rename(columns={
+        'Province': 'province', 'Title': 'title', 'Rating': 'rating',
+        'Address': 'address', 'Image': 'img'
+    }, inplace=True)
 
     # Thêm cột 'description' nếu chưa có
     if 'description' not in food_df.columns:
         food_df['description'] = ''
 
-    # Chuyển cột 'Service' thành 'types'
-    if 'Service' in food_df.columns:
-        food_df['types'] = food_df['Service'].apply(safe_literal_eval)
-    else:
-        food_df['types'] = [[] for _ in range(len(food_df))]
+    # Xử lý cột 'Service' thành 'types'
+    food_df['types'] = food_df.get('Service', pd.Series([[]] * len(food_df))).apply(safe_literal_eval)
 
-    # Xử lý cột 'rating' cho food_df
-    if 'rating' in food_df.columns:
-        food_df['rating'] = pd.to_numeric(
-            food_df['rating'].astype(str).str.replace(',', '.'),
-            errors='coerce'
-        )
-        food_df.dropna(subset=['rating'], inplace=True)
-
-    # Xử lý cho place_df
-    if 'rating' in place_df.columns:
-        place_df['rating'] = pd.to_numeric(
-            place_df['rating'].astype(str).str.replace(',', '.'),
-            errors='coerce'
-        )
-        place_df.dropna(subset=['rating'], inplace=True)
-    if 'types' in place_df.columns:
-        place_df['types'] = place_df['types'].apply(safe_literal_eval)
-    else:
-        place_df['types'] = [[] for _ in range(len(place_df))]
+    # Chuẩn hóa cột rating và types
+    for df in [food_df, place_df]:
+        if 'rating' in df.columns:
+            df['rating'] = pd.to_numeric(df['rating'].astype(str).str.replace(',', '.'), errors='coerce')
+            df.dropna(subset=['rating'], inplace=True)
+        if 'types' not in df.columns:
+            df['types'] = [[] for _ in range(len(df))]
+        else:
+            df['types'] = df['types'].apply(safe_literal_eval)
 
     # Chuẩn hóa cột province
     food_df['province'] = food_df['province'].apply(normalize_text)
@@ -101,54 +77,45 @@ def load_data(food_path, place_path):
 
     return food_df, place_df
 
-
+### **Hàm phân cụm**
 def perform_clustering(df, n_clusters=5):
     """
-    Phân cụm dữ liệu dựa trên cột 'rating'.
-    Cải tiến: Sau khi chuẩn hóa rating, dùng LinearRegression để tạo thêm một đặc trưng (residual)
-    nhằm bổ sung thông tin tuyến tính, sau đó thực hiện phân cụm trên không gian 2 chiều.
+    Phân cụm dữ liệu dựa trên rating và residual từ hồi quy tuyến tính.
+    - Sử dụng LinearRegression để tạo đặc trưng residual.
+    - Trả về DataFrame với cột 'Cluster' và thông tin đánh giá phân cụm.
     """
     if df.empty:
         raise ValueError("Dataset is empty.")
 
     # Chuẩn hóa rating
-    features = df[['rating']]
     scaler = StandardScaler()
-    scaled_rating = scaler.fit_transform(features)  # (n_samples, 1)
+    scaled_rating = scaler.fit_transform(df[['rating']])
 
-    # Tạo biến độc lập: chỉ số của bản ghi
+    # Tạo đặc trưng residual từ hồi quy tuyến tính
     indices = np.arange(len(df)).reshape(-1, 1)
-
-    # Huấn luyện mô hình hồi quy tuyến tính
     lin_reg = LinearRegression()
     lin_reg.fit(indices, scaled_rating)
-    predicted = lin_reg.predict(indices)
+    residuals = scaled_rating - lin_reg.predict(indices)
+    scaled_residuals = scaler.fit_transform(residuals)
 
-    # Tính residual và chuẩn hóa
-    residuals = scaled_rating - predicted
-    residual_scaler = StandardScaler()
-    scaled_residuals = residual_scaler.fit_transform(residuals)
+    # Kết hợp đặc trưng
+    features = np.hstack((scaled_rating, scaled_residuals))
 
-    # Kết hợp rating và residual thành đặc trưng 2 chiều
-    combined_features = np.hstack((scaled_rating, scaled_residuals))
+    # Phân cụm bằng KMeans
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+    df['Cluster'] = kmeans.fit_predict(features)
 
-    # Phân cụm với KMeans
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10, max_iter=300)
-    clusters = kmeans.fit_predict(combined_features)
-    df['Cluster'] = clusters
-
-    sil_score = silhouette_score(combined_features, clusters)
     return df, {
-        "silhouette_score": sil_score,
+        "silhouette_score": silhouette_score(features, df['Cluster']),
         "inertia": kmeans.inertia_
     }
 
-
-def recommend_one_day_trip(province, food_df, place_df, max_items=3):
+### **Hàm gợi ý**
+def recommend_one_day_trip(province, food_df, place_df, max_items=3, random_mode=False):
     """
-    Gợi ý cho 1 ngày dựa trên province.
-    Trả về danh sách (food, places) với mỗi loại max_items (mặc định 3).
-    Mỗi item được lấy theo rating cao nhất (không trùng 'title').
+    Gợi ý lịch trình 1 ngày: max_items món ăn và max_items địa điểm.
+    - Nếu random_mode=True: Chọn ngẫu nhiên từ danh sách.
+    - Nếu random_mode=False: Chọn theo rating cao nhất.
     """
     normalized_province = normalize_text(province)
     filtered_food = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)]
@@ -157,24 +124,33 @@ def recommend_one_day_trip(province, food_df, place_df, max_items=3):
     if filtered_food.empty or filtered_place.empty:
         return {"food": [], "places": []}
 
-    recommended_food = (
-        filtered_food.drop_duplicates(subset=['title'])
-                     .nlargest(max_items, 'rating')[['title', 'rating', 'description', 'address', 'img']]
-                     .to_dict('records')
-    )
+    # Xử lý food
+    filtered_food = filtered_food.drop_duplicates('title')
+    if random_mode:
+        food_result = filtered_food.sample(n=min(max_items, len(filtered_food)))[
+            ['title', 'rating', 'description', 'address', 'img']
+        ].to_dict('records')
+    else:
+        food_result = filtered_food.nlargest(max_items, 'rating')[
+            ['title', 'rating', 'description', 'address', 'img']
+        ].to_dict('records')
 
-    recommended_places = (
-        filtered_place.drop_duplicates(subset=['title'])
-                      .nlargest(max_items, 'rating')[['title', 'rating', 'description', 'address', 'img']]
-                      .to_dict('records')
-    )
+    # Xử lý place
+    filtered_place = filtered_place.drop_duplicates('title')
+    if random_mode:
+        place_result = filtered_place.sample(n=min(max_items, len(filtered_place)))[
+            ['title', 'rating', 'description', 'address', 'img', 'link']
+        ].to_dict('records')
+    else:
+        place_result = filtered_place.nlargest(max_items, 'rating')[
+            ['title', 'rating', 'description', 'address', 'img', 'link']
+        ].to_dict('records')
 
-    return {"food": recommended_food, "places": recommended_places}
-
+    return {"food": food_result, "places": place_result}
 
 def get_recommendation_pool(province, food_df, place_df):
     """
-    Lấy toàn bộ pool gợi ý (food, place) cho province (không trùng lặp, sắp xếp theo rating giảm dần).
+    Tạo pool gợi ý đầy đủ cho một tỉnh/thành phố, sắp xếp theo rating giảm dần.
     """
     normalized_province = normalize_text(province)
     filtered_food = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)]
@@ -183,113 +159,81 @@ def get_recommendation_pool(province, food_df, place_df):
     if filtered_food.empty or filtered_place.empty:
         return {"food": [], "places": []}
 
-    pool_food = (
-        filtered_food.drop_duplicates(subset=['title'])
-                     .sort_values(by='rating', ascending=False)[['title', 'rating', 'description', 'address', 'img']]
-                     .to_dict('records')
-    )
-    pool_place = (
-        filtered_place.drop_duplicates(subset=['title'])
-                      .sort_values(by='rating', ascending=False)[['title', 'rating', 'description', 'address', 'img']]
-                      .to_dict('records')
-    )
-    return {"food": pool_food, "places": pool_place}
+    food_pool = filtered_food.drop_duplicates('title').sort_values(by='rating', ascending=False)[
+        ['title', 'rating', 'description', 'address', 'img']
+    ].to_dict('records')
 
+    place_pool = filtered_place.drop_duplicates('title').sort_values(by='rating', ascending=False)[
+        ['title', 'rating', 'description', 'address', 'img', 'link']
+    ].to_dict('records')
 
-def recommend_trip_schedule(start_day, end_day, province, food_df, place_df):
+    return {"food": food_pool, "places": place_pool}
+
+def recommend_trip_schedule(start_day, end_day, province, food_df, place_df, random_mode=False):
     """
-    Tạo lịch trình nhiều ngày (start_day -> end_day) cho 1 province.
-    Trong mỗi ngày, theo thứ tự các buổi:
-      - Buổi sáng: recommend 1 món ăn và 1 nơi đi.
-      - Buổi trưa: recommend 1 món ăn.
-      - Buổi chiều: recommend 1 nơi đi.
-      - Buổi tối: recommend 1 món ăn và 1 nơi đi dạo.
-    Món ăn được chọn theo thứ tự (không lặp lại).
-    Đối với địa điểm, trước tiên nhóm theo "district" (trích xuất từ address với district = parts[-3]),
-    sau đó chọn địa điểm ngẫu nhiên từ các district chưa được dùng trong ngày nếu có đủ,
-    nếu không thì chọn ngẫu nhiên từ tất cả các địa điểm còn lại.
+    Tạo lịch trình nhiều ngày từ start_day đến end_day cho một tỉnh/thành phố.
+    - Mỗi ngày gồm: sáng (1 ăn + 1 đi), trưa (1 ăn), chiều (1 đi), tối (1 ăn + 1 đi).
+    - Địa điểm ưu tiên chọn từ các quận khác nhau trong ngày.
+    - Nếu random_mode=True: Chọn ngẫu nhiên từ pool.
     """
     fmt = "%Y-%m-%d"
-    start = datetime.strptime(start_day, fmt)
-    end = datetime.strptime(end_day, fmt)
+    try:
+        start = datetime.strptime(start_day, fmt)
+        end = datetime.strptime(end_day, fmt)
+    except ValueError:
+        return {"error": "Invalid date format. Please use YYYY-MM-DD."}
+
     total_days = (end - start).days + 1
     if total_days < 1:
         return {"error": "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu."}
 
     # Lấy pool gợi ý
     pool = get_recommendation_pool(province, food_df, place_df)
-    pool_food = pool.get("food", []).copy()
-    pool_place = pool.get("places", []).copy()
+    pool_food = pool["food"].copy()
+    pool_place = pool["places"].copy()
 
-    # Nhóm các địa điểm theo district (theo address)
+    if random_mode:
+        random.shuffle(pool_food)
+        random.shuffle(pool_place)
+
+    # Nhóm địa điểm theo quận
     district_to_places = {}
-    for item in pool_place:
-        addr = item.get("address", "")
-        parts = addr.split(", ")
-        district = parts[-3] if len(parts) >= 3 else ""
-        if district not in district_to_places:
-            district_to_places[district] = []
-        district_to_places[district].append(item)
-    # Trộn ngẫu nhiên các danh sách trong mỗi district (để chọn random)
+    for place in pool_place:
+        parts = place.get("address", "").split(", ")
+        district = parts[-3] if len(parts) >= 3 else "unknown"
+        district_to_places.setdefault(district, []).append(place)
     for district in district_to_places:
-        random.shuffle(district_to_places[district])
+        if random_mode:
+            random.shuffle(district_to_places[district])
 
-    # Hàm chọn địa điểm cho một buổi, ưu tiên lấy từ các district chưa dùng trong ngày
+    # Hàm chọn địa điểm
     def select_place(used_districts):
-        # Danh sách các district còn chưa dùng có sẵn
-        available_districts = [d for d, lst in district_to_places.items() if lst and d not in used_districts]
-        if available_districts:
-            # Chọn ngẫu nhiên 1 district từ available
-            chosen_district = random.choice(available_districts)
-            candidate = district_to_places[chosen_district].pop(0)
-            used_districts.add(chosen_district)
-            return candidate
-        # Nếu không còn district chưa dùng, chọn ngẫu nhiên từ tất cả các district còn có địa điểm
-        all_available = [(d, lst) for d, lst in district_to_places.items() if lst]
-        if all_available:
-            chosen_district, lst = random.choice(all_available)
-            candidate = district_to_places[chosen_district].pop(0)
-            used_districts.add(chosen_district)
-            return candidate
-        return {}
+        available = [d for d in district_to_places if district_to_places[d] and d not in used_districts]
+        if available:
+            district = random.choice(available)
+        else:
+            available = [d for d in district_to_places if district_to_places[d]]
+            district = random.choice(available) if available else None
+        return district_to_places[district].pop(0) if district else {}
 
-    # Hàm chọn món ăn (không lặp lại) theo thứ tự trong pool_food
+    # Hàm chọn món ăn
     def select_food():
         if pool_food:
             return pool_food.pop(0)
         return {}
 
+    # Tạo lịch trình
     schedule = []
     for i in range(total_days):
-        current_day = start + pd.Timedelta(days=i)
-        day_str = current_day.strftime(fmt)
-        used_districts = set()  # reset cho mỗi ngày
-
-        # Buổi sáng: 1 món ăn và 1 nơi đi
-        morning_food = select_food()
-        morning_place = select_place(used_districts)
-
-        # Buổi trưa: 1 món ăn
-        noon_food = select_food()
-
-        # Buổi chiều: 1 nơi đi
-        afternoon_place = select_place(used_districts)
-
-        # Buổi tối: 1 món ăn và 1 nơi đi dạo
-        evening_food = select_food()
-        evening_place = select_place(used_districts)
-
+        day = start + pd.Timedelta(days=i)
+        used_districts = set()
         itinerary = [
-            {"timeslot": "morning", "food": morning_food, "place": morning_place},
-            {"timeslot": "noon", "food": noon_food},
-            {"timeslot": "afternoon", "place": afternoon_place},
-            {"timeslot": "evening", "food": evening_food, "place": evening_place}
+            {"timeslot": "morning", "food": select_food(), "place": select_place(used_districts)},
+            {"timeslot": "noon", "food": select_food()},
+            {"timeslot": "afternoon", "place": select_place(used_districts)},
+            {"timeslot": "evening", "food": select_food(), "place": select_place(used_districts)}
         ]
-        day_schedule = {
-            "day": f"Day {i+1} ({day_str})",
-            "itinerary": itinerary
-        }
-        schedule.append(day_schedule)
+        schedule.append({"day": f"Day {i+1} ({day.strftime(fmt)})", "itinerary": itinerary})
 
     return {
         "total_days": total_days,
@@ -299,16 +243,23 @@ def recommend_trip_schedule(start_day, end_day, province, food_df, place_df):
         "schedule": schedule
     }
 
-
-def search_place(province):
+### **Hàm tìm kiếm**
+def search_place(province, random_mode=False):
+    """Tìm kiếm tất cả món ăn và địa điểm theo tỉnh/thành phố, có thể chọn ngẫu nhiên."""
     food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
     normalized_province = normalize_text(province)
     filtered_food = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)]
     filtered_place = place_df[place_df['province'].str.contains(normalized_province, case=False, na=False)]
-    food_list = filtered_food[['title', 'rating', 'description', 'address', 'img']].to_dict(orient='records')
-    place_list = filtered_place[['title', 'rating', 'description', 'address', 'img']].to_dict(orient='records')
+
+    if random_mode:
+        food_result = filtered_food.sample(frac=1).to_dict('records')
+        place_result = filtered_place.sample(frac=1).to_dict('records')
+    else:
+        food_result = filtered_food.to_dict('records')
+        place_result = filtered_place.to_dict('records')
+
     return {
         "province": province,
-        "food": food_list,
-        "places": place_list
+        "food": food_result,
+        "places": place_result
     }
