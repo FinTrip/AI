@@ -831,3 +831,17 @@ django.db.utils.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't
 [2025-03-31 14:38:13,193] ERROR Internal Server Error: /recommend/search-province/
 [2025-03-31 14:39:32,601] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
 [2025-03-31 14:39:33,282] INFO Watching for file changes with StatReloader
+[2025-03-31 15:03:09,565] INFO Watching for file changes with StatReloader
+[2025-03-31 15:03:50,010] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-31 15:03:50,735] INFO Watching for file changes with StatReloader
+[2025-03-31 15:15:31,564] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-31 15:15:32,812] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-31 15:15:32,816] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-31 15:15:34,962] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=DAD&destinationLocationCode=SGN&departureDate=2025-04-04&adults=1&max=8 HTTP/1.1" 200 None
+[2025-03-31 15:26:47,461] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 15:26:48,772] INFO Watching for file changes with StatReloader
+[2025-03-31 15:27:57,178] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 15:27:57,982] INFO Watching for file changes with StatReloader
+[2025-03-31 15:28:37,235] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-31 15:28:38,000] INFO Watching for file changes with StatReloader
+[2025-03-31 15:31:32,904] WARNING Method Not Allowed (GET): /recommend/delete-hotel/

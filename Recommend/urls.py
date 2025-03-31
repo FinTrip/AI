@@ -14,9 +14,18 @@ urlpatterns = [
     path('rcm-travel/', views.recommend_travel_day, name='recommend_travel_day'),
     path('travel-schedule/', views.recommend_travel_schedule, name='recommend_travel_schedule'),
     path('save-schedule/', views.save_schedule, name='save_schedule'),
+
+    #flight
     path('rcm-flight/', views.rcm_flight, name='rcm_flight'),
+
+    #Hotel show update delete
     path('rcm-hotel/', views.rcm_hotel, name='rcm_hotel'),
+    path('update-hotel/', views.update_hotel, name='update_hotel'),
+    path('delete-hotel/', views.delete_hotel, name='delete_hotel'),
+
     path('search-province/', views.search_province, name='search_province'),
+
+    #share schedule
     path('share-schedule/', views.share_schedule, name='share_schedule'),
     path('view-schedule/<int:schedule_id>/', views.view_schedule, name='view_schedule'),
 ]
