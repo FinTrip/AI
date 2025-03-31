@@ -16,7 +16,7 @@ import bcrypt
 
 from .CheckException import validate_request
 from .flight import search_flight_service
-from .hotel import process_hotel_data_from_csv
+from .hotel import process_hotel_data_from_csv,update_hotel_in_csv, delete_hotel_in_csv
 from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE,normalize_text
 
 # Cấu hình MySQL từ settings.py
@@ -446,6 +446,76 @@ def rcm_hotel(request):
         traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
+@csrf_exempt
+@require_POST
+def update_hotel(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        hotel_name = data.get("name", "").strip()
+
+        if not hotel_name:
+            return JsonResponse({"error": "Vui lòng cung cấp tên khách sạn (name)."}, status=400)
+
+        # Các trường có thể cập nhật
+        update_data = {
+            "name": hotel_name,
+            "link": data.get("link", "").strip(),
+            "description": data.get("description", "").strip(),
+            "price": data.get("price", "").strip(),
+            "name_nearby_place": data.get("name_nearby_place", "").strip(),
+            "hotel_class": data.get("hotel_class", "").strip(),
+            "img_origin": data.get("img_origin", "").strip(),
+            "location_rating": data.get("location_rating", "").strip(),
+            "province": data.get("province", "").strip()
+        }
+
+        # Gọi hàm cập nhật trong file CSV
+        updated = update_hotel_in_csv(hotel_name, update_data)
+        if not updated:
+            return JsonResponse({"error": "Không tìm thấy khách sạn để cập nhật."}, status=404)
+
+        return JsonResponse({
+            "message": "Cập nhật thông tin khách sạn thành công!",
+            "updated_hotel": update_data,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, json_dumps_params={"ensure_ascii": False}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+@csrf_exempt
+@require_POST
+def delete_hotel(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        hotel_name = data.get("name", "").strip()
+
+        if not hotel_name:
+            return JsonResponse({"error": "Vui lòng cung cấp tên khách sạn (name)."}, status=400)
+
+        # Gọi hàm xóa trong file CSV
+        deleted = delete_hotel_in_csv(hotel_name)
+        if not deleted:
+            return JsonResponse({"error": "Không tìm thấy khách sạn để xóa."}, status=404)
+
+        return JsonResponse({
+            "message": "Xóa khách sạn thành công!",
+            "deleted_hotel_name": hotel_name,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, json_dumps_params={"ensure_ascii": False}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+#search province
 @csrf_exempt
 @require_POST
 def search_province(request):
