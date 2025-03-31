@@ -4,7 +4,13 @@ from . import views
 app_name = 'Recommend'
 
 urlpatterns = [
+    #User
+    path('create-user/', views.create_user, name='create_user'),
     path('login-user/', views.login_user, name='login_user'),
+    path('delete-user/', views.delete_user, name='delete_user'),
+    path('update-user/', views.update_user, name='update_user'),
+
+    #Recommend travel
     path('rcm-travel/', views.recommend_travel_day, name='recommend_travel_day'),
     path('travel-schedule/', views.recommend_travel_schedule, name='recommend_travel_schedule'),
     path('save-schedule/', views.save_schedule, name='save_schedule'),

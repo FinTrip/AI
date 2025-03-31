@@ -15,7 +15,6 @@ def validate_request(data, *required_fields):
             return False, f"Thiếu trường bắt buộc: {field}"
     return True, None
 
-
 def check_password(plain_password: str, jwt_hashed: str) -> bool:
     try:
         payload = jwt.decode(jwt_hashed, PASSWORD_SECRET, algorithms=["HS256"])

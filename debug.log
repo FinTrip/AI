@@ -456,3 +456,378 @@
 [2025-03-27 22:05:43,084] INFO Watching for file changes with StatReloader
 [2025-03-27 22:10:35,879] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
 [2025-03-27 22:10:36,672] INFO Watching for file changes with StatReloader
+[2025-03-28 13:21:30,694] INFO Watching for file changes with StatReloader
+[2025-03-28 13:22:30,455] INFO Watching for file changes with StatReloader
+[2025-03-28 13:27:47,527] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-28 13:27:48,960] INFO Watching for file changes with StatReloader
+[2025-03-28 14:40:59,217] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-28 14:41:00,748] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-28 14:41:00,754] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-28 14:41:03,487] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=DAD&destinationLocationCode=SGN&departureDate=2025-04-04&adults=1&max=8 HTTP/1.1" 200 None
+[2025-03-28 14:42:06,573] ERROR Internal Server Error: /recommend/search-province/
+[2025-03-31 10:21:49,312] INFO Watching for file changes with StatReloader
+[2025-03-31 10:22:16,710] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\FinTrip\settings.py changed, reloading.
+[2025-03-31 10:22:17,505] INFO Watching for file changes with StatReloader
+[2025-03-31 10:26:33,827] ERROR Internal Server Error: /recommend/login-user/
+[2025-03-31 10:30:55,587] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 10:30:56,584] INFO Watching for file changes with StatReloader
+[2025-03-31 10:31:11,255] WARNING Bad Request: /recommend/login-user/
+[2025-03-31 10:31:21,959] WARNING Bad Request: /recommend/login-user/
+[2025-03-31 10:37:32,276] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 10:37:33,242] INFO Watching for file changes with StatReloader
+[2025-03-31 10:37:47,259] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 10:37:47,959] INFO Watching for file changes with StatReloader
+[2025-03-31 10:39:53,760] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-31 10:39:54,441] INFO Watching for file changes with StatReloader
+[2025-03-31 10:42:01,064] WARNING Not Found: /recommend/create-user/
+[2025-03-31 10:43:31,403] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-31 10:43:32,287] INFO Watching for file changes with StatReloader
+[2025-03-31 10:44:06,105] ERROR Internal Server Error: /recommend/login-user/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\utils\deprecation.py", line 136, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\middleware.py", line 59, in process_response
+    request.session.save()
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 80, in save
+    return self.create()
+           ^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 50, in create
+    self._session_key = self._get_new_session_key()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 150, in _get_new_session_key
+    if not self.exists(session_key):
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 46, in exists
+    return self.model.objects.filter(session_key=session_key).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\query.py", line 1288, in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\query.py", line 659, in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1530, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't exist")
+[2025-03-31 10:47:58,299] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 10:47:59,429] INFO Watching for file changes with StatReloader
+[2025-03-31 10:57:08,727] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 10:57:09,416] INFO Watching for file changes with StatReloader
+[2025-03-31 10:57:24,545] INFO Watching for file changes with StatReloader
+[2025-03-31 10:57:30,234] ERROR Internal Server Error: /recommend/login-user/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\utils\deprecation.py", line 136, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\middleware.py", line 59, in process_response
+    request.session.save()
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 80, in save
+    return self.create()
+           ^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 50, in create
+    self._session_key = self._get_new_session_key()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 150, in _get_new_session_key
+    if not self.exists(session_key):
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 46, in exists
+    return self.model.objects.filter(session_key=session_key).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\query.py", line 1288, in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\query.py", line 659, in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1530, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't exist")
+[2025-03-31 10:57:31,927] ERROR Internal Server Error: /recommend/login-user/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\utils\deprecation.py", line 136, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\middleware.py", line 59, in process_response
+    request.session.save()
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 80, in save
+    return self.create()
+           ^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 50, in create
+    self._session_key = self._get_new_session_key()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 150, in _get_new_session_key
+    if not self.exists(session_key):
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 46, in exists
+    return self.model.objects.filter(session_key=session_key).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\query.py", line 1288, in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\query.py", line 659, in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1530, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't exist")
+[2025-03-31 10:57:44,843] INFO Watching for file changes with StatReloader
+[2025-03-31 10:57:48,507] ERROR Internal Server Error: /recommend/login-user/
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\utils\deprecation.py", line 136, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\middleware.py", line 59, in process_response
+    request.session.save()
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 80, in save
+    return self.create()
+           ^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 50, in create
+    self._session_key = self._get_new_session_key()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 150, in _get_new_session_key
+    if not self.exists(session_key):
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 46, in exists
+    return self.model.objects.filter(session_key=session_key).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\query.py", line 1288, in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\query.py", line 659, in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1530, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't exist")
+[2025-03-31 11:01:45,203] INFO Watching for file changes with StatReloader
+[2025-03-31 11:02:32,474] WARNING Bad Request: /recommend/login-user/
+[2025-03-31 11:08:23,284] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 11:08:23,992] INFO Watching for file changes with StatReloader
+[2025-03-31 11:08:50,239] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-03-31 11:08:50,918] INFO Watching for file changes with StatReloader
+[2025-03-31 11:09:18,329] WARNING Bad Request: /recommend/delete-user/
+[2025-03-31 13:23:14,297] INFO Watching for file changes with StatReloader
+[2025-03-31 13:58:39,535] INFO Watching for file changes with StatReloader
+[2025-03-31 14:02:18,546] ERROR Internal Server Error: /recommend/search-province/
+[2025-03-31 14:02:32,217] WARNING Bad Request: /recommend/search-province/
+[2025-03-31 14:02:37,197] WARNING Bad Request: /recommend/search-province/
+[2025-03-31 14:03:12,650] ERROR Internal Server Error: /recommend/search-province/
+[2025-03-31 14:03:51,505] ERROR Internal Server Error: /recommend/search-province/
+[2025-03-31 14:04:16,551] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-31 14:04:17,489] DEBUG https://test.api.amadeus.com:443 "POST /v1/security/oauth2/token HTTP/1.1" 200 406
+[2025-03-31 14:04:17,491] DEBUG Starting new HTTPS connection (1): test.api.amadeus.com:443
+[2025-03-31 14:04:19,598] DEBUG https://test.api.amadeus.com:443 "GET /v2/shopping/flight-offers?originLocationCode=DAD&destinationLocationCode=SGN&departureDate=2025-04-04&adults=1&max=8 HTTP/1.1" 200 None
+[2025-03-31 14:07:39,245] WARNING Bad Request: /recommend/login-user/
+[2025-03-31 14:28:57,927] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 14:28:58,719] INFO Watching for file changes with StatReloader
+[2025-03-31 14:29:01,776] ERROR Internal Server Error: /recommend/search-province/
+[2025-03-31 14:36:58,049] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\CheckException.py changed, reloading.
+[2025-03-31 14:36:58,804] INFO Watching for file changes with StatReloader
+[2025-03-31 14:37:43,134] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\CheckException.py changed, reloading.
+[2025-03-31 14:37:43,857] INFO Watching for file changes with StatReloader
+[2025-03-31 14:38:09,318] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 14:38:10,057] INFO Watching for file changes with StatReloader
+[2025-03-31 14:38:13,193] ERROR Internal Server Error: /recommend/search-province/
+[2025-03-31 14:39:32,601] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-03-31 14:39:33,282] INFO Watching for file changes with StatReloader
