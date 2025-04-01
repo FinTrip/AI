@@ -61,30 +61,41 @@ fintrip/
 │-- requirements.txt
 │-- readme.MD
 │-- recommendations/
-│   │-- data/
+│   -- data/
 │       │-- food.csv
 │       │-- hotels.csv
 │       │-- hotels_data.csv
 │       │-- place.csv
 │       │-- place2.xlsx
-│   │-- .env/
-│   │-- _init_.py/
-│   │-- CheckException.py/
-│   │-- flight.py/
-│   │-- hotel.py/
-│   │-- processed.py/
-│   │-- tests.py/
+│   │-- .env
+│   │-- _init_.py
+│   │-- CheckException.py
+│   │-- flight.py
+│   │-- hotel.py
+│   │-- processed.py
+│   │-- tests.py
 │   │-- views.py
 │   │-- models.py
 │   │-- urls.py
 │   │-- admin.py
 │   │-- apps.py
 │-- chatbot/
+│   -- model/
+│    │-- views.py
+│   │-- _init_.py
+│   │-- admin.py
+│   │-- app.py
+│   │-- chatbot_model.py
 │   │-- views.py
+│   │-- utils.py
 │   │-- models.py
 │   │-- urls.py
-│-- fintrip_project/
+│-- FinTrip/
     │-- settings.py
     │-- urls.py
     │-- wsgi.py
+│-- static
+│   -- css/
+│   -- img/
+
 ```

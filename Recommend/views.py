@@ -16,7 +16,7 @@ import bcrypt
 
 from .CheckException import validate_request
 from .flight import search_flight_service
-from .hotel import process_hotel_data_from_csv,update_hotel_in_csv, delete_hotel_in_csv
+from .hotel import process_hotel_data_from_csv,update_hotel_in_csv, delete_hotel_in_csv,show_hotel_in_csv
 from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE,normalize_text
 
 # Cấu hình MySQL từ settings.py
@@ -442,6 +442,23 @@ def rcm_hotel(request):
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+@require_GET
+def get_all_hotels(request):
+    try:
+        hotels = show_hotel_in_csv()
+        if not hotels:
+            return JsonResponse({"error": "Không có khách sạn nào trong danh sách hoặc file CSV không tồn tại."}, status=404)
+
+        return JsonResponse({
+            "hotels": hotels,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, json_dumps_params={"ensure_ascii": False}, status=200)
+
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)

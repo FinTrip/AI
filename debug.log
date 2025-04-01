@@ -846,3 +846,34 @@ django.db.utils.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't
 [2025-03-31 15:28:38,000] INFO Watching for file changes with StatReloader
 [2025-03-31 15:31:32,904] WARNING Method Not Allowed (GET): /recommend/delete-hotel/
 [2025-03-31 16:52:37,818] INFO Watching for file changes with StatReloader
+[2025-04-01 14:38:04,169] INFO Watching for file changes with StatReloader
+[2025-04-01 14:40:09,721] INFO Watching for file changes with StatReloader
+[2025-04-01 14:41:52,018] INFO Watching for file changes with StatReloader
+[2025-04-01 14:42:05,118] ERROR Error loading model: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodelx1.
+[2025-04-01 14:42:54,867] WARNING Not Found: /api/chat/
+[2025-04-01 14:44:13,881] WARNING Not Found: /chatbot/chat/
+[2025-04-01 14:44:27,374] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\urls.py changed, reloading.
+[2025-04-01 14:44:28,765] INFO Watching for file changes with StatReloader
+[2025-04-01 14:44:35,826] ERROR Error loading model: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodelx1.
+[2025-04-01 14:44:46,103] INFO User input: chào
+[2025-04-01 14:44:46,104] ERROR Model or tokenizer not loaded.
+[2025-04-01 14:44:46,104] INFO Bot response: Sorry, the system is currently experiencing issues.
+[2025-04-01 14:46:24,308] INFO User input: chào
+[2025-04-01 14:46:24,308] ERROR Model or tokenizer not loaded.
+[2025-04-01 14:46:24,308] INFO Bot response: Sorry, the system is currently experiencing issues.
+[2025-04-01 14:47:29,183] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 14:47:30,729] INFO Watching for file changes with StatReloader
+[2025-04-01 14:47:37,548] ERROR Error loading model: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodelx1.
+[2025-04-01 14:52:24,586] INFO Watching for file changes with StatReloader
+[2025-04-01 14:52:30,298] INFO Loading tokenizer...
+[2025-04-01 14:52:30,899] INFO Tokenizer loaded successfully.
+[2025-04-01 14:52:30,899] INFO Loading model...
+[2025-04-01 14:52:30,983] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodelx1.
+[2025-04-01 14:52:46,668] INFO User input: hi
+[2025-04-01 14:52:46,669] ERROR Model or tokenizer not loaded.
+[2025-04-01 14:52:46,669] INFO Bot response: Sorry, the system is currently experiencing issues. (Model not loaded)
+[2025-04-01 15:57:04,650] INFO Watching for file changes with StatReloader
+[2025-04-01 15:57:13,757] INFO Loading tokenizer...
+[2025-04-01 15:57:14,552] INFO Tokenizer loaded successfully.
+[2025-04-01 15:57:14,552] INFO Loading model...
+[2025-04-01 15:57:14,688] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodelx1.

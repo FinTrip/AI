@@ -22,6 +22,7 @@ urlpatterns = [
     path('rcm-hotel/', views.rcm_hotel, name='rcm_hotel'),
     path('update-hotel/', views.update_hotel, name='update_hotel'),
     path('delete-hotel/', views.delete_hotel, name='delete_hotel'),
+    path('get-all-hotels/', views.get_all_hotels, name='get_all_hotels'),
 
     path('search-province/', views.search_province, name='search_province'),
 

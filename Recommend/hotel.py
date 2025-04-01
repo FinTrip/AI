@@ -40,6 +40,23 @@ def process_hotel_data_from_csv(search_term):
 
     return processed_hotels
 
+def show_hotel_in_csv():
+    try:
+        df = pd.read_csv(csv_filename)
+        if df.empty:
+            return []
+        hotels_list = df.to_dict(orient="records")
+        processed_hotels = [
+            {key: str(hotel.get(key, f"No {key}")) for key in
+             ["name", "link", "description", "price", "name_nearby_place", "hotel_class", "img_origin", "location_rating", "province"]}
+            for hotel in hotels_list
+        ]
+        return processed_hotels
+    except (FileNotFoundError, pd.errors.EmptyDataError):
+        return []
+    except Exception as e:
+        return []
+
 def update_hotel_in_csv(hotel_name, update_data):
     try:
         # Đọc file CSV
@@ -69,11 +86,6 @@ def update_hotel_in_csv(hotel_name, update_data):
         raise Exception(f"Không thể cập nhật khách sạn: {str(e)}")
 
 def delete_hotel_in_csv(hotel_name):
-    """
-    Xóa khách sạn khỏi file CSV dựa trên tên khách sạn.
-    - hotel_name: Tên khách sạn để xác định bản ghi cần xóa.
-    - Trả về True nếu xóa thành công, False nếu không tìm thấy khách sạn.
-    """
     try:
         # Đọc file CSV
         df = pd.read_csv(csv_filename)
