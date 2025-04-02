@@ -1,12 +1,11 @@
 import pandas as pd
 import re
 import os
-import unidecode  # Dùng để bỏ dấu tiếng Việt
+import unidecode
 import random
 
-from pyexpat import error
 
-csv_filename = os.path.join(os.path.dirname(__file__), "data", "hotels.csv")
+csv_filename = os.path.join(os.path.dirname(__file__), "data", "all_hotels.csv")
 
 
 def sanitize_input(input_str):
@@ -35,7 +34,7 @@ def process_hotel_data_from_csv(search_term):
 
     processed_hotels = [
         {key: str(hotel.get(key, f"No {key}")) for key in
-         ["name", "link", "description", "price", "name_nearby_place", "hotel_class", "img_origin", "location_rating"]}
+         ["name", "link", "description", "price", "name_nearby_place", "hotel_class", "img_origin", "location_rating","animates"]}
         for hotel in hotels_list
         if search_term in normalize_text(str(hotel.get("province", ""))) or search_term in normalize_text(
             str(hotel.get("name_nearby_place", "")))
@@ -51,7 +50,7 @@ def show_hotel_in_csv():
         hotels_list = df.to_dict(orient="records")
         processed_hotels = [
             {key: str(hotel.get(key, f"No {key}")) for key in
-             ["name", "link", "description", "price", "name_nearby_place", "hotel_class", "img_origin", "location_rating", "province"]}
+             ["name", "link", "description", "price", "name_nearby_place", "hotel_class", "img_origin", "location_rating", "province","animates"]}
             for hotel in hotels_list
         ]
         return processed_hotels
@@ -127,7 +126,7 @@ def get_hotel_homepage(num_item = None):
         top_hotels = df.drop_duplicates('name').nlargest(num_item, 'location_rating', keep='first')
         return top_hotels[
             ['name', 'link', 'description', 'price', 'name_nearby_place', 'hotel_class', 'img_origin',
-             'location_rating']
+             'location_rating', 'province',"animates"]
         ].fillna('N/A').to_dict('records')
     except(FileNotFoundError, pd.errors.EmptyDataError):
         return []

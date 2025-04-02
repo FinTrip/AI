@@ -17,12 +17,14 @@ urlpatterns = [
 
     #flight
     path('rcm-flight/', views.rcm_flight, name='rcm_flight'),
+    path('select-flight/', views.select_flight, name='select_flight'),
 
     #Hotel show update delete
     path('rcm-hotel/', views.rcm_hotel, name='rcm_hotel'),
     path('update-hotel/', views.update_hotel, name='update_hotel'),
     path('delete-hotel/', views.delete_hotel, name='delete_hotel'),
     path('get-all-hotels/', views.get_all_hotels, name='get_all_hotels'),
+    path('select_hotel/', views.select_hotel, name='select_hotel'),
 
     path('search-province/', views.search_province, name='search_province'),
 

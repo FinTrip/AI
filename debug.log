@@ -1451,3 +1451,65 @@ Traceback (most recent call last):
     raise FileNotFoundError(f"No model weights found in {MODEL_DIR}")
 FileNotFoundError: No model weights found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
 [2025-04-02 14:18:54,160] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-02 14:26:59,460] WARNING Not Found: /
+[2025-04-02 14:27:00,573] WARNING Not Found: /
+[2025-04-02 14:27:00,670] WARNING Not Found: /favicon.ico
+[2025-04-02 15:58:46,605] INFO Watching for file changes with StatReloader
+[2025-04-02 15:58:46,910] INFO Starting chatbot_model.py import process...
+[2025-04-02 15:59:13,022] INFO Successfully imported torch and transformers.
+[2025-04-02 15:59:13,023] INFO Model directory set to: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 15:59:13,023] INFO Initializing model loading process...
+[2025-04-02 15:59:13,023] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 15:59:13,024] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 15:59:13,024] ERROR Model directory does not exist: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 15:59:13,024] ERROR Failed to load model or tokenizer: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1' not found.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 36, in load_model
+    raise FileNotFoundError(f"Model directory '{MODEL_DIR}' not found.")
+FileNotFoundError: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1' not found.
+[2025-04-02 15:59:13,025] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-02 16:02:36,314] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\hotel.py changed, reloading.
+[2025-04-02 16:02:37,539] INFO Watching for file changes with StatReloader
+[2025-04-02 16:02:37,692] INFO Starting chatbot_model.py import process...
+[2025-04-02 16:02:42,215] INFO Successfully imported torch and transformers.
+[2025-04-02 16:02:42,216] INFO Model directory set to: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:02:42,216] INFO Initializing model loading process...
+[2025-04-02 16:02:42,217] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:02:42,217] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:02:42,218] ERROR Model directory does not exist: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:02:42,218] ERROR Failed to load model or tokenizer: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1' not found.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 36, in load_model
+    raise FileNotFoundError(f"Model directory '{MODEL_DIR}' not found.")
+FileNotFoundError: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1' not found.
+[2025-04-02 16:02:42,220] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-02 16:12:26,543] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-04-02 16:12:27,850] INFO Watching for file changes with StatReloader
+[2025-04-02 16:12:28,051] INFO Starting chatbot_model.py import process...
+[2025-04-02 16:12:34,280] INFO Successfully imported torch and transformers.
+[2025-04-02 16:12:34,280] INFO Model directory set to: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:12:34,281] INFO Initializing model loading process...
+[2025-04-02 16:12:34,281] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:12:34,282] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:12:34,282] ERROR Model directory does not exist: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:12:34,283] ERROR Failed to load model or tokenizer: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1' not found.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 36, in load_model
+    raise FileNotFoundError(f"Model directory '{MODEL_DIR}' not found.")
+FileNotFoundError: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1' not found.
+[2025-04-02 16:12:34,284] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-02 16:13:08,743] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-04-02 16:13:09,826] INFO Watching for file changes with StatReloader
+[2025-04-02 16:13:09,970] INFO Starting chatbot_model.py import process...
+[2025-04-02 16:13:15,295] INFO Successfully imported torch and transformers.
+[2025-04-02 16:13:15,296] INFO Model directory set to: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:13:15,297] INFO Initializing model loading process...
+[2025-04-02 16:13:15,297] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:13:15,298] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:13:15,298] ERROR Model directory does not exist: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 16:13:15,298] ERROR Failed to load model or tokenizer: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1' not found.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 36, in load_model
+    raise FileNotFoundError(f"Model directory '{MODEL_DIR}' not found.")
+FileNotFoundError: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1' not found.
+[2025-04-02 16:13:15,299] CRITICAL Model initialization failed. Chatbot will not function properly.

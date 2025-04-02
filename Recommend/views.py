@@ -361,21 +361,41 @@ def recommend_travel_day(request):
 def recommend_travel_schedule(request):
     try:
         data = json.loads(request.body)
-        start_day = data.get("start_day", "").strip()
-        end_day = data.get("end_day", "").strip()
-        province = data.get("province", "").strip()
+        selected_hotel = request.session.get('selected_hotel', {})
+        selected_flight = request.session.get('selected_flight', {})
 
-        if not start_day or not end_day or not province:
-            return JsonResponse({"error": "Thiếu trường bắt buộc: start_day, end_day, province"}, status=400)
+        # Lấy province: ưu tiên hotel, sau đó flight, cuối cùng từ input
+        province = selected_hotel.get('province', selected_flight.get('destination', data.get("province", "").strip()))
+
+        # Lấy start_day: từ flight hoặc input
+        start_day = selected_flight.get('departure_time', data.get("start_day", "").strip())
+        if start_day and 'T' in start_day:  # Nếu từ flight, cắt lấy ngày
+            start_day = start_day.split('T')[0]
+
+        # Lấy end_day: luôn từ input
+        end_day = data.get("end_day", "").strip()
+
+        # Kiểm tra các trường bắt buộc
+        missing_fields = []
+        if not province:
+            missing_fields.append("province")
+        if not start_day:
+            missing_fields.append("start_day")
+        if not end_day:
+            missing_fields.append("end_day")
+        if missing_fields:
+            return JsonResponse({"error": f"Thiếu trường bắt buộc: {', '.join(missing_fields)}"}, status=400)
 
         # Kiểm tra độ dài
-        if any(len(value) > 50 for value in [start_day, end_day, province]):
+        if any(len(value) > 50 for value in [province, start_day, end_day]):
             return JsonResponse({"error": "Dữ liệu đầu vào không được dài quá 50 ký tự."}, status=400)
 
+        # Kiểm tra định dạng province
         province_pattern = r"^[A-Za-z\u00C0-\u1EF9\s]+$"
         if not re.match(province_pattern, province):
             return JsonResponse({"error": "Province chỉ được chứa chữ cái (kể cả có dấu) và khoảng trắng."}, status=400)
 
+        # Kiểm tra định dạng ngày
         date_pattern = r"^\d{4}-\d{2}-\d{2}$"
         if not re.match(date_pattern, start_day) or not re.match(date_pattern, end_day):
             return JsonResponse({"error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD."}, status=400)
@@ -398,16 +418,26 @@ def recommend_travel_schedule(request):
         if total_days > 30:
             return JsonResponse({"error": "Tổng số ngày của lịch trình không được vượt quá 30 ngày."}, status=400)
 
+        # Tải dữ liệu và tạo lịch trình
         food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
         schedule_result = recommend_trip_schedule(start_day, end_day, province, food_df, place_df)
         if "error" in schedule_result:
             return JsonResponse({"error": schedule_result["error"]}, status=400)
 
-        return JsonResponse({
+        # Tạo response cơ bản
+        response_data = {
             "schedule": schedule_result,
             "timestamp": datetime.now().isoformat(),
             "csrf_token": get_token(request)
-        }, status=200)
+        }
+
+        # Thêm từng cái nếu có
+        if selected_hotel:
+            response_data["hotel"] = selected_hotel
+        if selected_flight:
+            response_data["flight"] = selected_flight
+
+        return JsonResponse(response_data, status=200)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
@@ -446,6 +476,8 @@ def rcm_hotel(request):
         traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
+
+####Admin
 @require_GET
 def get_all_hotels(request):
     try:
@@ -531,6 +563,9 @@ def delete_hotel(request):
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+### end admin
+
+
 
 #search province
 @csrf_exempt
@@ -618,10 +653,68 @@ def save_schedule(request):
             data = json.loads(request.body)
             schedule_name = data.get("schedule_name", "My Custom Schedule").strip()
             days_data = data.get("days", [])
+            province = data.get("destinationInput", "").strip()  # Thêm để hỗ trợ activate
 
+            # Nếu có province từ activate, tự động tạo days_data từ search_province
+            if province and not days_data:
+                if len(province) > 100:
+                    return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
+
+                # Tải dữ liệu từ search_province logic
+                food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+                normalized_province = normalize_text(province)
+
+                foods = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
+                places = place_df[place_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
+
+                if not foods and not places:
+                    return JsonResponse({"error": "Không tìm thấy hoạt động nào cho tỉnh/thành phố này."}, status=404)
+
+                # Tạo days_data từ foods và places
+                days_data = [{
+                    "day_index": 1,
+                    "date_str": datetime.now().strftime("%Y-%m-%d"),  # Ngày hiện tại làm ví dụ
+                    "itinerary": []
+                }]
+
+                # Thêm foods vào itinerary
+                for food in foods:
+                    days_data[0]["itinerary"].append({
+                        "timeslot": "morning",  # Mặc định, có thể cải tiến
+                        "food": {
+                            "province": food.get("province"),
+                            "title": food.get("title"),
+                            "rating": float(food.get("rating")) if pd.notna(food.get("rating")) else None,
+                            "price": food.get("Price"),
+                            "address": food.get("address"),
+                            "phone": food.get("Phone"),
+                            "link": food.get("Link"),
+                            "service": food.get("types"),
+                            "image": food.get("img")
+                        }
+                    })
+
+                # Thêm places vào itinerary
+                for place in places:
+                    days_data[0]["itinerary"].append({
+                        "timeslot": "afternoon",  # Mặc định, có thể cải tiến
+                        "place": {
+                            "province": place.get("province"),
+                            "title": place.get("title"),
+                            "rating": float(place.get("rating")) if pd.notna(place.get("rating")) else None,
+                            "description": place.get("description"),
+                            "address": place.get("address"),
+                            "img": place.get("img"),
+                            "types": place.get("types"),
+                            "link": place.get("link")
+                        }
+                    })
+
+            # Kiểm tra days_data
             if not days_data:
                 return JsonResponse({"error": "Dữ liệu ngày không được để trống."}, status=400)
 
+            # Lưu vào DB
             sql_schedule = "INSERT INTO schedule (user_id, name, created_at) VALUES (%s, %s, NOW())"
             cursor.execute(sql_schedule, [user_id, schedule_name])
             schedule_id = cursor.lastrowid
@@ -829,6 +922,29 @@ def rcm_flight(request):
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
+@csrf_exempt
+@require_POST
+def select_flight(request):
+    try:
+        data = json.loads(request.body)
+        flight_info = data.get('flight_info')
+
+        if not flight_info:
+            return JsonResponse({"error": "Missing flight info"},status=400)
+
+        request.session['selected_flight'] = {
+            'flight_details': flight_info,
+            'origin': flight_info.get('origin', 'N/A'),
+            'destination': flight_info.get('destination', 'N/A'),
+            'departure_time': flight_info.get('departure_time', 'N/A')
+        }
+        return JsonResponse({"error": "Flight selected successful"},status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": f"Error system {str(e)}"}, status=400)
+
 #Homepage
 @require_GET
 def get_all_hotels_homepage(request):
@@ -846,6 +962,24 @@ def get_all_hotels_homepage(request):
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+#selection hotels
+@require_POST
+def select_hotel(request):
+    try:
+        data = json.loads(request.body)
+        hotel_info = data.get('hotel_info')
+
+        if hotel_info:
+            request.session['selected_hotel'] = hotel_info
+            return JsonResponse({"message": "Hotel selected successfully"}, status=200)
+        else:
+            return JsonResponse({"error": "Missing hotel_info"}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
 
 @require_GET
 def get_all_place_homepage(request):
