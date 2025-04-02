@@ -263,3 +263,53 @@ def search_place(province, random_mode=False):
         "food": food_result,
         "places": place_result
     }
+
+# homepage get ra những món ăn có do rating cao nhất
+def get_food_homepage(num_item=None):
+    if num_item is None:
+        num_item = random.randint(10, 15)
+
+    try:
+        df = pd.read_csv(FOOD_FILE)
+        df.rename(columns={
+            'Province': 'province', 'Title': 'title', 'Rating': 'rating',
+            'Address': 'address', 'Image': 'img'
+        },inplace=True)
+        if 'description' not in df.columns:
+            df['description'] = ''
+        if df.empty:
+            return []
+        df['rating'] = pd.to_numeric(df['rating'].astype(str).str.replace(',','.'), errors='coerce')
+        df.dropna(subset=['rating', 'title'], inplace=True)
+        top_foods = df.drop_duplicates('title').nlargest(num_item, 'rating', keep='first')
+        return top_foods[
+            ['title', 'rating', 'description', 'address', 'img']
+        ].fillna('N/A').to_dict('records')
+    except(FileNotFoundError, pd.errors.EmptyDataError):
+        return []
+    except Exception as e:
+        print(f"Error loading food data: {e}")
+        return []
+
+# homepage get ra những món ăn có do rating cao nhất
+def get_place_homepage(num_item=None):
+    if num_item is None:
+        num_item = random.randint(10, 15)
+
+    try:
+        df = pd.read_excel(PLACE_FILE)
+        df['rating'] = pd.to_numeric(df['rating'].astype(str).str.replace(',','.'), errors='coerce')
+        df.dropna(subset=['rating', 'title'], inplace=True)
+        non_hotel_df = df[
+            ~df.get('types', pd.Series([''] * len(df))).apply(lambda x: 'hotel' in normalize_text(x)) &
+            ~df['title'].apply(normalize_text).str.contains('hotel', na=False)
+            ].drop_duplicates('title')
+        top_place = non_hotel_df.drop_duplicates('title').nlargest(num_item, 'rating', keep='first')
+        return top_place[
+            ['title', 'rating', 'description', 'address', 'img', 'link']
+        ].fillna('N/A').to_dict('records')
+    except(FileNotFoundError, pd.errors.EmptyDataError):
+        return []
+    except Exception as e:
+        print(f"Error loading place data: {e}")
+        return []

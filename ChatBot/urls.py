@@ -3,5 +3,5 @@ from .views import ChatbotAPIView
 app_name = 'ChatBot'
 
 urlpatterns = [
-path('chat/', ChatbotAPIView.as_view(), name='chatbot_api'),
+    path('chat/', ChatbotAPIView.as_view(), name='chatbot_api'),
 ]

@@ -877,3 +877,577 @@ django.db.utils.ProgrammingError: (1146, "Table 'FinTrip.django_session' doesn't
 [2025-04-01 15:57:14,552] INFO Tokenizer loaded successfully.
 [2025-04-01 15:57:14,552] INFO Loading model...
 [2025-04-01 15:57:14,688] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodelx1.
+[2025-04-01 16:14:56,615] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\urls.py changed, reloading.
+[2025-04-01 16:14:59,260] INFO Watching for file changes with StatReloader
+[2025-04-01 16:15:08,047] ERROR Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodelx1' not found. Please check the model path.
+[2025-04-01 16:15:08,048] INFO Loading tokenizer...
+[2025-04-01 16:15:08,048] ERROR Error loading model/tokenizer: Repo id must use alphanumeric chars or '-', '_', '.', '--' and '..' are forbidden, '-' and '.' cannot start or end the name, max length is 96: 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodelx1'.
+[2025-04-01 16:33:45,130] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 16:33:46,796] INFO Watching for file changes with StatReloader
+[2025-04-01 16:33:53,170] INFO Loading tokenizer...
+[2025-04-01 16:33:53,688] INFO Tokenizer loaded successfully.
+[2025-04-01 16:33:53,688] INFO Loading model...
+[2025-04-01 16:33:53,805] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 16:34:12,793] INFO User input: chào
+[2025-04-01 16:34:12,793] ERROR Model or tokenizer not loaded.
+[2025-04-01 16:34:12,793] INFO Bot response: Sorry, the system is currently experiencing issues. (Model not loaded)
+[2025-04-01 16:35:55,665] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 16:35:57,031] INFO Watching for file changes with StatReloader
+[2025-04-01 16:36:02,011] DEBUG Checking model directory: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 16:36:02,011] DEBUG Checking safetensors file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\model-001.safetensors
+[2025-04-01 16:36:02,011] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 16:36:02,012] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 16:36:02,012] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer_config.json
+[2025-04-01 16:36:02,013] INFO Loading tokenizer...
+[2025-04-01 16:36:02,499] INFO Tokenizer loaded successfully.
+[2025-04-01 16:36:02,499] INFO Loading model...
+[2025-04-01 16:36:02,578] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 16:36:21,774] INFO User input: chào
+[2025-04-01 16:36:21,774] INFO User input: chào
+[2025-04-01 16:36:21,774] ERROR Model or tokenizer not loaded.
+[2025-04-01 16:36:21,775] INFO Bot response: Sorry, the system is currently experiencing issues. (Model not loaded)
+[2025-04-01 16:36:24,976] INFO User input: hi
+[2025-04-01 16:36:24,976] INFO User input: hi
+[2025-04-01 16:36:24,976] ERROR Model or tokenizer not loaded.
+[2025-04-01 16:36:24,976] INFO Bot response: Sorry, the system is currently experiencing issues. (Model not loaded)
+[2025-04-01 16:44:15,344] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 16:44:16,532] INFO Watching for file changes with StatReloader
+[2025-04-01 16:44:21,273] DEBUG Checking model directory: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 16:44:21,274] DEBUG Checking safetensors file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\model-001.safetensors
+[2025-04-01 16:44:21,274] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 16:44:21,274] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 16:44:21,275] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer_config.json
+[2025-04-01 16:44:21,275] INFO Loading tokenizer...
+[2025-04-01 16:44:21,768] INFO Tokenizer loaded successfully.
+[2025-04-01 16:44:21,768] INFO Loading model...
+[2025-04-01 16:44:21,836] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 46, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 16:44:40,916] INFO User input: hello
+[2025-04-01 16:44:40,916] INFO User input: hello
+[2025-04-01 16:44:40,916] ERROR Model or tokenizer not loaded.
+[2025-04-01 16:44:40,917] INFO Bot response: Sorry, the system is currently experiencing issues. (Model not loaded)
+[2025-04-01 16:45:04,280] INFO User input: chào
+[2025-04-01 16:45:04,280] INFO User input: chào
+[2025-04-01 16:45:04,281] ERROR Model or tokenizer not loaded.
+[2025-04-01 16:45:04,281] INFO Bot response: Sorry, the system is currently experiencing issues. (Model not loaded)
+[2025-04-01 16:50:21,841] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\utils.py changed, reloading.
+[2025-04-01 16:50:23,194] INFO Watching for file changes with StatReloader
+[2025-04-01 16:50:28,200] DEBUG Checking model directory: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 16:50:28,201] DEBUG Checking safetensors file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\model-001.safetensors
+[2025-04-01 16:50:28,201] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 16:50:28,201] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 16:50:28,201] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer_config.json
+[2025-04-01 16:50:28,201] INFO Loading tokenizer...
+[2025-04-01 16:50:28,743] INFO Tokenizer loaded successfully.
+[2025-04-01 16:50:28,744] INFO Loading model...
+[2025-04-01 16:50:28,823] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 46, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 16:50:32,887] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 16:50:34,217] INFO Watching for file changes with StatReloader
+[2025-04-01 16:50:39,011] INFO Starting to load model...
+[2025-04-01 16:50:39,011] DEBUG Checking model directory: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 16:50:39,012] DEBUG Checking safetensors file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\model-001.safetensors
+[2025-04-01 16:50:39,012] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 16:50:39,013] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 16:50:39,013] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer_config.json
+[2025-04-01 16:50:39,013] INFO Loading tokenizer...
+[2025-04-01 16:50:39,500] INFO Tokenizer loaded successfully.
+[2025-04-01 16:50:39,500] INFO Loading model...
+[2025-04-01 16:50:39,593] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 46, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 16:50:39,723] ERROR Failed to load model at startup.
+[2025-04-01 16:50:43,683] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\views.py changed, reloading.
+[2025-04-01 16:50:45,062] INFO Watching for file changes with StatReloader
+[2025-04-01 16:50:49,524] INFO Starting to load model...
+[2025-04-01 16:50:49,524] DEBUG Checking model directory: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 16:50:49,525] DEBUG Checking safetensors file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\model-001.safetensors
+[2025-04-01 16:50:49,525] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 16:50:49,526] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 16:50:49,526] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer_config.json
+[2025-04-01 16:50:49,527] INFO Loading tokenizer...
+[2025-04-01 16:50:49,998] INFO Tokenizer loaded successfully.
+[2025-04-01 16:50:49,998] INFO Loading model...
+[2025-04-01 16:50:50,085] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 46, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 16:50:50,202] ERROR Failed to load model at startup.
+[2025-04-01 16:53:20,477] ERROR Internal Server Error: /chatbot/chat
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\utils\deprecation.py", line 136, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\middleware\common.py", line 108, in process_response
+    return self.response_redirect_class(self.get_full_path_with_slash(request))
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\middleware\common.py", line 87, in get_full_path_with_slash
+    raise RuntimeError(
+RuntimeError: You called this URL via POST, but the URL doesn't end in a slash and you have APPEND_SLASH set. Django can't redirect to the slash URL while maintaining POST data. Change your form to point to 127.0.0.1:8000/chatbot/chat/ (note the trailing slash), or set APPEND_SLASH=False in your Django settings.
+[2025-04-01 19:59:43,499] INFO Watching for file changes with StatReloader
+[2025-04-01 20:00:09,073] INFO Starting to load model...
+[2025-04-01 20:00:09,073] DEBUG Checking model directory: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:00:09,074] DEBUG Checking safetensors file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\model-001.safetensors
+[2025-04-01 20:00:09,074] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 20:00:09,075] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 20:00:09,075] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer_config.json
+[2025-04-01 20:00:09,076] INFO Loading tokenizer...
+[2025-04-01 20:00:09,769] INFO Tokenizer loaded successfully.
+[2025-04-01 20:00:09,770] INFO Loading model...
+[2025-04-01 20:00:09,908] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 46, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 20:00:10,099] ERROR Failed to load model at startup.
+[2025-04-01 20:00:52,838] ERROR Internal Server Error: /chatbot/chat
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\utils\deprecation.py", line 136, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\middleware\common.py", line 108, in process_response
+    return self.response_redirect_class(self.get_full_path_with_slash(request))
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\django\middleware\common.py", line 87, in get_full_path_with_slash
+    raise RuntimeError(
+RuntimeError: You called this URL via POST, but the URL doesn't end in a slash and you have APPEND_SLASH set. Django can't redirect to the slash URL while maintaining POST data. Change your form to point to 127.0.0.1:8000/chatbot/chat/ (note the trailing slash), or set APPEND_SLASH=False in your Django settings.
+[2025-04-01 20:01:31,386] INFO Received user input: chào
+[2025-04-01 20:01:31,386] INFO User input: chào
+[2025-04-01 20:01:31,387] ERROR Model or tokenizer not loaded.
+[2025-04-01 20:03:38,959] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\utils.py changed, reloading.
+[2025-04-01 20:03:40,231] INFO Watching for file changes with StatReloader
+[2025-04-01 20:03:46,790] INFO Starting to load model...
+[2025-04-01 20:03:46,790] DEBUG Checking model directory: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:03:46,790] DEBUG Checking safetensors file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\model-001.safetensors
+[2025-04-01 20:03:46,790] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 20:03:46,791] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 20:03:46,791] DEBUG Checking required file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer_config.json
+[2025-04-01 20:03:46,791] INFO Loading tokenizer...
+[2025-04-01 20:03:47,401] INFO Tokenizer loaded successfully.
+[2025-04-01 20:03:47,402] INFO Loading model...
+[2025-04-01 20:03:47,521] ERROR Error loading model/tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 46, in load_model
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 20:03:47,669] ERROR Failed to load model at startup.
+[2025-04-01 20:03:52,635] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 20:03:53,742] INFO Watching for file changes with StatReloader
+[2025-04-01 20:03:58,511] INFO Starting to load model...
+[2025-04-01 20:03:58,511] INFO Loading tokenizer from facebook/blenderbot-400M-distill...
+[2025-04-01 20:03:58,517] DEBUG Starting new HTTPS connection (1): huggingface.co:443
+[2025-04-01 20:03:59,452] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/tokenizer_config.json HTTP/1.1" 200 0
+[2025-04-01 20:03:59,459] DEBUG Attempting to acquire lock 2403179706064 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\2b13caafbcba82c02a6d4935daad7745b7de349a.lock
+[2025-04-01 20:03:59,460] DEBUG Lock 2403179706064 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\2b13caafbcba82c02a6d4935daad7745b7de349a.lock
+[2025-04-01 20:03:59,757] DEBUG https://huggingface.co:443 "GET /facebook/blenderbot-400M-distill/resolve/main/tokenizer_config.json HTTP/1.1" 200 1153
+[2025-04-01 20:03:59,784] DEBUG Attempting to release lock 2403179706064 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\2b13caafbcba82c02a6d4935daad7745b7de349a.lock
+[2025-04-01 20:03:59,785] DEBUG Lock 2403179706064 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\2b13caafbcba82c02a6d4935daad7745b7de349a.lock
+[2025-04-01 20:04:00,554] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/config.json HTTP/1.1" 200 0
+[2025-04-01 20:04:00,556] DEBUG Attempting to acquire lock 2403220298064 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\66e084c9ed7569bfb5d37f4409c952625c79875e.lock
+[2025-04-01 20:04:00,556] DEBUG Lock 2403220298064 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\66e084c9ed7569bfb5d37f4409c952625c79875e.lock
+[2025-04-01 20:04:00,975] DEBUG https://huggingface.co:443 "GET /facebook/blenderbot-400M-distill/resolve/main/config.json HTTP/1.1" 200 1572
+[2025-04-01 20:04:00,979] DEBUG Attempting to release lock 2403220298064 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\66e084c9ed7569bfb5d37f4409c952625c79875e.lock
+[2025-04-01 20:04:00,979] DEBUG Lock 2403220298064 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\66e084c9ed7569bfb5d37f4409c952625c79875e.lock
+[2025-04-01 20:04:01,347] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/vocab.json HTTP/1.1" 200 0
+[2025-04-01 20:04:01,348] DEBUG Attempting to acquire lock 2403220474512 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\21b5c341f10df656025c59b4344cb0f4add5200b.lock
+[2025-04-01 20:04:01,349] DEBUG Lock 2403220474512 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\21b5c341f10df656025c59b4344cb0f4add5200b.lock
+[2025-04-01 20:04:01,636] DEBUG https://huggingface.co:443 "GET /facebook/blenderbot-400M-distill/resolve/main/vocab.json HTTP/1.1" 200 126891
+[2025-04-01 20:04:01,724] DEBUG Attempting to release lock 2403220474512 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\21b5c341f10df656025c59b4344cb0f4add5200b.lock
+[2025-04-01 20:04:01,725] DEBUG Lock 2403220474512 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\21b5c341f10df656025c59b4344cb0f4add5200b.lock
+[2025-04-01 20:04:02,049] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/merges.txt HTTP/1.1" 200 0
+[2025-04-01 20:04:02,051] DEBUG Attempting to acquire lock 2403220473744 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\88513e098ed579d19b8c5fd3c8858dae231f8f9d.lock
+[2025-04-01 20:04:02,051] DEBUG Lock 2403220473744 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\88513e098ed579d19b8c5fd3c8858dae231f8f9d.lock
+[2025-04-01 20:04:02,341] DEBUG https://huggingface.co:443 "GET /facebook/blenderbot-400M-distill/resolve/main/merges.txt HTTP/1.1" 200 62871
+[2025-04-01 20:04:02,354] DEBUG Attempting to release lock 2403220473744 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\88513e098ed579d19b8c5fd3c8858dae231f8f9d.lock
+[2025-04-01 20:04:02,355] DEBUG Lock 2403220473744 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\88513e098ed579d19b8c5fd3c8858dae231f8f9d.lock
+[2025-04-01 20:04:02,645] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/added_tokens.json HTTP/1.1" 200 0
+[2025-04-01 20:04:02,647] DEBUG Attempting to acquire lock 2403220473744 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\3f35fe0f527ae0416b1b71ac668a9dd53ba1ced8.lock
+[2025-04-01 20:04:02,647] DEBUG Lock 2403220473744 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\3f35fe0f527ae0416b1b71ac668a9dd53ba1ced8.lock
+[2025-04-01 20:04:02,944] DEBUG https://huggingface.co:443 "GET /facebook/blenderbot-400M-distill/resolve/main/added_tokens.json HTTP/1.1" 200 16
+[2025-04-01 20:04:02,948] DEBUG Attempting to release lock 2403220473744 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\3f35fe0f527ae0416b1b71ac668a9dd53ba1ced8.lock
+[2025-04-01 20:04:02,949] DEBUG Lock 2403220473744 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\3f35fe0f527ae0416b1b71ac668a9dd53ba1ced8.lock
+[2025-04-01 20:04:03,249] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/special_tokens_map.json HTTP/1.1" 200 0
+[2025-04-01 20:04:03,250] DEBUG Attempting to acquire lock 2403220473872 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\e97d1993365bb21c88f390e8703e4c1af564821f.lock
+[2025-04-01 20:04:03,251] DEBUG Lock 2403220473872 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\e97d1993365bb21c88f390e8703e4c1af564821f.lock
+[2025-04-01 20:04:03,609] DEBUG https://huggingface.co:443 "GET /facebook/blenderbot-400M-distill/resolve/main/special_tokens_map.json HTTP/1.1" 200 772
+[2025-04-01 20:04:03,613] DEBUG Attempting to release lock 2403220473872 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\e97d1993365bb21c88f390e8703e4c1af564821f.lock
+[2025-04-01 20:04:03,613] DEBUG Lock 2403220473872 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\e97d1993365bb21c88f390e8703e4c1af564821f.lock
+[2025-04-01 20:04:03,902] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/tokenizer.json HTTP/1.1" 200 0
+[2025-04-01 20:04:03,904] DEBUG Attempting to acquire lock 2403220477712 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\96e3cf14209b242b9f16a5e78c9c3646fbb4cc81.lock
+[2025-04-01 20:04:03,905] DEBUG Lock 2403220477712 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\96e3cf14209b242b9f16a5e78c9c3646fbb4cc81.lock
+[2025-04-01 20:04:04,194] DEBUG https://huggingface.co:443 "GET /facebook/blenderbot-400M-distill/resolve/main/tokenizer.json HTTP/1.1" 200 309565
+[2025-04-01 20:04:04,677] DEBUG Attempting to release lock 2403220477712 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\96e3cf14209b242b9f16a5e78c9c3646fbb4cc81.lock
+[2025-04-01 20:04:04,678] DEBUG Lock 2403220477712 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\96e3cf14209b242b9f16a5e78c9c3646fbb4cc81.lock
+[2025-04-01 20:04:04,966] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/chat_template.jinja HTTP/1.1" 404 0
+[2025-04-01 20:04:05,036] INFO Tokenizer loaded successfully.
+[2025-04-01 20:04:05,037] INFO Loading model from facebook/blenderbot-400M-distill...
+[2025-04-01 20:04:05,322] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/config.json HTTP/1.1" 200 0
+[2025-04-01 20:04:05,683] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/model.safetensors HTTP/1.1" 404 0
+[2025-04-01 20:04:05,973] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/model.safetensors.index.json HTTP/1.1" 404 0
+[2025-04-01 20:04:06,266] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/pytorch_model.bin HTTP/1.1" 302 0
+[2025-04-01 20:04:06,268] DEBUG Attempting to acquire lock 2403223583184 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\075e032320c5f6c96b55c04b252c0a47ca5e8bbd86ef209cd1470fdd750449c5.lock
+[2025-04-01 20:04:06,269] DEBUG Lock 2403223583184 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\075e032320c5f6c96b55c04b252c0a47ca5e8bbd86ef209cd1470fdd750449c5.lock
+[2025-04-01 20:04:06,271] DEBUG Starting new HTTPS connection (1): cdn-lfs.hf.co:443
+[2025-04-01 20:04:06,587] DEBUG https://cdn-lfs.hf.co:443 "GET /facebook/blenderbot-400M-distill/075e032320c5f6c96b55c04b252c0a47ca5e8bbd86ef209cd1470fdd750449c5?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27pytorch_model.bin%3B+filename%3D%22pytorch_model.bin%22%3B&response-content-type=application%2Foctet-stream&Expires=1743516246&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc0MzUxNjI0Nn19LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9mYWNlYm9vay9ibGVuZGVyYm90LTQwME0tZGlzdGlsbC8wNzVlMDMyMzIwYzVmNmM5NmI1NWMwNGIyNTJjMGE0N2NhNWU4YmJkODZlZjIwOWNkMTQ3MGZkZDc1MDQ0OWM1P3Jlc3BvbnNlLWNvbnRlbnQtZGlzcG9zaXRpb249KiZyZXNwb25zZS1jb250ZW50LXR5cGU9KiJ9XX0_&Signature=Y06cNO6wiVHJlBFYpMAJCzGr-8lXkOfpVKYsnQ8lsebYSAYQbjvOibT-ShrWl05rwMV2a1VSlFWKDDUJQrp~ttpiikR5-43hGHJLKiePHQAGTPVUQysubs2EWHeR1wKwmzqpUzbo03JiYPG3VlxTgJGg05v5fKObDve2k6niMXHwmkzKFEOLvjSidT-OAklJIM5zfwmkHhX~p0GjTf1RjULFWFQUxHWlMqg8TQL-H8BzCoawhdyuqHtm6-jnFLi1vfD2ileKgBSBOiqFfmgStTix1buRxravxBcWxQv5giTiN~KPy8H8SgZbtVO6EqbsAJmzh4s-5zdzv~aeiw~Ryw__&Key-Pair-Id=K3RPWS32NSSJCE HTTP/1.1" 200 729755983
+[2025-04-01 20:04:31,821] DEBUG Attempting to release lock 2403223583184 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\075e032320c5f6c96b55c04b252c0a47ca5e8bbd86ef209cd1470fdd750449c5.lock
+[2025-04-01 20:04:31,822] DEBUG Lock 2403223583184 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\075e032320c5f6c96b55c04b252c0a47ca5e8bbd86ef209cd1470fdd750449c5.lock
+[2025-04-01 20:04:32,130] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/model.safetensors HTTP/1.1" 404 0
+[2025-04-01 20:04:32,133] DEBUG Starting new HTTPS connection (1): huggingface.co:443
+[2025-04-01 20:04:32,804] DEBUG https://huggingface.co:443 "GET /api/models/facebook/blenderbot-400M-distill HTTP/1.1" 200 5501
+[2025-04-01 20:04:33,810] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/main/generation_config.json HTTP/1.1" 200 0
+[2025-04-01 20:04:33,812] DEBUG Attempting to acquire lock 2403222709072 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\4bdb819ef10be2b1f9631d01a05447821b0d1489.lock
+[2025-04-01 20:04:33,814] DEBUG Lock 2403222709072 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\4bdb819ef10be2b1f9631d01a05447821b0d1489.lock
+[2025-04-01 20:04:33,818] DEBUG https://huggingface.co:443 "GET /api/models/facebook/blenderbot-400M-distill/commits/main HTTP/1.1" 200 2736
+[2025-04-01 20:04:34,100] DEBUG https://huggingface.co:443 "GET /facebook/blenderbot-400M-distill/resolve/main/generation_config.json HTTP/1.1" 200 347
+[2025-04-01 20:04:34,104] DEBUG Attempting to release lock 2403222709072 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\4bdb819ef10be2b1f9631d01a05447821b0d1489.lock
+[2025-04-01 20:04:34,104] DEBUG Lock 2403222709072 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\4bdb819ef10be2b1f9631d01a05447821b0d1489.lock
+[2025-04-01 20:04:34,125] INFO Model loaded successfully.
+[2025-04-01 20:04:34,129] DEBUG https://huggingface.co:443 "GET /api/models/facebook/blenderbot-400M-distill/discussions?p=0 HTTP/1.1" 200 12376
+[2025-04-01 20:04:34,454] DEBUG https://huggingface.co:443 "GET /api/models/facebook/blenderbot-400M-distill/commits/refs%2Fpr%2F7 HTTP/1.1" 200 3701
+[2025-04-01 20:04:35,330] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/refs%2Fpr%2F7/model.safetensors.index.json HTTP/1.1" 404 0
+[2025-04-01 20:04:35,636] DEBUG https://huggingface.co:443 "HEAD /facebook/blenderbot-400M-distill/resolve/refs%2Fpr%2F7/model.safetensors HTTP/1.1" 302 0
+[2025-04-01 20:04:35,639] DEBUG Attempting to acquire lock 2403253782096 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\90a8490a70885df0f00b10166b7c08d6d063208542747250c6e560a2c1d9445c.lock
+[2025-04-01 20:04:35,640] DEBUG Lock 2403253782096 acquired on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\90a8490a70885df0f00b10166b7c08d6d063208542747250c6e560a2c1d9445c.lock
+[2025-04-01 20:04:35,642] DEBUG Starting new HTTPS connection (1): cdn-lfs.hf.co:443
+[2025-04-01 20:04:35,779] DEBUG https://cdn-lfs.hf.co:443 "GET /facebook/blenderbot-400M-distill/90a8490a70885df0f00b10166b7c08d6d063208542747250c6e560a2c1d9445c?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27model.safetensors%3B+filename%3D%22model.safetensors%22%3B&Expires=1743516276&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc0MzUxNjI3Nn19LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9mYWNlYm9vay9ibGVuZGVyYm90LTQwME0tZGlzdGlsbC85MGE4NDkwYTcwODg1ZGYwZjAwYjEwMTY2YjdjMDhkNmQwNjMyMDg1NDI3NDcyNTBjNmU1NjBhMmMxZDk0NDVjP3Jlc3BvbnNlLWNvbnRlbnQtZGlzcG9zaXRpb249KiJ9XX0_&Signature=HuGoMx0OfgI5es0KoWciunrZyGWri4KSZUFhoPKhE7HCAPF-qcyz3FKNz56lcw1JDSrPZCq26iECA~3DZ3Cr28l0ftYbDubwUS7hSvvhplu5jKR-oa93ZE397ivhen8cOy6uBhX-pYB2stoa93Cn~ZNvc63fa2C6x8DzEToLwE2r9FhWaiK~kRq1H2akgOS1SuS2xN2oymwK~VurfiiONwG4cJM7GOepdv0fDOW3x1AJLzaU6bmaSFBEAAr-OXfJ0PcCXX39d1r0C9gakYWfO5fQmMHNDP5Z6ysuouCF4kTweLlur0UALX~-xkUV0yeTbwINtC6MU5ou-4dtcmJDlw__&Key-Pair-Id=K3RPWS32NSSJCE HTTP/1.1" 200 729662408
+[2025-04-01 20:05:03,025] DEBUG Attempting to release lock 2403253782096 on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\90a8490a70885df0f00b10166b7c08d6d063208542747250c6e560a2c1d9445c.lock
+[2025-04-01 20:05:03,026] DEBUG Lock 2403253782096 released on C:\Users\Admin\.cache\huggingface\hub\.locks\models--facebook--blenderbot-400M-distill\90a8490a70885df0f00b10166b7c08d6d063208542747250c6e560a2c1d9445c.lock
+[2025-04-01 20:05:32,013] INFO Received user input: chào
+[2025-04-01 20:05:32,013] INFO User input: chào
+[2025-04-01 20:05:37,732] INFO Bot response:  A choir is a musical ensemble consisting of singers and instrumentalists
+[2025-04-01 20:14:38,716] INFO Watching for file changes with StatReloader
+[2025-04-01 20:14:47,351] INFO Initializing model loading process...
+[2025-04-01 20:14:47,353] INFO Loading tokenizer from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:14:48,117] INFO Tokenizer loaded successfully.
+[2025-04-01 20:14:48,118] INFO Loading model from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:14:48,281] ERROR Failed to load model or tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 34, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 20:14:48,433] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-01 20:15:00,463] INFO Received user input: 'chào'
+[2025-04-01 20:15:00,464] INFO Processing user input: 'chào'
+[2025-04-01 20:15:00,465] ERROR Cannot generate response: Model or tokenizer not loaded.
+[2025-04-01 20:15:00,466] INFO Response generated in 0.00 seconds.
+[2025-04-01 20:15:00,467] ERROR Service Unavailable: /chatbot/chat/
+[2025-04-01 20:22:19,915] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 20:22:21,271] INFO Watching for file changes with StatReloader
+[2025-04-01 20:22:25,888] INFO Initializing model loading process...
+[2025-04-01 20:22:25,904] INFO Checking model directory: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:22:25,904] ERROR Required file missing: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\model-00001-of-00001.safetensors
+[2025-04-01 20:22:25,904] ERROR Failed to load model or tokenizer: File 'model-00001-of-00001.safetensors' not found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 31, in load_model
+    raise FileNotFoundError(f"File '{file_name}' not found in {MODEL_DIR}")
+FileNotFoundError: File 'model-00001-of-00001.safetensors' not found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:22:25,904] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-01 20:22:30,197] INFO Received user input: 'chào'
+[2025-04-01 20:22:30,197] INFO Processing user input: 'chào'
+[2025-04-01 20:22:30,197] ERROR Cannot generate response: Model or tokenizer not loaded.
+[2025-04-01 20:22:30,197] INFO Response generated in 0.00 seconds.
+[2025-04-01 20:22:30,197] ERROR Service Unavailable: /chatbot/chat/
+[2025-04-01 20:22:32,880] INFO Received user input: 'chào'
+[2025-04-01 20:22:32,880] INFO Processing user input: 'chào'
+[2025-04-01 20:22:32,880] ERROR Cannot generate response: Model or tokenizer not loaded.
+[2025-04-01 20:22:32,880] INFO Response generated in 0.00 seconds.
+[2025-04-01 20:22:32,880] ERROR Service Unavailable: /chatbot/chat/
+[2025-04-01 20:23:59,090] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 20:24:00,381] INFO Watching for file changes with StatReloader
+[2025-04-01 20:24:06,974] INFO Initializing model loading process...
+[2025-04-01 20:24:06,975] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:24:06,975] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:24:06,976] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 20:24:06,977] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 20:24:06,977] INFO Loading tokenizer from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:24:07,493] INFO Tokenizer loaded successfully.
+[2025-04-01 20:24:07,494] INFO Loading model from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:24:07,600] ERROR Failed to load model or tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 53, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 20:24:07,718] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-01 20:24:12,816] INFO Received user input: 'chào'
+[2025-04-01 20:24:12,817] INFO Processing user input: 'chào'
+[2025-04-01 20:24:12,817] ERROR Cannot generate response: Model or tokenizer not loaded.
+[2025-04-01 20:24:12,818] INFO Response generated in 0.00 seconds.
+[2025-04-01 20:24:12,818] ERROR Service Unavailable: /chatbot/chat/
+[2025-04-01 20:34:39,068] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 20:34:40,318] INFO Watching for file changes with StatReloader
+[2025-04-01 20:34:40,473] INFO Starting chatbot_model.py import process...
+[2025-04-01 20:34:45,311] INFO Initializing model loading process...
+[2025-04-01 20:34:45,311] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:34:45,312] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:34:45,312] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 20:34:45,312] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 20:34:45,313] INFO Loading tokenizer from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:34:45,914] INFO Tokenizer loaded successfully.
+[2025-04-01 20:34:45,914] INFO Loading model from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:34:45,993] ERROR Failed to load model or tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 67, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 20:34:46,113] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-01 20:34:50,197] INFO Received user input: 'chào'
+[2025-04-01 20:34:50,198] INFO Processing user input: 'chào'
+[2025-04-01 20:34:50,199] ERROR Cannot generate response: Model or tokenizer not loaded.
+[2025-04-01 20:34:50,199] INFO Response generated in 0.00 seconds.
+[2025-04-01 20:34:50,200] ERROR Service Unavailable: /chatbot/chat/
+[2025-04-01 20:37:50,793] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\FinTrip\settings.py changed, reloading.
+[2025-04-01 20:37:52,396] INFO Watching for file changes with StatReloader
+[2025-04-01 20:37:52,632] INFO Starting chatbot_model.py import process...
+[2025-04-01 20:37:57,311] INFO Initializing model loading process...
+[2025-04-01 20:37:57,311] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:37:57,312] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:37:57,312] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 20:37:57,312] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 20:37:57,312] INFO Loading tokenizer from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:37:57,796] INFO Tokenizer loaded successfully.
+[2025-04-01 20:37:57,796] INFO Loading model from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:37:57,881] ERROR Failed to load model or tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 67, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 20:37:57,994] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-01 20:38:10,435] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-01 20:38:11,647] INFO Watching for file changes with StatReloader
+[2025-04-01 20:38:11,825] INFO Starting chatbot_model.py import process...
+[2025-04-01 20:38:15,529] INFO Watching for file changes with StatReloader
+[2025-04-01 20:38:15,677] INFO Starting chatbot_model.py import process...
+[2025-04-01 20:38:20,183] INFO Successfully imported torch and transformers.
+[2025-04-01 20:38:20,183] INFO Model directory set to: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:38:20,184] INFO Initializing model loading process...
+[2025-04-01 20:38:20,184] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:38:20,185] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:38:20,185] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 20:38:20,186] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 20:38:20,186] INFO Loading tokenizer from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:38:20,626] INFO Tokenizer loaded successfully.
+[2025-04-01 20:38:20,626] INFO Loading model from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:38:20,710] ERROR Failed to load model or tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 71, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 20:38:20,826] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-01 20:38:23,637] INFO Received user input: 'chào'
+[2025-04-01 20:38:23,637] INFO Processing user input: 'chào'
+[2025-04-01 20:38:23,638] ERROR Cannot generate response: Model or tokenizer not loaded.
+[2025-04-01 20:38:23,638] INFO Response generated in 0.00 seconds.
+[2025-04-01 20:38:23,639] ERROR Service Unavailable: /chatbot/chat/
+[2025-04-01 20:38:26,003] INFO Received user input: 'chào'
+[2025-04-01 20:38:26,003] INFO Processing user input: 'chào'
+[2025-04-01 20:38:26,004] ERROR Cannot generate response: Model or tokenizer not loaded.
+[2025-04-01 20:38:26,004] INFO Response generated in 0.00 seconds.
+[2025-04-01 20:38:26,005] ERROR Service Unavailable: /chatbot/chat/
+[2025-04-01 20:38:51,918] INFO Watching for file changes with StatReloader
+[2025-04-01 20:38:52,069] INFO Starting chatbot_model.py import process...
+[2025-04-01 20:38:58,405] INFO Successfully imported torch and transformers.
+[2025-04-01 20:38:58,406] INFO Model directory set to: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:38:58,406] INFO Initializing model loading process...
+[2025-04-01 20:38:58,406] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:38:58,407] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:38:58,407] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\config.json
+[2025-04-01 20:38:58,407] DEBUG Checking file: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1\tokenizer.json
+[2025-04-01 20:38:58,408] INFO Loading tokenizer from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:38:59,264] INFO Tokenizer loaded successfully.
+[2025-04-01 20:38:59,298] INFO Loading model from D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1...
+[2025-04-01 20:38:59,450] ERROR Failed to load model or tokenizer: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 71, in load_model
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\models\auto\auto_factory.py", line 573, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 272, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 4317, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\FinTrip\Recommand\FinTrip\venv\Lib\site-packages\transformers\modeling_utils.py", line 982, in _get_resolved_checkpoint_files
+    raise EnvironmentError(
+OSError: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1.
+[2025-04-01 20:38:59,605] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-01 20:42:03,056] INFO Watching for file changes with StatReloader
+[2025-04-01 20:42:03,200] INFO Starting chatbot_model.py import process...
+[2025-04-01 20:42:07,705] INFO Successfully imported torch and transformers.
+[2025-04-01 20:42:07,706] INFO Model directory set to: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:42:07,707] INFO Initializing model loading process...
+[2025-04-01 20:42:07,708] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:42:07,708] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:42:07,709] ERROR No weight files (pytorch_model.bin or model.safetensors) found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:42:07,709] ERROR Failed to load model or tokenizer: No model weights found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 43, in load_model
+    raise FileNotFoundError(f"No model weights found in {MODEL_DIR}")
+FileNotFoundError: No model weights found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-01 20:42:07,710] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-01 20:42:27,063] INFO Received user input: 'chào'
+[2025-04-01 20:42:27,063] INFO Processing user input: 'chào'
+[2025-04-01 20:42:27,064] ERROR Cannot generate response: Model or tokenizer not loaded.
+[2025-04-01 20:42:27,064] INFO Response generated in 0.00 seconds.
+[2025-04-01 20:42:27,065] ERROR Service Unavailable: /chatbot/chat/
+[2025-04-02 14:18:27,150] INFO Watching for file changes with StatReloader
+[2025-04-02 14:18:27,516] INFO Starting chatbot_model.py import process...
+[2025-04-02 14:18:54,155] INFO Successfully imported torch and transformers.
+[2025-04-02 14:18:54,156] INFO Model directory set to: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54,156] INFO Initializing model loading process...
+[2025-04-02 14:18:54,156] DEBUG Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54,158] INFO Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54,159] ERROR No weight files (pytorch_model.bin or model.safetensors) found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54,159] ERROR Failed to load model or tokenizer: No model weights found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 43, in load_model
+    raise FileNotFoundError(f"No model weights found in {MODEL_DIR}")
+FileNotFoundError: No model weights found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54,160] CRITICAL Model initialization failed. Chatbot will not function properly.

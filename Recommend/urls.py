@@ -29,4 +29,9 @@ urlpatterns = [
     #share schedule
     path('share-schedule/', views.share_schedule, name='share_schedule'),
     path('view-schedule/<int:schedule_id>/', views.view_schedule, name='view_schedule'),
+
+    #Homepage
+    path('homepage-hotels/', views.get_all_hotels_homepage, name='get_all_hotels_homepage'),
+    path('homepage-place/', views.get_all_place_homepage, name='get_all_place_homepage'),
+    path('homepage-food/', views.get_all_food_homepage, name='get_all_food_homepage'),
 ]

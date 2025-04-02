@@ -16,8 +16,8 @@ import bcrypt
 
 from .CheckException import validate_request
 from .flight import search_flight_service
-from .hotel import process_hotel_data_from_csv,update_hotel_in_csv, delete_hotel_in_csv,show_hotel_in_csv
-from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE,normalize_text
+from .hotel import process_hotel_data_from_csv,update_hotel_in_csv, delete_hotel_in_csv,show_hotel_in_csv, get_hotel_homepage
+from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE,normalize_text,get_food_homepage,get_place_homepage
 
 # Cấu hình MySQL từ settings.py
 MYSQL_HOST = settings.DATABASES['default']['HOST']
@@ -829,39 +829,54 @@ def rcm_flight(request):
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
-# Hàm tạo dữ liệu mẫu (đã sửa để mã hóa mật khẩu)
-def create_sample_data():
+#Homepage
+@require_GET
+def get_all_hotels_homepage(request):
     try:
-        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
-        cursor = db.cursor()
+        hotels = get_hotel_homepage()
+        if not hotels:
+            return JsonResponse({"error": "Error File..."}, status=404)
 
-        try:
-            # Tạo dữ liệu cho bảng Roles
-            cursor.execute("INSERT INTO Roles (role_name, description) VALUES ('Admin', 'Quản trị viên hệ thống')")
-            cursor.execute("INSERT INTO Roles (role_name, description) VALUES ('User', 'Người dùng thông thường')")
-
-            # Tạo dữ liệu cho bảng Users với mật khẩu đã mã hóa
-            users = [
-                ('admin@gmail.com', 'admin123', 'Admin User', 'active', 1),
-                ('user1@gmail.com', 'password123', 'User One', 'active', 2),
-                ('user2@gmail.com', 'password456', 'User Two', 'inactive', 2),
-                ('user3@gmail.com', 'pass789', 'User Three', 'banned', 2),
-            ]
-
-            for email, password, full_name, status, role_id in users:
-                hashed_password = hash_password(password)
-                cursor.execute(
-                    "INSERT INTO Users (email, password, full_name, status, role_id) VALUES (%s, %s, %s, %s, %s)",
-                    [email, hashed_password, full_name, status, role_id]
-                )
-
-            db.commit()
-            print("Dữ liệu mẫu đã được tạo thành công!")
-
-        finally:
-            cursor.close()
-            db.close()
+        return JsonResponse({
+            "hotels": hotels,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, json_dumps_params={"ensure_ascii": False}, status=200)
 
     except Exception as e:
-        print(f"Lỗi khi tạo dữ liệu mẫu: {str(e)}")
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+@require_GET
+def get_all_place_homepage(request):
+    try:
+        places = get_place_homepage()
+        if not places:
+            return JsonResponse({"error": "Error File..."}, status=404)
+
+        return JsonResponse({
+            "places": places,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, json_dumps_params={"ensure_ascii": False}, status=200)
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+@require_GET
+def get_all_food_homepage(request):
+    try:
+        foods = get_food_homepage()
+        if not foods:
+            return JsonResponse({"error": "Error File..."}, status=404)
+
+        return JsonResponse({
+            "foods": foods,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, json_dumps_params={"ensure_ascii": False}, status=200)
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)

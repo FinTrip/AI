@@ -2,6 +2,9 @@ import pandas as pd
 import re
 import os
 import unidecode  # Dùng để bỏ dấu tiếng Việt
+import random
+
+from pyexpat import error
 
 csv_filename = os.path.join(os.path.dirname(__file__), "data", "hotels.csv")
 
@@ -110,3 +113,24 @@ def delete_hotel_in_csv(hotel_name):
         return False
     except Exception as e:
         raise Exception(f"Không thể xóa khách sạn: {str(e)}")
+
+def get_hotel_homepage(num_item = None):
+    if num_item is None:
+        num_item = random.randint(10,15)
+
+    try:
+        df = pd.read_csv(csv_filename)
+        if df.empty:
+            return []
+        df['location_rating'] = pd.to_numeric(df['location_rating'], errors= 'coerce')
+        df.dropna(subset=['location_rating', 'name'],inplace=True)
+        top_hotels = df.drop_duplicates('name').nlargest(num_item, 'location_rating', keep='first')
+        return top_hotels[
+            ['name', 'link', 'description', 'price', 'name_nearby_place', 'hotel_class', 'img_origin',
+             'location_rating']
+        ].fillna('N/A').to_dict('records')
+    except(FileNotFoundError, pd.errors.EmptyDataError):
+        return []
+    except Exception as e:
+        print(f"Error loading hotel data: {e}")
+        return []

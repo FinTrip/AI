@@ -1,0 +1,13 @@
+[2025-04-02 14:18:27] INFO [chatbot_model.py:5] Starting chatbot_model.py import process...
+[2025-04-02 14:18:54] INFO [chatbot_model.py:11] Successfully imported torch and transformers.
+[2025-04-02 14:18:54] INFO [chatbot_model.py:18] Model directory set to: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54] INFO [chatbot_model.py:86] Initializing model loading process...
+[2025-04-02 14:18:54] DEBUG [chatbot_model.py:30] Starting load_model() with MODEL_DIR: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54] INFO [chatbot_model.py:33] Checking if model directory exists: D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54] ERROR [chatbot_model.py:42] No weight files (pytorch_model.bin or model.safetensors) found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54] ERROR [chatbot_model.py:82] Failed to load model or tokenizer: No model weights found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+Traceback (most recent call last):
+  File "D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py", line 43, in load_model
+    raise FileNotFoundError(f"No model weights found in {MODEL_DIR}")
+FileNotFoundError: No model weights found in D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1
+[2025-04-02 14:18:54] CRITICAL [chatbot_model.py:89] Model initialization failed. Chatbot will not function properly.
