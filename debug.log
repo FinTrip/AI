@@ -1513,3 +1513,17 @@ Traceback (most recent call last):
     raise FileNotFoundError(f"Model directory '{MODEL_DIR}' not found.")
 FileNotFoundError: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\model\Gptmodel1' not found.
 [2025-04-02 16:13:15,299] CRITICAL Model initialization failed. Chatbot will not function properly.
+[2025-04-04 10:17:26,054] INFO Watching for file changes with StatReloader
+[2025-04-04 10:18:24,506] INFO Watching for file changes with StatReloader
+[2025-04-04 10:26:10,335] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-04 10:26:12,466] INFO Watching for file changes with StatReloader
+[2025-04-04 10:28:11,258] INFO Watching for file changes with StatReloader
+[2025-04-04 10:28:56,391] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-04 10:28:57,580] INFO Watching for file changes with StatReloader
+[2025-04-04 10:32:40,342] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-04 10:32:42,261] INFO Watching for file changes with StatReloader
+[2025-04-04 10:33:57,666] INFO Watching for file changes with StatReloader
+[2025-04-04 10:35:10,883] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-04 10:35:12,235] INFO Watching for file changes with StatReloader
+[2025-04-04 10:48:03,961] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
+[2025-04-04 10:48:05,311] INFO Watching for file changes with StatReloader
