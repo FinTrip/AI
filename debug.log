@@ -1527,3 +1527,11 @@ FileNotFoundError: Model directory 'D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot
 [2025-04-04 10:35:12,235] INFO Watching for file changes with StatReloader
 [2025-04-04 10:48:03,961] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\ChatBot\chatbot_model.py changed, reloading.
 [2025-04-04 10:48:05,311] INFO Watching for file changes with StatReloader
+[2025-04-04 11:57:11,773] INFO Watching for file changes with StatReloader
+[2025-04-04 13:06:59,662] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\urls.py changed, reloading.
+[2025-04-04 13:07:02,798] INFO Watching for file changes with StatReloader
+[2025-04-04 13:07:41,830] ERROR Internal Server Error: /recommend/search-place/
+[2025-04-04 13:08:12,183] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-04-04 13:08:13,365] INFO Watching for file changes with StatReloader
+[2025-04-04 13:08:40,027] INFO D:\FinTrip\Recommand\FinTrip\FinTrip\Recommend\views.py changed, reloading.
+[2025-04-04 13:08:41,162] INFO Watching for file changes with StatReloader

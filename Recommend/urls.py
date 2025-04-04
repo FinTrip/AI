@@ -27,6 +27,8 @@ urlpatterns = [
     path('select_hotel/', views.select_hotel, name='select_hotel'),
 
     path('search-province/', views.search_province, name='search_province'),
+    path('search-place/', views.search_place, name='search_place'),
+    path('search-food/', views.search_food, name='search_food'),
 
     #share schedule
     path('share-schedule/', views.share_schedule, name='share_schedule'),

@@ -631,6 +631,108 @@ def search_province(request):
         traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
+#search place
+@csrf_exempt
+@require_POST
+def search_place(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        province = data.get("destinationInput", "").strip()
+        if not province:
+            return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
+
+        # Kiểm tra độ dài
+        if len(province) > 100:
+            return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
+
+        # Tải dữ liệu
+        food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+
+        # Chuẩn hóa tỉnh/thành phố đầu vào
+        normalized_province = normalize_text(province)
+
+        # Lọc dữ liệu theo tỉnh/thành phố
+        foods = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
+        places = place_df[place_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
+
+        place_list = [{
+            "province": place.get("province"),
+            "title": place.get("title"),
+            "rating": float(place.get("rating")) if pd.notna(place.get("rating")) else None,
+            "description": place.get("description"),
+            "address": place.get("address"),
+            "img": place.get("img"),
+            "types": place.get("types"),
+            "link": place.get("link")  # Cột này có thể không tồn tại
+        } for place in places]
+
+        if not place_list:
+            return JsonResponse({"error": "Không tìm thấy hoạt động nào cho tỉnh/thành phố này."}, status=404)
+
+        return JsonResponse({
+            "places": place_list,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+#search province
+@csrf_exempt
+@require_POST
+def search_food(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        province = data.get("destinationInput", "").strip()
+        if not province:
+            return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
+
+        # Kiểm tra độ dài
+        if len(province) > 100:
+            return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
+
+        # Tải dữ liệu
+        food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+
+        # Chuẩn hóa tỉnh/thành phố đầu vào
+        normalized_province = normalize_text(province)
+
+        # Lọc dữ liệu theo tỉnh/thành phố
+        foods = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
+        places = place_df[place_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
+
+        # Chuyển đổi dữ liệu thành định dạng JSON
+        food_list = [{
+            "province": food.get("province"),
+            "title": food.get("title"),
+            "rating": float(food.get("rating")) if pd.notna(food.get("rating")) else None,
+            "price": food.get("Price"),  # Cột này có thể không tồn tại
+            "address": food.get("address"),
+            "phone": food.get("Phone"),  # Cột này có thể không tồn tại
+            "link": food.get("Link"),    # Cột này có thể không tồn tại
+            "service": food.get("types"),  # Đã đổi từ 'Service' thành 'types' trong load_data
+            "image": food.get("img")
+        } for food in foods]
+
+        if not food_list :
+            return JsonResponse({"error": "Không tìm thấy hoạt động nào cho tỉnh/thành phố này."}, status=404)
+
+        return JsonResponse({
+            "foods": food_list,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
 # API lưu lịch trình
 @csrf_exempt
 @require_POST

@@ -89,7 +89,7 @@ fintrip/
 │   │-- apps.py
 │-- chatbot/
 │   -- model/
-│    │-- views.py
+│    │-- T5_vn_finetuned
 │   │-- _init_.py
 │   │-- admin.py
 │   │-- app.py
