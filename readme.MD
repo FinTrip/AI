@@ -41,13 +41,21 @@ cd AI
     pip install -r requirements.txt
 ```
 
-4. **Set up the Django project**:
+4. **Download Model Chatbot **:
+```commandline
+    https://drive.google.com/drive/folders/1-QAqkJL41shoeeXqHxsta4qVh2_Dpxcg?usp=drive_link
+```
+
+Unzip the downloaded zip file
+copy the model to the "model" folder in Chatbot/model
+
+5. **Set up the Django project**:
 - **Make database migrations**:
 ```commandline
     python manage.py migrate
 ```
 
-5. **Run the Django development server**:
+6. **Run the Django development server**:
 ```commandline
     python manage.py runserver
 ```
