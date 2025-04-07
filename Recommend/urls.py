@@ -27,6 +27,7 @@ urlpatterns = [
     path('select_hotel/', views.select_hotel, name='select_hotel'),
 
     path('search-province/', views.search_province, name='search_province'),
+    path('get-top-cities/', views.get_top_cities, name='get_top_cities'),
     path('search-place/', views.search_place, name='search_place'),
     path('search-food/', views.search_food, name='search_food'),
 

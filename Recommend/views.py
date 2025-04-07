@@ -17,7 +17,7 @@ import bcrypt
 from .CheckException import validate_request
 from .flight import search_flight_service
 from .hotel import process_hotel_data_from_csv,update_hotel_in_csv, delete_hotel_in_csv,show_hotel_in_csv, get_hotel_homepage
-from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE,normalize_text,get_food_homepage,get_place_homepage
+from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE,HOTEL_FILE,normalize_text,get_food_homepage,get_place_homepage,get_city_to_be_miss
 
 # Cấu hình MySQL từ settings.py
 MYSQL_HOST = settings.DATABASES['default']['HOST']
@@ -337,7 +337,7 @@ def recommend_travel_day(request):
         if len(location) > 100:
             return JsonResponse({"error": "Location không được dài quá 100 ký tự."}, status=400)
 
-        food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+        food_df, place_df,_ = load_data(FOOD_FILE, PLACE_FILE)
         recommendations = recommend_one_day_trip(location, food_df, place_df)
         if not recommendations:
             return JsonResponse({"error": "Không tìm thấy gợi ý cho địa điểm này."}, status=404)
@@ -419,7 +419,7 @@ def recommend_travel_schedule(request):
             return JsonResponse({"error": "Tổng số ngày của lịch trình không được vượt quá 30 ngày."}, status=400)
 
         # Tải dữ liệu và tạo lịch trình
-        food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+        food_df, place_df,_ = load_data(FOOD_FILE, PLACE_FILE)
         schedule_result = recommend_trip_schedule(start_day, end_day, province, food_df, place_df)
         if "error" in schedule_result:
             return JsonResponse({"error": schedule_result["error"]}, status=400)
@@ -572,64 +572,128 @@ def delete_hotel(request):
 @require_POST
 def search_province(request):
     try:
-        data = json.loads(request.body.decode('utf-8'))
+        # Kiểm tra xem request.body có rỗng không
+        if not request.body:
+            return JsonResponse({"error": "Không có dữ liệu trong request body."}, status=400)
+
+        # Parse dữ liệu từ request body
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except json.JSONDecodeError as e:
+            return JsonResponse({"error": f"Dữ liệu JSON không hợp lệ: {str(e)}"}, status=400)
+
         province = data.get("destinationInput", "").strip()
+        query = data.get("query", "").strip()
+
+        # Kiểm tra province
         if not province:
             return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
-
-        # Kiểm tra độ dài
         if len(province) > 100:
             return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
 
         # Tải dữ liệu
-        food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+        food_df, place_df, hotel_df = load_data(FOOD_FILE, PLACE_FILE, HOTEL_FILE)
 
-        # Chuẩn hóa tỉnh/thành phố đầu vào
+        # Chuẩn hóa đầu vào
         normalized_province = normalize_text(province)
+        normalized_query = normalize_text(query) if query else None
 
-        # Lọc dữ liệu theo tỉnh/thành phố
-        foods = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
-        places = place_df[place_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
+        # Hàm lọc dữ liệu
+        def filter_data(df, province_col='province', name_col='title'):
+            if df is None or df.empty:
+                return pd.DataFrame()
+            df = df.dropna(subset=[province_col, name_col])
+            if normalized_province and normalized_query:
+                return df[
+                    df[province_col].str.contains(normalized_province, case=False, na=False) &
+                    df[name_col].str.contains(normalized_query, case=False, na=False)
+                ]
+            elif normalized_province:
+                return df[df[province_col].str.contains(normalized_province, case=False, na=False)]
+            elif normalized_query:
+                return df[df[name_col].str.contains(normalized_query, case=False, na=False)]
+            else:
+                return df
 
-        # Chuyển đổi dữ liệu thành định dạng JSON
+        # Lọc dữ liệu
+        filtered_food = filter_data(food_df, province_col='province', name_col='title')
+        filtered_place = filter_data(place_df, province_col='province', name_col='title')
+        filtered_hotel = filter_data(hotel_df, province_col='province', name_col='name')
+
+        # Chuyển đổi dữ liệu thành danh sách dictionary
         food_list = [{
-            "province": food.get("province"),
-            "title": food.get("title"),
-            "rating": float(food.get("rating")) if pd.notna(food.get("rating")) else None,
-            "price": food.get("Price"),  # Cột này có thể không tồn tại
-            "address": food.get("address"),
-            "phone": food.get("Phone"),  # Cột này có thể không tồn tại
-            "link": food.get("Link"),    # Cột này có thể không tồn tại
-            "service": food.get("types"),  # Đã đổi từ 'Service' thành 'types' trong load_data
-            "image": food.get("img")
-        } for food in foods]
+            "province": food.get("province", ""),
+            "title": food.get("title", ""),
+            "rating": float(food["rating"]) if pd.notna(food.get("rating")) else None,
+            "price": food.get("Price", ""),
+            "address": food.get("address", ""),
+            "phone": food.get("Phone", ""),
+            "link": food.get("Link", ""),
+            "service": food.get("types", []),
+            "image": food.get("img", "")
+        } for food in filtered_food.to_dict('records')]
 
         place_list = [{
-            "province": place.get("province"),
-            "title": place.get("title"),
-            "rating": float(place.get("rating")) if pd.notna(place.get("rating")) else None,
-            "description": place.get("description"),
-            "address": place.get("address"),
-            "img": place.get("img"),
-            "types": place.get("types"),
-            "link": place.get("link")  # Cột này có thể không tồn tại
-        } for place in places]
+            "province": place.get("province", ""),
+            "title": place.get("title", ""),
+            "rating": float(place["rating"]) if pd.notna(place.get("rating")) else None,
+            "description": place.get("description", ""),
+            "address": place.get("address", ""),
+            "img": place.get("img", ""),
+            "types": place.get("types", []),
+            "link": place.get("link", "")
+        } for place in filtered_place.to_dict('records')]
 
-        if not food_list and not place_list:
+        hotel_list = [{
+            "province": hotel.get("province", ""),
+            "name": hotel.get("name", ""),
+            "location_rating": float(hotel["location_rating"]) if pd.notna(hotel.get("location_rating")) else None,
+            "description": hotel.get("description", ""),
+            "address": hotel.get("address", ""),
+            "img": hotel.get("img_origin", ""),
+            "link": hotel.get("link", ""),
+            "price": hotel.get("price", ""),
+            "name_nearby_place": hotel.get("name_nearby_place", ""),
+            "hotel_class": hotel.get("hotel_class", ""),
+            "animates": hotel.get("animates", "")
+        } for hotel in filtered_hotel.to_dict('records')] if hotel_df is not None else []
+
+        # Kiểm tra nếu không tìm thấy kết quả
+        if not food_list and not place_list and not hotel_list:
             return JsonResponse({"error": "Không tìm thấy hoạt động nào cho tỉnh/thành phố này."}, status=404)
 
+        # Trả về phản hồi JSON
         return JsonResponse({
             "foods": food_list,
             "places": place_list,
+            "hotels": hotel_list,
             "timestamp": datetime.now().isoformat(),
             "csrf_token": get_token(request)
         }, status=200)
 
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+#Những Thành Phố Không Thể Bỏ Lỡ
+@csrf_exempt
+@require_GET
+def get_top_cities(request):
+    try:
+        num_cities = int(request.GET.get('num_cities', 10))
+        result = get_city_to_be_miss(num_cities=num_cities)
+
+        if "error" in result:
+            return JsonResponse({"error": result["error"]}, status=404 if "Không có dữ liệu" in result["error"] else 500)
+
+        return JsonResponse(result, status=200)
+
+    except ValueError:
+        return JsonResponse({"error": "Số lượng thành phố phải là số nguyên."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
 
 #search place
 @csrf_exempt
@@ -696,7 +760,7 @@ def search_food(request):
             return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
 
         # Tải dữ liệu
-        food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+        food_df, place_df,_ = load_data(FOOD_FILE, PLACE_FILE)
 
         # Chuẩn hóa tỉnh/thành phố đầu vào
         normalized_province = normalize_text(province)
@@ -763,7 +827,7 @@ def save_schedule(request):
                     return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
 
                 # Tải dữ liệu từ search_province logic
-                food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
+                food_df, place_df,_ = load_data(FOOD_FILE, PLACE_FILE)
                 normalized_province = normalize_text(province)
 
                 foods = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
