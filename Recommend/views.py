@@ -14,7 +14,7 @@ import MySQLdb
 import jwt
 import bcrypt
 
-from .CheckException import validate_request
+from .CheckException import validate_request, check_missing_fields,check_field_length,check_province_format,check_date_format,check_date_logic
 from .flight import search_flight_service
 from .hotel import process_hotel_data_from_csv,update_hotel_in_csv, delete_hotel_in_csv,show_hotel_in_csv, get_hotel_homepage
 from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE,HOTEL_FILE,normalize_text,get_food_homepage,get_place_homepage,get_city_to_be_miss
@@ -332,15 +332,15 @@ def recommend_travel_schedule(request):
         data = json.loads(request.body)
         selected_hotel = request.session.get('selected_hotel', {})
         selected_flight = request.session.get('selected_flight', {})
-        selected_place = request.session.get('selected_province',{})
-        selected_place_detail = request.session.get('selected_place_info',{})
+        selected_place = request.session.get('selected_province', {})
+        selected_place_detail = request.session.get('selected_place_info', {})
 
-        # Lấy province: ưu tiên place hotel, sau đó flight, cuối cùng từ input
+        # Lấy province: ưu tiên place, sau đó hotel, flight, cuối cùng từ input
         province = (
-                selected_place or
-                selected_hotel.get('province') or
-                selected_flight.get('destination') or
-                data.get("province", "").strip()
+            selected_place or
+            selected_hotel.get('province') or
+            selected_flight.get('destination') or
+            data.get("province", "").strip()
         )
 
         # Lấy start_day: từ flight hoặc input
@@ -352,47 +352,38 @@ def recommend_travel_schedule(request):
         end_day = data.get("end_day", "").strip()
 
         # Kiểm tra các trường bắt buộc
-        missing_fields = []
-        if not province:
-            missing_fields.append("province")
-        if not start_day:
-            missing_fields.append("start_day")
-        if not end_day:
-            missing_fields.append("end_day")
-        if missing_fields:
-            return JsonResponse({"error": f"Thiếu trường bắt buộc: {', '.join(missing_fields)}"}, status=400)
+        fields = {"province": province, "start_day": start_day, "end_day": end_day}
+        error_response = check_missing_fields(fields)
+        if error_response:
+            return error_response
 
-        # Kiểm tra độ dài của các trường đầu vào
-        if any(len(value) > 50 for value in [province, start_day, end_day]):
-            return JsonResponse({"error": "Dữ liệu đầu vào không được dài quá 50 ký tự."}, status=400)
+        error_response = check_field_length(fields)
+        if error_response:
+            return error_response
 
-        # Kiểm tra định dạng province (cho phép chữ cái và khoảng trắng)
-        province_pattern = r"^[A-Za-z\u00C0-\u1EF9\s]+$"
-        if not re.match(province_pattern, province):
-            return JsonResponse({"error": "Province chỉ được chứa chữ cái (kể cả có dấu) và khoảng trắng."}, status=400)
+        # Kiểm tra định dạng province
+        error_response = check_province_format(province)
+        if error_response:
+            return error_response
 
-        # Kiểm tra định dạng ngày (YYYY-MM-DD)
-        date_pattern = r"^\d{4}-\d{2}-\d{2}$"
-        if not re.match(date_pattern, start_day) or not re.match(date_pattern, end_day):
-            return JsonResponse({"error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD."}, status=400)
+        # Kiểm tra định dạng ngày
+        error_response = check_date_format(start_day, "start_day")
+        if error_response:
+            return error_response
+        error_response = check_date_format(end_day, "end_day")
+        if error_response:
+            return error_response
 
+        # Chuyển đổi ngày sang định dạng date
         fmt = "%Y-%m-%d"
-        try:
-            start_date = datetime.strptime(start_day, fmt).date()
-            end_date = datetime.strptime(end_day, fmt).date()
-        except ValueError:
-            return JsonResponse({"error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng YYYY-MM-DD."}, status=400)
-
+        start_date = datetime.strptime(start_day, fmt).date()
+        end_date = datetime.strptime(end_day, fmt).date()
         current_date = datetime.now().date()
-        if start_date < current_date or end_date < current_date:
-            return JsonResponse({"error": "Ngày bắt đầu và ngày kết thúc phải không bé hơn ngày hiện tại."}, status=400)
 
-        if start_date >= end_date:
-            return JsonResponse({"error": "Ngày bắt đầu phải bé hơn ngày kết thúc."}, status=400)
-
-        total_days = (end_date - start_date).days + 1
-        if total_days > 30:
-            return JsonResponse({"error": "Tổng số ngày của lịch trình không được vượt quá 30 ngày."}, status=400)
+        # Kiểm tra logic ngày tháng
+        error_response = check_date_logic(start_date, end_date, current_date)
+        if error_response:
+            return error_response
 
         # Tải dữ liệu và tạo lịch trình (giả sử hàm này đã được định nghĩa)
         food_df, place_df, _ = load_data(FOOD_FILE, PLACE_FILE)
@@ -406,6 +397,7 @@ def recommend_travel_schedule(request):
             "csrf_token": get_token(request)
         }
 
+        total_days = (end_date - start_date).days + 1
         if total_days < 14:
             offset = (start_date - current_date).days
             required_forecast_days = offset + total_days
@@ -415,12 +407,11 @@ def recommend_travel_schedule(request):
         else:
             response_data["weather_forecast"] = "Bỏ qua do lịch trình vượt quá giới hạn thời tiết (>= 14 ngày)."
 
-        # Thêm thông tin hotel và flight nếu có
+        # Thêm thông tin hotel, flight và place nếu có
         if selected_hotel:
             response_data["hotel"] = selected_hotel
         if selected_flight:
             response_data["flight"] = selected_flight
-
         if selected_place_detail:
             response_data["place"] = selected_place_detail
 
