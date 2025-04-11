@@ -3,7 +3,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
 # Path to the model directory
-MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model', 'T5_vn_finetuned')
+MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model', 'T5_vn_finetuned_model2')
 
 def load_model():
     try:

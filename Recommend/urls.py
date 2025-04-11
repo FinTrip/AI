@@ -38,5 +38,6 @@ urlpatterns = [
     #Homepage
     path('homepage-hotels/', views.get_all_hotels_homepage, name='get_all_hotels_homepage'),
     path('homepage-place/', views.get_all_place_homepage, name='get_all_place_homepage'),
+    path('select-place/', views.select_place, name='select_place'),
     path('homepage-food/', views.get_all_food_homepage, name='get_all_food_homepage'),
 ]
