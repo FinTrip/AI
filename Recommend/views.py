@@ -2,23 +2,31 @@ import json
 import os
 import re
 import pandas as pd
+import uuid
 import traceback
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django.views.decorators.http import require_POST, require_GET
 from rest_framework import status
 from django.conf import settings
 import MySQLdb
 import jwt
-import bcrypt
+import logging
+from django.contrib.auth import login, logout
+from django.contrib.auth.models import User
 
-from .CheckException import validate_request, check_missing_fields,check_field_length,check_province_format,check_date_format,check_date_logic
+from .CheckException import validate_request, check_missing_fields, check_field_length, check_province_format, check_date_format, check_date_logic
 from .flight import search_flight_service
-from .hotel import process_hotel_data_from_csv,update_hotel_in_csv, delete_hotel_in_csv,show_hotel_in_csv, get_hotel_homepage
-from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE,HOTEL_FILE,normalize_text,get_food_homepage,get_place_homepage,get_city_to_be_miss
+from .hotel import process_hotel_data_from_csv, update_hotel_in_csv, delete_hotel_in_csv, show_hotel_in_csv, get_hotel_homepage
+from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE, HOTEL_FILE, normalize_text, get_food_homepage, get_place_homepage, get_city_to_be_miss
 from .weather import display_forecast, get_weather
+
+# Thiết lập logging
+logger = logging.getLogger(__name__)
 
 # Cấu hình MySQL từ settings.py
 MYSQL_HOST = settings.DATABASES['default']['HOST']
@@ -75,33 +83,52 @@ def create_user(request):
         # Kiểm tra role_id có tồn tại trong bảng Roles
         cursor.execute("SELECT id FROM Roles WHERE id = %s", [int(role_id)])
         if not cursor.fetchone():
+            cursor.close()
+            db.close()
             return JsonResponse({"error": "Role ID không tồn tại"}, status=400)
 
-        # Kiểm tra email trùng lặp
+        # Kiểm tra email trùng lặp trong bảng Users
         cursor.execute("SELECT id FROM Users WHERE email = %s", [email])
         if cursor.fetchone():
-            return JsonResponse({"error": "Email đã tồn tại"}, status=400)
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Email đã tồn tại trong bảng Users"}, status=400)
 
+        # Kiểm tra email trùng lặp trong bảng auth_user
+        if User.objects.filter(username=email).exists():
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Email đã tồn tại trong hệ thống xác thực"}, status=400)
+
+        # Tạo người dùng trong bảng auth_user của Django
+        django_user = User.objects.create_user(username=email, email=email, password=password)
+        django_user_id = django_user.id
+
+        # Mã hóa mật khẩu cho bảng Users
         hashed_password = hash_password(password)
-        # Không cần chèn created_at, updated_at vì cơ sở dữ liệu tự xử lý
         cursor.execute(
-            "INSERT INTO Users (email, password, full_name, status, role_id) VALUES (%s, %s, %s, %s, %s)",
-            [email, hashed_password, full_name, status, int(role_id)]
+            "INSERT INTO Users (id, email, password, full_name, status, role_id) VALUES (%s, %s, %s, %s, %s, %s)",
+            [django_user_id, email, hashed_password, full_name, status, int(role_id)]
         )
         db.commit()
-        user_id = cursor.lastrowid
 
         cursor.close()
         db.close()
-        return JsonResponse({"message": "Tạo người dùng thành công", "user_id": user_id}, status=201)
+        return JsonResponse({"message": "Tạo người dùng thành công", "user_id": django_user_id}, status=201)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in create_user: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'db' in locals():
+            db.close()
 
-#hàm delete
+# Hàm xóa người dùng
 @csrf_exempt
 @require_POST
 def delete_user(request):
@@ -109,46 +136,54 @@ def delete_user(request):
         data = json.loads(request.body)
         user_id = data.get("user_id")
 
-        # Kiểm tra trường bắt buộc
         if not user_id:
             return JsonResponse({"error": "Thiếu trường bắt buộc: user_id"}, status=400)
 
-        # Ép kiểu user_id thành int
         try:
             user_id = int(user_id)
         except (TypeError, ValueError):
             return JsonResponse({"error": "User ID phải là một số nguyên."}, status=400)
 
-        # Kết nối cơ sở dữ liệu
         db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
 
-        try:
-            # Kiểm tra người dùng có tồn tại không
-            cursor.execute("SELECT id FROM Users WHERE id = %s", [user_id])
-            if not cursor.fetchone():
-                return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
-
-            # Xóa người dùng
-            cursor.execute("DELETE FROM Users WHERE id = %s", [user_id])
-            db.commit()
-
-            return JsonResponse({
-                "message": "Xóa người dùng thành công!",
-                "user_id": user_id
-            }, status=200)
-
-        finally:
+        cursor.execute("SELECT id FROM Users WHERE id = %s", [user_id])
+        if not cursor.fetchone():
             cursor.close()
             db.close()
+            return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
+
+        cursor.execute("DELETE FROM Users WHERE id = %s", [user_id])
+        db.commit()
+
+        try:
+            django_user = User.objects.get(id=user_id)
+            django_user.delete()
+        except User.DoesNotExist:
+            pass
+
+        cursor.close()
+        db.close()
+
+        return JsonResponse({
+            "message": "Xóa người dùng thành công!",
+            "user_id": user_id
+        }, status=200)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in delete_user: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'db' in locals():
+            db.close()
 
+# Hàm cập nhật người dùng
 @csrf_exempt
 @require_POST
 def update_user(request):
@@ -156,140 +191,192 @@ def update_user(request):
         data = json.loads(request.body)
         user_id = data.get("user_id")
 
-        # Kiểm tra trường bắt buộc
         if not user_id:
             return JsonResponse({"error": "Thiếu trường bắt buộc: user_id"}, status=400)
 
-        # Ép kiểu user_id thành int
         try:
             user_id = int(user_id)
         except (TypeError, ValueError):
             return JsonResponse({"error": "User ID phải là một số nguyên."}, status=400)
 
-        # Lấy các trường cần cập nhật (các trường không bắt buộc)
         email = data.get("email", "").strip()
         password = data.get("password", "").strip()
         full_name = data.get("full_name", "").strip()
         status = data.get("status", "").strip()
         role_id = data.get("role_id")
 
-        # Kết nối cơ sở dữ liệu
         db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
 
-        try:
-            # Kiểm tra người dùng có tồn tại không
-            cursor.execute("SELECT email, password, full_name, status, role_id FROM Users WHERE id = %s", [user_id])
-            user = cursor.fetchone()
-            if not user:
-                return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
-
-            # Lấy thông tin hiện tại của người dùng
-            current_email, current_password, current_full_name, current_status, current_role_id = user
-
-            # Kiểm tra và cập nhật email (nếu có)
-            if email:
-                email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-                if not re.match(email_pattern, email):
-                    return JsonResponse({"error": "Email không hợp lệ."}, status=400)
-                # Kiểm tra email đã tồn tại chưa (trừ email của chính user này)
-                cursor.execute("SELECT id FROM Users WHERE email = %s AND id != %s", [email, user_id])
-                if cursor.fetchone():
-                    return JsonResponse({"error": "Email đã tồn tại."}, status=400)
-            else:
-                email = current_email
-
-            # Kiểm tra và mã hóa mật khẩu (nếu có)
-            if password:
-                hashed_password = hash_password(password)
-            else:
-                hashed_password = current_password
-
-            # Kiểm tra và cập nhật full_name (nếu có)
-            if not full_name:
-                full_name = current_full_name
-
-            # Kiểm tra và cập nhật status (nếu có)
-            if status:
-                valid_statuses = ['active', 'inactive', 'banned']
-                if status not in valid_statuses:
-                    return JsonResponse({"error": "Status phải là 'active', 'inactive', hoặc 'banned'."}, status=400)
-            else:
-                status = current_status
-
-            # Kiểm tra và cập nhật role_id (nếu có)
-            if role_id is not None:
-                try:
-                    role_id = int(role_id)
-                    cursor.execute("SELECT id FROM Roles WHERE id = %s", [role_id])
-                    if not cursor.fetchone():
-                        return JsonResponse({"error": "Role ID không tồn tại."}, status=400)
-                except (TypeError, ValueError):
-                    return JsonResponse({"error": "Role ID phải là một số nguyên."}, status=400)
-            else:
-                role_id = current_role_id
-
-            # Cập nhật thông tin người dùng
-            sql = """
-                UPDATE Users 
-                SET email = %s, password = %s, full_name = %s, status = %s, role_id = %s
-                WHERE id = %s
-            """
-            cursor.execute(sql, [email, hashed_password, full_name, status, role_id, user_id])
-            db.commit()
-
-            return JsonResponse({
-                "message": "Cập nhật thông tin người dùng thành công!",
-                "user_id": user_id,
-                "updated_info": {
-                    "email": email,
-                    "full_name": full_name,
-                    "status": status,
-                    "role_id": role_id
-                }
-            }, status=200)
-
-        finally:
+        cursor.execute("SELECT email, password, full_name, status, role_id FROM Users WHERE id = %s", [user_id])
+        user = cursor.fetchone()
+        if not user:
             cursor.close()
             db.close()
+            return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
+
+        current_email, current_password, current_full_name, current_status, current_role_id = user
+
+        if email:
+            email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+            if not re.match(email_pattern, email):
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Email không hợp lệ."}, status=400)
+            cursor.execute("SELECT id FROM Users WHERE email = %s AND id != %s", [email, user_id])
+            if cursor.fetchone():
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Email đã tồn tại."}, status=400)
+            if User.objects.filter(username=email).exclude(id=user_id).exists():
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Email đã tồn tại trong hệ thống xác thực."}, status=400)
+        else:
+            email = current_email
+
+        if password:
+            hashed_password = hash_password(password)
+        else:
+            hashed_password = current_password
+
+        if not full_name:
+            full_name = current_full_name
+
+        if status:
+            valid_statuses = ['active', 'inactive', 'banned']
+            if status not in valid_statuses:
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Status phải là 'active', 'inactive', hoặc 'banned'."}, status=400)
+        else:
+            status = current_status
+
+        if role_id is not None:
+            try:
+                role_id = int(role_id)
+                cursor.execute("SELECT id FROM Roles WHERE id = %s", [role_id])
+                if not cursor.fetchone():
+                    cursor.close()
+                    db.close()
+                    return JsonResponse({"error": "Role ID không tồn tại."}, status=400)
+            except (TypeError, ValueError):
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Role ID phải là một số nguyên."}, status=400)
+        else:
+            role_id = current_role_id
+
+        sql = """
+            UPDATE Users 
+            SET email = %s, password = %s, full_name = %s, status = %s, role_id = %s
+            WHERE id = %s
+        """
+        cursor.execute(sql, [email, hashed_password, full_name, status, role_id, user_id])
+        db.commit()
+
+        try:
+            django_user = User.objects.get(id=user_id)
+            django_user.username = email
+            django_user.email = email
+            if password:
+                django_user.set_password(password)
+            django_user.save()
+        except User.DoesNotExist:
+            pass
+
+        cursor.close()
+        db.close()
+
+        return JsonResponse({
+            "message": "Cập nhật thông tin người dùng thành công!",
+            "user_id": user_id,
+            "updated_info": {
+                "email": email,
+                "full_name": full_name,
+                "status": status,
+                "role_id": role_id
+            }
+        }, status=200)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in update_user: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'db' in locals():
+            db.close()
 
+# Hàm đăng nhập người dùng
+@csrf_exempt
+@require_http_methods(['GET', 'POST'])
+def login_user(request):
+    logger.debug(f"Request method: {request.method}")
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            return JsonResponse({"message": "Người dùng đã đăng nhập", "user_id": request.user.id}, status=200)
+        return JsonResponse({"message": "Vui lòng sử dụng phương thức POST để đăng nhập"}, status=200)
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get("email", "").strip()
+            password = data.get("password", "").strip()
+
+            logger.debug(f"Attempting login for email: {email}")
+            if not email or not password:
+                return JsonResponse({"error": "Thiếu email hoặc password"}, status=400)
+
+            db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                                 db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+            cursor = db.cursor()
+            cursor.execute("SELECT id, password FROM Users WHERE email = %s", [email])
+            user = cursor.fetchone()
+
+            if not user or not check_password(password, user[1]):
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Email hoặc mật khẩu không đúng"}, status=400)
+
+            user_id = user[0]
+            cursor.close()
+            db.close()
+
+            # Kiểm tra hoặc tạo người dùng trong auth_user
+            try:
+                django_user = User.objects.get(username=email)
+                if django_user.id != user_id:
+                    logger.error(f"User ID mismatch: auth_user.id={django_user.id}, Users.id={user_id}")
+                    return JsonResponse({"error": "Lỗi đồng bộ người dùng, vui lòng liên hệ quản trị viên"}, status=500)
+            except User.DoesNotExist:
+                django_user = User.objects.create_user(id=user_id, username=email, email=email, password=password)
+
+            login(request, django_user)
+            request.session['user_id'] = user_id
+            logger.debug(f"User logged in: {django_user.username}, Django User ID: {django_user.id}, Custom User ID: {user_id}")
+            return JsonResponse({"message": "Đăng nhập thành công", "user_id": user_id}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
+        except Exception as e:
+            traceback.print_exc()
+            logger.error(f"Login error: {str(e)}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+# Hàm đăng xuất người dùng
 @csrf_exempt
 @require_POST
-def login_user(request):
-    """Đăng nhập người dùng."""
+def logout_user(request):
     try:
-        data = json.loads(request.body)
-        email = data.get("email", "").strip()
-        password = data.get("password", "").strip()
-
-        if not email or not password:
-            return JsonResponse({"error": "Thiếu email hoặc password"}, status=400)
-
-        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
-        cursor = db.cursor()
-        cursor.execute("SELECT id, password FROM Users WHERE email = %s", [email])
-        user = cursor.fetchone()
-
-        if not user or not check_password(password, user[1]):
-            return JsonResponse({"error": "Email hoặc mật khẩu không đúng"}, status=400)
-
-        request.session['user_id'] = user[0]
-        cursor.close()
-        db.close()
-        return JsonResponse({"message": "Đăng nhập thành công", "user_id": user[0]}, status=200)
-
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
+        logout(request)
+        logger.debug("User logged out successfully")
+        return JsonResponse({"message": "Đăng xuất thành công"}, status=200)
     except Exception as e:
-        traceback.print_exc()
+        logger.error(f"Logout error: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
 
 # API gợi ý lịch trình 1 ngày
@@ -302,11 +389,10 @@ def recommend_travel_day(request):
         if not location:
             return JsonResponse({"error": "Thiếu trường bắt buộc: location"}, status=400)
 
-        # Kiểm tra độ dài location
         if len(location) > 100:
             return JsonResponse({"error": "Location không được dài quá 100 ký tự."}, status=400)
 
-        food_df, place_df,_ = load_data(FOOD_FILE, PLACE_FILE)
+        food_df, place_df, _ = load_data(FOOD_FILE, PLACE_FILE)
         recommendations = recommend_one_day_trip(location, food_df, place_df)
         if not recommendations:
             return JsonResponse({"error": "Không tìm thấy gợi ý cho địa điểm này."}, status=404)
@@ -322,6 +408,7 @@ def recommend_travel_day(request):
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in recommend_travel_day: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
 
 # API gợi ý lịch trình nhiều ngày
@@ -335,7 +422,6 @@ def recommend_travel_schedule(request):
         selected_place = request.session.get('selected_province', {})
         selected_place_detail = request.session.get('selected_place_info', {})
 
-        # Lấy province: ưu tiên place, sau đó hotel, flight, cuối cùng từ input
         province = (
             selected_place or
             selected_hotel.get('province') or
@@ -343,15 +429,12 @@ def recommend_travel_schedule(request):
             data.get("province", "").strip()
         )
 
-        # Lấy start_day: từ flight hoặc input
         start_day = selected_flight.get('departure_time', data.get("start_day", "").strip())
         if start_day and 'T' in start_day:
             start_day = start_day.split('T')[0]
 
-        # Lấy end_day: luôn từ input
         end_day = data.get("end_day", "").strip()
 
-        # Kiểm tra các trường bắt buộc
         fields = {"province": province, "start_day": start_day, "end_day": end_day}
         error_response = check_missing_fields(fields)
         if error_response:
@@ -361,12 +444,10 @@ def recommend_travel_schedule(request):
         if error_response:
             return error_response
 
-        # Kiểm tra định dạng province
         error_response = check_province_format(province)
         if error_response:
             return error_response
 
-        # Kiểm tra định dạng ngày
         error_response = check_date_format(start_day, "start_day")
         if error_response:
             return error_response
@@ -374,18 +455,15 @@ def recommend_travel_schedule(request):
         if error_response:
             return error_response
 
-        # Chuyển đổi ngày sang định dạng date
         fmt = "%Y-%m-%d"
         start_date = datetime.strptime(start_day, fmt).date()
         end_date = datetime.strptime(end_day, fmt).date()
         current_date = datetime.now().date()
 
-        # Kiểm tra logic ngày tháng
         error_response = check_date_logic(start_date, end_date, current_date)
         if error_response:
             return error_response
 
-        # Tải dữ liệu và tạo lịch trình (giả sử hàm này đã được định nghĩa)
         food_df, place_df, _ = load_data(FOOD_FILE, PLACE_FILE)
         schedule_result = recommend_trip_schedule(start_day, end_day, province, food_df, place_df)
         if "error" in schedule_result:
@@ -407,7 +485,6 @@ def recommend_travel_schedule(request):
         else:
             response_data["weather_forecast"] = "Bỏ qua do lịch trình vượt quá giới hạn thời tiết (>= 14 ngày)."
 
-        # Thêm thông tin hotel, flight và place nếu có
         if selected_hotel:
             response_data["hotel"] = selected_hotel
         if selected_flight:
@@ -421,10 +498,10 @@ def recommend_travel_schedule(request):
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in recommend_travel_schedule: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
 
-
-####Admin
+#### Admin
 @require_GET
 def get_all_hotels(request):
     try:
@@ -440,6 +517,7 @@ def get_all_hotels(request):
 
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in get_all_hotels: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
 @csrf_exempt
@@ -452,7 +530,6 @@ def update_hotel(request):
         if not hotel_name:
             return JsonResponse({"error": "Vui lòng cung cấp tên khách sạn (name)."}, status=400)
 
-        # Các trường có thể cập nhật
         update_data = {
             "name": hotel_name,
             "link": data.get("link", "").strip(),
@@ -465,7 +542,6 @@ def update_hotel(request):
             "province": data.get("province", "").strip()
         }
 
-        # Gọi hàm cập nhật trong file CSV
         updated = update_hotel_in_csv(hotel_name, update_data)
         if not updated:
             return JsonResponse({"error": "Không tìm thấy khách sạn để cập nhật."}, status=404)
@@ -481,6 +557,7 @@ def update_hotel(request):
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in update_hotel: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
 @csrf_exempt
@@ -493,7 +570,6 @@ def delete_hotel(request):
         if not hotel_name:
             return JsonResponse({"error": "Vui lòng cung cấp tên khách sạn (name)."}, status=400)
 
-        # Gọi hàm xóa trong file CSV
         deleted = delete_hotel_in_csv(hotel_name)
         if not deleted:
             return JsonResponse({"error": "Không tìm thấy khách sạn để xóa."}, status=404)
@@ -509,43 +585,32 @@ def delete_hotel(request):
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in delete_hotel: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
-### end admin
+### End admin
 
-
-
-#search province
+# API tìm kiếm tỉnh/thành phố
 @csrf_exempt
 @require_POST
 def search_province(request):
     try:
-        # Kiểm tra xem request.body có rỗng không
         if not request.body:
             return JsonResponse({"error": "Không có dữ liệu trong request body."}, status=400)
 
-        # Parse dữ liệu từ request body
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-        except json.JSONDecodeError as e:
-            return JsonResponse({"error": f"Dữ liệu JSON không hợp lệ: {str(e)}"}, status=400)
-
+        data = json.loads(request.body.decode('utf-8'))
         province = data.get("destinationInput", "").strip()
         query = data.get("query", "").strip()
 
-        # Kiểm tra province
         if not province:
             return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
         if len(province) > 100:
             return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
 
-        # Tải dữ liệu
         food_df, place_df, hotel_df = load_data(FOOD_FILE, PLACE_FILE, HOTEL_FILE)
 
-        # Chuẩn hóa đầu vào
         normalized_province = normalize_text(province)
         normalized_query = normalize_text(query) if query else None
 
-        # Hàm lọc dữ liệu
         def filter_data(df, province_col='province', name_col='title'):
             if df is None or df.empty:
                 return pd.DataFrame()
@@ -562,12 +627,10 @@ def search_province(request):
             else:
                 return df
 
-        # Lọc dữ liệu
         filtered_food = filter_data(food_df, province_col='province', name_col='title')
         filtered_place = filter_data(place_df, province_col='province', name_col='title')
         filtered_hotel = filter_data(hotel_df, province_col='province', name_col='name')
 
-        # Chuyển đổi dữ liệu thành danh sách dictionary
         food_list = [{
             "province": food.get("province", ""),
             "title": food.get("title", ""),
@@ -605,11 +668,9 @@ def search_province(request):
             "animates": hotel.get("animates", "")
         } for hotel in filtered_hotel.to_dict('records')] if hotel_df is not None else []
 
-        # Kiểm tra nếu không tìm thấy kết quả
         if not food_list and not place_list and not hotel_list:
             return JsonResponse({"error": "Không tìm thấy hoạt động nào cho tỉnh/thành phố này."}, status=404)
 
-        # Trả về phản hồi JSON
         return JsonResponse({
             "foods": food_list,
             "places": place_list,
@@ -620,9 +681,10 @@ def search_province(request):
 
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in search_province: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-#Những Thành Phố Không Thể Bỏ Lỡ
+# API lấy danh sách thành phố nổi bật
 @csrf_exempt
 @require_GET
 def get_top_cities(request):
@@ -639,10 +701,10 @@ def get_top_cities(request):
         return JsonResponse({"error": "Số lượng thành phố phải là số nguyên."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in get_top_cities: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-
-#search place
+# API tìm kiếm địa điểm
 @csrf_exempt
 @require_POST
 def search_place(request):
@@ -652,18 +714,13 @@ def search_place(request):
         if not province:
             return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
 
-        # Kiểm tra độ dài
         if len(province) > 100:
             return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
 
-        # Tải dữ liệu
         food_df, place_df = load_data(FOOD_FILE, PLACE_FILE)
 
-        # Chuẩn hóa tỉnh/thành phố đầu vào
         normalized_province = normalize_text(province)
 
-        # Lọc dữ liệu theo tỉnh/thành phố
-        foods = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
         places = place_df[place_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
 
         place_list = [{
@@ -674,7 +731,7 @@ def search_place(request):
             "address": place.get("address"),
             "img": place.get("img"),
             "types": place.get("types"),
-            "link": place.get("link")  # Cột này có thể không tồn tại
+            "link": place.get("link")
         } for place in places]
 
         if not place_list:
@@ -690,9 +747,10 @@ def search_place(request):
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in search_place: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-#search province
+# API tìm kiếm món ăn
 @csrf_exempt
 @require_POST
 def search_food(request):
@@ -702,34 +760,28 @@ def search_food(request):
         if not province:
             return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
 
-        # Kiểm tra độ dài
         if len(province) > 100:
             return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
 
-        # Tải dữ liệu
-        food_df, place_df,_ = load_data(FOOD_FILE, PLACE_FILE)
+        food_df, place_df, _ = load_data(FOOD_FILE, PLACE_FILE)
 
-        # Chuẩn hóa tỉnh/thành phố đầu vào
         normalized_province = normalize_text(province)
 
-        # Lọc dữ liệu theo tỉnh/thành phố
         foods = food_df[food_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
-        places = place_df[place_df['province'].str.contains(normalized_province, case=False, na=False)].to_dict('records')
 
-        # Chuyển đổi dữ liệu thành định dạng JSON
         food_list = [{
             "province": food.get("province"),
             "title": food.get("title"),
             "rating": float(food.get("rating")) if pd.notna(food.get("rating")) else None,
-            "price": food.get("Price"),  # Cột này có thể không tồn tại
+            "price": food.get("Price"),
             "address": food.get("address"),
-            "phone": food.get("Phone"),  # Cột này có thể không tồn tại
-            "link": food.get("Link"),    # Cột này có thể không tồn tại
-            "service": food.get("types"),  # Đã đổi từ 'Service' thành 'types' trong load_data
+            "phone": food.get("Phone"),
+            "link": food.get("Link"),
+            "service": food.get("types"),
             "image": food.get("img")
         } for food in foods]
 
-        if not food_list :
+        if not food_list:
             return JsonResponse({"error": "Không tìm thấy hoạt động nào cho tỉnh/thành phố này."}, status=404)
 
         return JsonResponse({
@@ -742,106 +794,267 @@ def search_food(request):
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in search_food: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
 # API lưu lịch trình
 @csrf_exempt
 @require_POST
 def save_schedule(request):
-    """Lưu lịch trình vào bảng Schedules, Days, Itineraries."""
+    db = None
+    cursor = None
     try:
-        user_id = request.session.get('user_id')
-        if not user_id:
-            return JsonResponse({"error": "Cần đăng nhập"}, status=403)
-
         data = json.loads(request.body)
-        schedule_name = data.get("schedule_name", "My Schedule").strip()
-        days_data = data.get("days", [])
+        user_id = data.get("user_id")
+        if not user_id:
+            return JsonResponse({"error": "Thiếu user_id trong yêu cầu"}, status=400)
 
-        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        db = MySQLdb.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            passwd=MYSQL_PASSWORD,
+            db=MYSQL_DB,
+            port=MYSQL_PORT,
+            charset=MYSQL_CHARSET
+        )
         cursor = db.cursor()
 
-        # Lưu vào Schedules, không cần chèn created_at
+        # Check if user_id exists in Users table
+        cursor.execute("SELECT id FROM Users WHERE id = %s", [user_id])
+        user = cursor.fetchone()
+        if not user:
+            return JsonResponse({"error": "Không tìm thấy thông tin người dùng"}, status=404)
+
+        schedule_name = data.get("schedule_name", "Lịch trình của tôi").strip()
+        days_data = data.get("days", [])
+
+        if not days_data:
+            return JsonResponse({"error": "Danh sách ngày (days) không được rỗng"}, status=400)
+
         cursor.execute("INSERT INTO Schedules (user_id, name) VALUES (%s, %s)", [user_id, schedule_name])
         schedule_id = cursor.lastrowid
 
         for day in days_data:
             day_index = day.get("day_index", 1)
             date_str = day.get("date_str", "")
+            # Extract date "YYYY-MM-DD" from date_str
+            date_match = re.search(r'\((\d{4}-\d{2}-\d{2})\)', date_str)
+            if date_match:
+                date_str = date_match.group(1)  # Get "YYYY-MM-DD"
+            else:
+                date_str = date_str[:10]  # Match VARCHAR(10)
             cursor.execute("INSERT INTO Days (schedule_id, day_index, date_str) VALUES (%s, %s, %s)",
                            [schedule_id, day_index, date_str])
             day_id = cursor.lastrowid
 
             itinerary_list = day.get("itinerary", [])
+            if not isinstance(itinerary_list, list):
+                return JsonResponse({"error": "Itinerary phải là một danh sách"}, status=400)
+
             for item in itinerary_list:
+                # Check for meaningful data
+                food_title = item.get("food_title")
+                place_title = item.get("place_title")
+                hotel_name = item.get("hotel_name")
+                if not (food_title and food_title.strip()) and \
+                   not (place_title and place_title.strip()) and \
+                   not (hotel_name and hotel_name.strip()):
+                    continue
+
+                # Truncate strings to match database constraints
+                place_img = item.get("place_img", "")[:255]
+                food_image = item.get("food_image", "")[:255]
+                place_link = item.get("place_link", "")[:255]
+                food_link = item.get("food_link", "")[:255]
+                food_address = item.get("food_address", "")[:200]
+                place_address = item.get("place_address", "")[:200]
+                hotel_link = item.get("hotel_link", "")[:255]
+                hotel_img_origin = item.get("hotel_img_origin", "")[:255]
+                food_title = item.get("food_title", "")[:100]
+                place_title = item.get("place_title", "")[:100]
+                hotel_name = item.get("hotel_name", "")[:100]
+                food_price = item.get("food_price", "")[:50]
+                hotel_price = item.get("hotel_price", "")[:50]
+                timeslot = item.get("timeslot", "")[:20]
+                food_phone = item.get("food_phone", "")[:20]
+                hotel_class = item.get("hotel_class", "")[:20]
+
                 cursor.execute(
-                    "INSERT INTO Itineraries (day_id, timeslot, food_title, food_rating, food_price, food_address, food_phone, food_link, food_image, place_title, place_rating, place_description, place_address, place_img, place_link, hotel_name, hotel_link, hotel_description, hotel_price, hotel_class, hotel_img_origin, hotel_location_rating, `order`) "
-                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                    [day_id, item.get("timeslot"), item.get("food_title"), item.get("food_rating"), item.get("food_price"), item.get("food_address"), item.get("food_phone"), item.get("food_link"), item.get("food_image"), item.get("place_title"), item.get("place_rating"), item.get("place_description"), item.get("place_address"), item.get("place_img"), item.get("place_link"), item.get("hotel_name"), item.get("hotel_link"), item.get("hotel_description"), item.get("hotel_price"), item.get("hotel_class"), item.get("hotel_img_origin"), item.get("hotel_location_rating"), item.get("order")]
+                    """
+                    INSERT INTO Itineraries (
+                        day_id, timeslot, food_title, food_rating, food_price, food_address, 
+                        food_phone, food_link, food_image, place_title, place_rating, 
+                        place_description, place_address, place_img, place_link, 
+                        hotel_name, hotel_link, hotel_description, hotel_price, 
+                        hotel_class, hotel_img_origin, hotel_location_rating, `order`
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    [
+                        day_id,
+                        timeslot,
+                        food_title,
+                        item.get("food_rating"),
+                        food_price,
+                        food_address,
+                        food_phone,
+                        food_link,
+                        food_image,
+                        place_title,
+                        item.get("place_rating"),
+                        item.get("place_description"),
+                        place_address,
+                        place_img,
+                        place_link,
+                        hotel_name,
+                        hotel_link,
+                        item.get("hotel_description"),
+                        hotel_price,
+                        hotel_class,
+                        hotel_img_origin,
+                        item.get("hotel_location_rating"),
+                        item.get("order")
+                    ]
                 )
 
+        # Generate share link with lowercase UUID and correct path
+        share_token = str(uuid.uuid4()).lower()
+        share_link = f"http://{request.get_host()}/recommend/view-schedule/{share_token}/"
+        cursor.execute(
+            "INSERT INTO SharedLinks (schedule_id, share_link) VALUES (%s, %s)",
+            [schedule_id, share_link]
+        )
+
         db.commit()
-        cursor.close()
-        db.close()
-        return JsonResponse({"message": "Lưu thành công", "schedule_id": schedule_id}, status=201)
+        return JsonResponse({
+            "message": "Lịch trình đã được lưu thành công",
+            "schedule_id": schedule_id,
+            "share_link": share_link
+        }, status=201)
 
     except json.JSONDecodeError:
-        return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
-    except Exception as e:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ"}, status=400)
+    except MySQLdb.IntegrityError:
+        return JsonResponse({"error": "Lỗi cơ sở dữ liệu: Liên kết chia sẻ đã tồn tại"}, status=409)
+    except MySQLdb.Error:
+        return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
+    except Exception:
         traceback.print_exc()
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": "Lỗi không xác định"}, status=500)
+    finally:
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'db' in locals() and db and db.open:
+            db.close()
 
-# API chia sẻ lịch trình
 @csrf_exempt
 @require_POST
 def share_schedule(request):
-    """Chia sẻ lịch trình và lưu link vào SharedLinks."""
+    db = None
+    cursor = None
     try:
-        user_id = request.session.get('user_id')
-        if not user_id:
-            return JsonResponse({"error": "Cần đăng nhập"}, status=403)
-
         data = json.loads(request.body)
+        user_id = data.get("user_id")
         schedule_id = data.get("schedule_id")
+
+        if not user_id:
+            return JsonResponse({"error": "Thiếu user_id"}, status=400)
         if not schedule_id:
             return JsonResponse({"error": "Thiếu schedule_id"}, status=400)
 
-        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        db = MySQLdb.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            passwd=MYSQL_PASSWORD,
+            db=MYSQL_DB,
+            port=MYSQL_PORT,
+            charset=MYSQL_CHARSET
+        )
         cursor = db.cursor()
+
+        # Verify schedule exists and belongs to user
         cursor.execute("SELECT user_id FROM Schedules WHERE id = %s", [schedule_id])
         result = cursor.fetchone()
         if not result or result[0] != user_id:
             return JsonResponse({"error": "Không có quyền chia sẻ"}, status=403)
 
-        share_link = f"http://{request.get_host()}/view-schedule/{schedule_id}/"
-        cursor.execute("INSERT INTO SharedLinks (schedule_id, share_link) VALUES (%s, %s)",
-                       [schedule_id, share_link])
+        # Check for existing share link
+        cursor.execute("SELECT share_link FROM SharedLinks WHERE schedule_id = %s", [schedule_id])
+        existing_link = cursor.fetchone()
+        if existing_link:
+            return JsonResponse({"message": "Liên kết đã tồn tại", "share_link": existing_link[0]}, status=200)
+
+        # Generate new share link with lowercase UUID and correct path
+        share_token = str(uuid.uuid4()).lower()
+        share_link = f"http://{request.get_host()}/recommend/view-schedule/{share_token}/"
+        cursor.execute(
+            "INSERT INTO SharedLinks (schedule_id, share_link) VALUES (%s, %s)",
+            [schedule_id, share_link]
+        )
         db.commit()
-        cursor.close()
-        db.close()
+
         return JsonResponse({"message": "Chia sẻ thành công", "share_link": share_link}, status=200)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
-    except Exception as e:
+    except MySQLdb.IntegrityError:
+        return JsonResponse({"error": "Liên kết chia sẻ đã tồn tại"}, status=409)
+    except MySQLdb.Error:
+        if 'db' in locals() and db:
+            db.rollback()
+        return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
+    except Exception:
         traceback.print_exc()
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": "Lỗi không xác định"}, status=500)
+    finally:
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'db' in locals() and db and db.open:
+            db.close()
 
-# API xem lịch trình qua link
 @require_GET
-def view_schedule(request, schedule_id):
-    """Xem lịch trình qua link."""
+def view_schedule(request, share_token):
+    db = None
+    cursor = None
     try:
-        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        db = MySQLdb.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            passwd=MYSQL_PASSWORD,
+            db=MYSQL_DB,
+            port=MYSQL_PORT,
+            charset=MYSQL_CHARSET
+        )
+
         cursor = db.cursor()
+
+        # Normalize share_token to lowercase
+        share_token = share_token.lower()
+
+        # Construct the expected share_link directly
+        share_link_with_slash = f"http://127.0.0.1:8000/recommend/view-schedule/{share_token}/"
+        share_link_without_slash = f"http://127.0.0.1:8000/recommend/view-schedule/{share_token}"
+
+        # Case-insensitive lookup
+        cursor.execute(
+            """
+            SELECT schedule_id FROM SharedLinks 
+            WHERE LOWER(share_link) = LOWER(%s) OR LOWER(share_link) = LOWER(%s)
+            """,
+            [share_link_with_slash, share_link_without_slash]
+        )
+        result = cursor.fetchone()
+        if result:
+            schedule_id = result[0]
+        else:
+            return JsonResponse({"error": "Liên kết chia sẻ không hợp lệ"}, status=404)
+
+        # Fetch schedule details
         cursor.execute("SELECT name FROM Schedules WHERE id = %s", [schedule_id])
         schedule = cursor.fetchone()
         if not schedule:
             return JsonResponse({"error": "Lịch trình không tồn tại"}, status=404)
 
+        # Fetch days
         cursor.execute("SELECT id, day_index, date_str FROM Days WHERE schedule_id = %s ORDER BY day_index", [schedule_id])
         days = cursor.fetchall()
 
@@ -882,13 +1095,18 @@ def view_schedule(request, schedule_id):
             }
             plan["days"].append(day_plan)
 
-        cursor.close()
-        db.close()
         return JsonResponse({"plan": plan}, status=200)
 
-    except Exception as e:
+    except MySQLdb.Error:
+        return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
+    except Exception:
         traceback.print_exc()
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": "Lỗi không xác định"}, status=500)
+    finally:
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'db' in locals() and db and db.open:
+            db.close()
 
 # API tìm kiếm chuyến bay
 @csrf_exempt
@@ -919,8 +1137,10 @@ def rcm_flight(request):
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in rcm_flight: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
 
+# API chọn chuyến bay
 @csrf_exempt
 @require_POST
 def select_flight(request):
@@ -929,7 +1149,7 @@ def select_flight(request):
         flight_info = data.get('flight_info')
 
         if not flight_info:
-            return JsonResponse({"error": "Missing flight info"},status=400)
+            return JsonResponse({"error": "Missing flight info"}, status=400)
 
         request.session['selected_flight'] = {
             'flight_details': flight_info,
@@ -937,14 +1157,13 @@ def select_flight(request):
             'destination': flight_info.get('destination', 'N/A'),
             'departure_time': flight_info.get('departure_time', 'N/A')
         }
-        return JsonResponse({"error": "Flight selected successful"},status=200)
+        return JsonResponse({"message": "Flight selected successfully"}, status=200)
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
     except Exception as e:
         traceback.print_exc()
-        return JsonResponse({"error": f"Error system {str(e)}"}, status=400)
-
-
+        logger.error(f"Error in select_flight: {str(e)}")
+        return JsonResponse({"error": f"Error system: {str(e)}"}, status=400)
 
 # API tìm kiếm khách sạn
 @csrf_exempt
@@ -957,7 +1176,6 @@ def rcm_hotel(request):
         if not search_term:
             return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
 
-        # Kiểm tra độ dài
         if len(search_term) > 100:
             return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
 
@@ -975,11 +1193,10 @@ def rcm_hotel(request):
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in rcm_hotel: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-
-
-#selection hotels
+# API chọn khách sạn
 @csrf_exempt
 @require_POST
 def select_hotel(request):
@@ -989,7 +1206,7 @@ def select_hotel(request):
 
         if hotel_info:
             request.session['selected_hotel'] = {
-                'hotel_details' : hotel_info,
+                'hotel_details': hotel_info,
                 'destination': hotel_info.get('destination', 'N/A'),
             }
             return JsonResponse({"message": "Hotel selected successfully"}, status=200)
@@ -998,10 +1215,11 @@ def select_hotel(request):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON data"}, status=400)
     except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in select_hotel: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-
-#Homepage
+# Homepage APIs
 @require_GET
 def get_all_hotels_homepage(request):
     try:
@@ -1017,6 +1235,7 @@ def get_all_hotels_homepage(request):
 
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in get_all_hotels_homepage: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
 @require_GET
@@ -1034,6 +1253,7 @@ def get_all_place_homepage(request):
 
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in get_all_place_homepage: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
 @csrf_exempt
@@ -1054,8 +1274,9 @@ def select_place(request):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ"}, status=400)
     except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in select_place: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
-
 
 @require_GET
 def get_all_food_homepage(request):
@@ -1072,4 +1293,5 @@ def get_all_food_homepage(request):
 
     except Exception as e:
         traceback.print_exc()
+        logger.error(f"Error in get_all_food_homepage: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)

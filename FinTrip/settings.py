@@ -28,6 +28,7 @@ DEBUG = True  # Đổi thành False khi deploy production.
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "your-production-domain.com"]
 
+LOGIN_URL = '/recommend/login-user/'
 
 # Application definition
 
@@ -148,6 +149,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 604800
+
 CORS_ALLOWED_METHODS = [
     'DELETE',
     'GET',
@@ -206,7 +213,7 @@ LOGGING = {
         '': {  # Root logger
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         },
     },
 }

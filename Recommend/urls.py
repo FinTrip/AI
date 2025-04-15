@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path,re_path
 from . import views
 
 app_name = 'Recommend'
@@ -33,7 +33,7 @@ urlpatterns = [
 
     #share schedule
     path('share-schedule/', views.share_schedule, name='share_schedule'),
-    path('view-schedule/<int:schedule_id>/', views.view_schedule, name='view_schedule'),
+    re_path(r'^view-schedule/(?P<share_token>[0-9a-f-]{36})/?$', views.view_schedule, name='view_schedule'),
 
     #Homepage
     path('homepage-hotels/', views.get_all_hotels_homepage, name='get_all_hotels_homepage'),
