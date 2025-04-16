@@ -33,6 +33,7 @@ urlpatterns = [
 
     #share schedule
     path('share-schedule/', views.share_schedule, name='share_schedule'),
+    path('share-schedule-via-email/', views.share_schedule_via_email, name='share_schedule_via_email'),
     re_path(r'^view-schedule/(?P<share_token>[0-9a-f-]{36})/?$', views.view_schedule, name='view_schedule'),
 
     #Homepage

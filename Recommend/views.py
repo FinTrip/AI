@@ -10,6 +10,7 @@ from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.core.mail import send_mail
 from django.views.decorators.http import require_POST, require_GET
 from rest_framework import status
 from django.conf import settings
@@ -1011,6 +1012,100 @@ def share_schedule(request):
         if 'db' in locals() and db and db.open:
             db.close()
 
+@csrf_exempt
+@require_POST
+def share_schedule_via_email(request):
+    db = None
+    cursor = None
+    try:
+        data = json.loads(request.body)
+        user_id = data.get("user_id")
+        schedule_id = data.get("schedule_id")
+        recipient_email = data.get("email")
+
+        if not user_id:
+            return JsonResponse({"error": "Thiếu user_id"}, status=400)
+        if not schedule_id:
+            return JsonResponse({"error": "Thiếu schedule_id"}, status=400)
+        if not recipient_email:
+            return JsonResponse({"error": "Thiếu email người nhận"}, status=400)
+
+        db = MySQLdb.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            passwd=MYSQL_PASSWORD,
+            db=MYSQL_DB,
+            port=MYSQL_PORT,
+            charset=MYSQL_CHARSET
+        )
+        cursor = db.cursor()
+
+        # Verify schedule exists and belongs to user
+        cursor.execute("SELECT user_id FROM Schedules WHERE id = %s", [schedule_id])
+        result = cursor.fetchone()
+        if not result or result[0] != user_id:
+            return JsonResponse({"error": "Không có quyền chia sẻ"}, status=403)
+
+        # Get full_name from Users table
+        cursor.execute("SELECT full_name FROM Users WHERE id = %s", [user_id])
+        user_result = cursor.fetchone()
+        if not user_result:
+            return JsonResponse({"error": "Người dùng không tồn tại"}, status=404)
+        full_name = user_result[0]
+
+        # Check for existing share link
+        cursor.execute("SELECT share_link FROM SharedLinks WHERE schedule_id = %s", [schedule_id])
+        existing_link = cursor.fetchone()
+        if existing_link:
+            share_link = existing_link[0]
+        else:
+            # Generate new share link with lowercase UUID and correct path
+            share_token = str(uuid.uuid4()).lower()
+            share_link = f"http://{request.get_host()}/recommend/view-schedule/{share_token}/"
+            cursor.execute(
+                "INSERT INTO SharedLinks (schedule_id, share_link) VALUES (%s, %s)",
+                [schedule_id, share_link]
+            )
+            db.commit()
+
+        # Send email using Gmail SMTP settings from settings.py
+        subject = 'Lịch trình du lịch được chia sẻ từ FinTrip'
+        message = f'''Xin chào,
+
+Bạn vừa nhận được một lịch trình du lịch được chia sẻ qua ứng dụng FinTrip – trợ lý đồng hành đáng tin cậy trong mọi hành trình khám phá.
+
+Người dùng {full_name} đã chia sẻ với bạn một kế hoạch chi tiết bao gồm các điểm tham quan nổi bật và những gợi ý hấp dẫn cho chuyến đi.
+
+Vui lòng nhấn vào đường link sau để xem chi tiết lịch trình:
+{share_link}
+
+Chúc bạn có những trải nghiệm tuyệt vời cùng FinTrip!
+
+Trân trọng,  
+Đội ngũ FinTrip'''
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [recipient_email]
+        send_mail(subject, message, email_from, recipient_list)
+
+        return JsonResponse({"message": "Chia sẻ thành công qua email", "share_link": share_link}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
+    except MySQLdb.IntegrityError:
+        return JsonResponse({"error": "Liên kết chia sẻ đã tồn tại"}, status=409)
+    except MySQLdb.Error:
+        if 'db' in locals() and db:
+            db.rollback()
+        return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
+    except Exception as e:
+        return JsonResponse({"error": f"Lỗi không xác định: {str(e)}"}, status=500)
+    finally:
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'db' in locals() and db and db.open:
+            db.close()
+
+
 @require_GET
 def view_schedule(request, share_token):
     db = None
@@ -1054,11 +1149,39 @@ def view_schedule(request, share_token):
         if not schedule:
             return JsonResponse({"error": "Lịch trình không tồn tại"}, status=404)
 
+        # Fetch flight details if exists
+        cursor.execute("SELECT * FROM Flights WHERE schedule_id = %s", [schedule_id])
+        flight = cursor.fetchone()
+        flight_data = None
+        if flight:
+            flight_data = {
+                "flight_id": flight[0],
+                "departure": flight[1],
+                "arrival": flight[2],
+                # Add other flight fields as needed
+            }
+
+        # Fetch hotel details if exists
+        cursor.execute("SELECT * FROM Hotels WHERE schedule_id = %s", [schedule_id])
+        hotel = cursor.fetchone()
+        hotel_data = None
+        if hotel:
+            hotel_data = {
+                "hotel_id": hotel[0],
+                "name": hotel[1],
+                "address": hotel[2],
+                # Add other hotel fields as needed
+            }
+
         # Fetch days
         cursor.execute("SELECT id, day_index, date_str FROM Days WHERE schedule_id = %s ORDER BY day_index", [schedule_id])
         days = cursor.fetchall()
 
-        plan = {"schedule_name": schedule[0], "days": []}
+        # Construct schedule data
+        schedule_data = {
+            "name": schedule[0],
+            "days": []
+        }
         for day in days:
             day_id, day_index, date_str = day
             cursor.execute("SELECT * FROM Itineraries WHERE day_id = %s ORDER BY `order`", [day_id])
@@ -1093,9 +1216,17 @@ def view_schedule(request, share_token):
                     } for item in itineraries
                 ]
             }
-            plan["days"].append(day_plan)
+            schedule_data["days"].append(day_plan)
 
-        return JsonResponse({"plan": plan}, status=200)
+        # Construct response data
+        response_data = {}
+        if flight_data:
+            response_data["flight"] = flight_data
+        if hotel_data:
+            response_data["hotel"] = hotel_data
+        response_data["schedule"] = schedule_data
+
+        return JsonResponse(response_data, status=200)
 
     except MySQLdb.Error:
         return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
