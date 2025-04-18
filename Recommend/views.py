@@ -412,29 +412,209 @@ def recommend_travel_day(request):
         logger.error(f"Error in recommend_travel_day: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
 
+
+
+'''
+
+
+bắt đầu q&a để đưa ra lịch trình 
+
+
+'''
+######## Q&A để lưu thông tin tỉnh
+@csrf_exempt
+@require_POST
+def set_province(request):
+    try:
+        data = json.loads(request.body)
+        province = data.get("province", "").strip()
+
+        fields = {"province": province}
+        error_response = check_missing_fields(fields)
+        if error_response:
+            return error_response
+
+        error_response = check_field_length(fields)
+        if error_response:
+            return error_response
+
+        error_response = check_province_format(province)
+        if error_response:
+            return error_response
+
+        request.session['selected_province'] = province
+        request.session.modified = True
+        return JsonResponse({"message": "Tỉnh đã được lưu."}, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+
+
+######## Q&A để lưu thông tin ngày đi và ngày ve
+@csrf_exempt
+@require_POST
+def set_dates(request):
+    try:
+        data = json.loads(request.body)
+        start_day = data.get("start_day", "").strip()
+        end_day = data.get("end_day", "").strip()
+
+        fields = {"start_day": start_day, "end_day": end_day}
+        error_response = check_missing_fields(fields)
+        if error_response:
+            return error_response
+
+        error_response = check_field_length(fields)
+        if error_response:
+            return error_response
+
+        # Kiểm tra định dạng ngày
+        error = check_date_format(start_day, "start_day") or check_date_format(end_day, "end_day")
+        if error:
+            return error
+
+        # Chuyển đổi ngày và kiểm tra logic
+        fmt = "%Y-%m-%d"
+        start_date = datetime.strptime(start_day, fmt).date()
+        end_date = datetime.strptime(end_day, fmt).date()
+        current_date = datetime.now().date()
+
+        error_response = check_date_logic(start_date, end_date, current_date)
+        if error_response:
+            return error_response
+
+        request.session['start_day'] = start_day
+        request.session['end_day'] = end_day
+        request.session.modified = True
+        return JsonResponse({"message": "Ngày đã được lưu."}, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+
+######## Tim kiem chuyen bay
+@csrf_exempt
+@require_POST
+def rcm_flight(request):
+    try:
+        data = json.loads(request.body)
+        origin = data.get("origin", "").strip()
+        destination = data.get("destination", request.session.get('selected_province', '')).strip()
+        departure_date = data.get("departure_date", request.session.get('start_day', '')).strip()
+
+        if not origin or not destination or not departure_date:
+            return JsonResponse({"error": "Thiếu trường bắt buộc: origin, destination, departure_date"}, status=400)
+
+        if any(len(value) > 50 for value in [origin, destination, departure_date]):
+            return JsonResponse({"error": "Dữ liệu đầu vào quá dài."}, status=400)
+
+        if any(char in origin + destination for char in "<>\"'{}[]()|&;"):
+            return JsonResponse({"error": "Dữ liệu chứa ký tự không hợp lệ."}, status=400)
+
+        result = search_flight_service(origin, destination, departure_date)
+        if "error" in result:
+            return JsonResponse({"error": result["error"]}, status=400)
+
+        return JsonResponse(result, safe=False, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in rcm_flight: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+######## Lưu thông tin chuyến bay
+@csrf_exempt
+@require_POST
+def select_flight(request):
+    try:
+        data = json.loads(request.body)
+        flight_info = data.get('flight_info')
+
+        if not flight_info:
+            return JsonResponse({"error": "Missing flight info"}, status=400)
+
+        request.session['selected_flight'] = {
+            'flight_details': flight_info,
+            'origin': flight_info.get('origin', 'N/A'),
+            'destination': flight_info.get('destination', 'N/A'),
+            'departure_time': flight_info.get('departure_time', 'N/A')
+        }
+        request.session.modified = True
+        return JsonResponse({"message": "Flight selected successfully"}, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in select_flight: {str(e)}")
+        return JsonResponse({"error": f"Error system: {str(e)}"}, status=400)
+
+######## Tim kiem khach san phu hop
+@csrf_exempt
+@require_POST
+def rcm_hotel(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        search_term = data.get("destination", request.session.get('selected_province', '')).strip()
+
+        if not search_term:
+            return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
+
+        if len(search_term) > 100:
+            return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
+
+        result = process_hotel_data_from_csv(search_term)
+        if not result:
+            return JsonResponse({"error": "Không tìm thấy khách sạn."}, status=404)
+
+        return JsonResponse({
+            "hotels": result,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, json_dumps_params={"ensure_ascii": False}, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in rcm_hotel: {str(e)}")
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+######## Lưu khách sạn đã chọn
+@csrf_exempt
+@require_POST
+def select_hotel(request):
+    try:
+        data = json.loads(request.body)
+        hotel_info = data.get('hotel_info')
+
+        if not hotel_info:
+            return JsonResponse({"error": "Missing hotel_info"}, status=400)
+
+        request.session['selected_hotel'] = {
+            'hotel_details': hotel_info,
+            'destination': hotel_info.get('destination', 'N/A'),
+        }
+        request.session.modified = True
+        return JsonResponse({"message": "Hotel selected successfully"}, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in select_hotel: {str(e)}")
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+
 # API gợi ý lịch trình nhiều ngày
 @csrf_exempt
 @require_POST
 def recommend_travel_schedule(request):
     try:
         data = json.loads(request.body)
+        province = data.get("province", request.session.get('selected_province', '')).strip()
+        start_day = data.get("start_day", request.session.get('start_day', '')).strip()
+        end_day = data.get("end_day", request.session.get('end_day', '')).strip()
+
         selected_hotel = request.session.get('selected_hotel', {})
         selected_flight = request.session.get('selected_flight', {})
-        selected_place = request.session.get('selected_province', {})
         selected_place_detail = request.session.get('selected_place_info', {})
-
-        province = (
-            selected_place or
-            selected_hotel.get('province') or
-            selected_flight.get('destination') or
-            data.get("province", "").strip()
-        )
-
-        start_day = selected_flight.get('departure_time', data.get("start_day", "").strip())
-        if start_day and 'T' in start_day:
-            start_day = start_day.split('T')[0]
-
-        end_day = data.get("end_day", "").strip()
 
         fields = {"province": province, "start_day": start_day, "end_day": end_day}
         error_response = check_missing_fields(fields)
@@ -465,7 +645,7 @@ def recommend_travel_schedule(request):
         if error_response:
             return error_response
 
-        food_df, place_df, _ = load_data(FOOD_FILE, PLACE_FILE)
+        food_df, place_df, _ = load_data("FOOD_FILE", "PLACE_FILE")
         schedule_result = recommend_trip_schedule(start_day, end_day, province, food_df, place_df)
         if "error" in schedule_result:
             return JsonResponse({"error": schedule_result["error"]}, status=400)
@@ -494,7 +674,6 @@ def recommend_travel_schedule(request):
             response_data["place"] = selected_place_detail
 
         return JsonResponse(response_data, status=200)
-
     except json.JSONDecodeError:
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
@@ -502,7 +681,20 @@ def recommend_travel_schedule(request):
         logger.error(f"Error in recommend_travel_schedule: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
 
-#### Admin
+
+'''
+
+Kết thúc lịch trinh
+
+'''
+
+
+
+#######################################
+
+'''
+Admin để quản ly khách sạn
+'''
 @require_GET
 def get_all_hotels(request):
     try:
@@ -588,7 +780,9 @@ def delete_hotel(request):
         traceback.print_exc()
         logger.error(f"Error in delete_hotel: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
-### End admin
+'''
+end Admin để quản ly khách sạn
+'''
 
 # API tìm kiếm tỉnh/thành phố
 @csrf_exempt
@@ -1239,118 +1433,10 @@ def view_schedule(request, share_token):
         if 'db' in locals() and db and db.open:
             db.close()
 
-# API tìm kiếm chuyến bay
-@csrf_exempt
-@require_POST
-def rcm_flight(request):
-    try:
-        data = json.loads(request.body)
-        origin = data.get("origin", "").strip()
-        destination = data.get("destination", "").strip()
-        departure_date = data.get("departure_date", "").strip()
 
-        if not origin or not destination or not departure_date:
-            return JsonResponse({"error": "Thiếu trường bắt buộc: origin, destination, departure_date"}, status=400)
-
-        if any(len(value) > 50 for value in [origin, destination, departure_date]):
-            return JsonResponse({"error": "Dữ liệu đầu vào quá dài."}, status=400)
-
-        if any(char in origin + destination for char in "<>\"'{}[]()|&;"):
-            return JsonResponse({"error": "Dữ liệu chứa ký tự không hợp lệ."}, status=400)
-
-        result = search_flight_service(origin, destination, departure_date)
-        if "error" in result:
-            return JsonResponse({"error": result["error"]}, status=400)
-
-        return JsonResponse(result, safe=False, status=200)
-
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
-    except Exception as e:
-        traceback.print_exc()
-        logger.error(f"Error in rcm_flight: {str(e)}")
-        return JsonResponse({"error": str(e)}, status=500)
-
-# API chọn chuyến bay
-@csrf_exempt
-@require_POST
-def select_flight(request):
-    try:
-        data = json.loads(request.body)
-        flight_info = data.get('flight_info')
-
-        if not flight_info:
-            return JsonResponse({"error": "Missing flight info"}, status=400)
-
-        request.session['selected_flight'] = {
-            'flight_details': flight_info,
-            'origin': flight_info.get('origin', 'N/A'),
-            'destination': flight_info.get('destination', 'N/A'),
-            'departure_time': flight_info.get('departure_time', 'N/A')
-        }
-        return JsonResponse({"message": "Flight selected successfully"}, status=200)
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
-    except Exception as e:
-        traceback.print_exc()
-        logger.error(f"Error in select_flight: {str(e)}")
-        return JsonResponse({"error": f"Error system: {str(e)}"}, status=400)
-
-# API tìm kiếm khách sạn
-@csrf_exempt
-@require_POST
-def rcm_hotel(request):
-    try:
-        data = json.loads(request.body.decode('utf-8'))
-        search_term = data.get("destination", "").strip()
-
-        if not search_term:
-            return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
-
-        if len(search_term) > 100:
-            return JsonResponse({"error": "Tỉnh/thành phố không được dài quá 100 ký tự."}, status=400)
-
-        result = process_hotel_data_from_csv(search_term)
-        if not result:
-            return JsonResponse({"error": "Không tìm thấy khách sạn."}, status=404)
-
-        return JsonResponse({
-            "hotels": result,
-            "timestamp": datetime.now().isoformat(),
-            "csrf_token": get_token(request)
-        }, json_dumps_params={"ensure_ascii": False}, status=200)
-
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
-    except Exception as e:
-        traceback.print_exc()
-        logger.error(f"Error in rcm_hotel: {str(e)}")
-        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
-
-# API chọn khách sạn
-@csrf_exempt
-@require_POST
-def select_hotel(request):
-    try:
-        data = json.loads(request.body)
-        hotel_info = data.get('hotel_info')
-
-        if hotel_info:
-            request.session['selected_hotel'] = {
-                'hotel_details': hotel_info,
-                'destination': hotel_info.get('destination', 'N/A'),
-            }
-            return JsonResponse({"message": "Hotel selected successfully"}, status=200)
-        else:
-            return JsonResponse({"error": "Missing hotel_info"}, status=400)
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON data"}, status=400)
-    except Exception as e:
-        traceback.print_exc()
-        logger.error(f"Error in select_hotel: {str(e)}")
-        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
-
-# Homepage APIs
+'''''
+Homepage APIs
+'''''
 @require_GET
 def get_all_hotels_homepage(request):
     try:

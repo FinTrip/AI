@@ -11,6 +11,8 @@ urlpatterns = [
     path('update-user/', views.update_user, name='update_user'),
 
     #Recommend travel
+    path('set-province/', views.set_province, name='set_province'),
+    path('set-dates/', views.set_dates, name='set_dates'),
     path('rcm-travel/', views.recommend_travel_day, name='recommend_travel_day'),
     path('travel-schedule/', views.recommend_travel_schedule, name='recommend_travel_schedule'),
     path('save-schedule/', views.save_schedule, name='save_schedule'),
