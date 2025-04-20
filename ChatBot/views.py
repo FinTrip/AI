@@ -5,21 +5,31 @@ from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from .chatbot_model import chatbot_response
+import logging
+
+# Thiết lập logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ChatbotAPIView(APIView):
-    permission_classes = [AllowAny]  # Allow anyone to send requests without authentication
+    permission_classes = [AllowAny]
 
     def post(self, request, format=None):
-        data = request.data
-        msg = data.get('text', '').strip()
-        if not msg:
-            return Response({"error": "No message provided."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = request.data
+            msg = data.get('text', '').strip()
+            if not msg:
+                logger.warning("Không có tin nhắn nào được cung cấp.")
+                return Response({"error": "Không có tin nhắn nào được cung cấp."}, status=status.HTTP_400_BAD_REQUEST)
 
-        predicted_class, confidence, bot_response_text = chatbot_response(msg)
+            predicted_class, confidence, bot_response_text = chatbot_response(msg)
 
-        return Response({
-            "predicted_class": predicted_class,
-            "confidence": confidence,
-            "response": bot_response_text
-        }, status=status.HTTP_200_OK)
+            return Response({
+                "predicted_class": predicted_class,
+                "confidence": confidence,
+                "response": bot_response_text
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Lỗi trong view: {e}")
+            return Response({"error": "Lỗi server nội bộ"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

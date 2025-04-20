@@ -2,63 +2,73 @@ import os
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
-# Path to the model directory
-MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model', 'T5_vn_finetuned_model2')
+# Đường dẫn tới thư mục mô hình
+MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model', 'T5_vn_finetuned_modelx3')
+
+# Lịch sử hội thoại toàn cục (có thể thay bằng cơ chế lưu trữ khác nếu cần)
+conversation_history = []
+
 
 def load_model():
+    """Tải mô hình và tokenizer từ thư mục đã chỉ định."""
+    if not os.path.exists(MODEL_DIR):
+        print(f"Lỗi: Thư mục mô hình không tồn tại: {MODEL_DIR}")
+        return None, None
     try:
         tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
         model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_DIR, trust_remote_code=True)
         model.eval()
         return model, tokenizer
     except Exception as e:
-        print(f"Error loading model: {e}") # Print error to console instead of logging
+        print(f"Lỗi khi tải mô hình: {e}")
         return None, None
 
-# Load the model and tokenizer when the module is imported
+
+# Tải mô hình và tokenizer khi module được import
 model, tokenizer = load_model()
 
+
 def chatbot_response(input_text):
-    """
-    Generate a response from the trained model with fixed configuration parameters.
+    """Tạo phản hồi từ chatbot dựa trên đầu vào của người dùng."""
+    global conversation_history
 
-    Parameters:
-        input_text (str): The user's input text.
-
-    Returns:
-        tuple: A tuple containing predicted_class, confidence, and response_text.
-    """
     if model is None or tokenizer is None:
-        print("Model or tokenizer not loaded.") # Print error to console instead of logging
-        return "Error", 0.0, "Sorry, the system is currently experiencing issues."
+        return "Error", 0.0, "Xin lỗi, hệ thống hiện đang gặp sự cố."
 
     try:
-        # For Seq2Seq models like T5, use a prefix to guide the task
-        prompt = f"question: {input_text}"
+        # Thêm câu hỏi mới vào lịch sử hội thoại
+        conversation_history.append(f"User: {input_text}")
 
+        # Giới hạn độ dài lịch sử để tránh vượt quá giới hạn token
+        if len(conversation_history) > 10:  # Giữ 10 lượt hội thoại gần nhất
+            conversation_history = conversation_history[-10:]
+
+        # Tạo prompt bao gồm lịch sử hội thoại
+        prompt = " ".join(conversation_history) + " Assistant:"
+
+        # Mã hóa prompt
         inputs = tokenizer.encode(prompt, return_tensors="pt", max_length=512, truncation=True)
 
+        # Tạo phản hồi với các tham số đã điều chỉnh
         outputs = model.generate(
             inputs,
-            max_length=100,             # Maximum length of the response
+            max_length=100,
             pad_token_id=tokenizer.eos_token_id,
-            no_repeat_ngram_size=1,      # Do not repeat n-grams
-            temperature=0.7,             # Temperature
-            top_p=0.9,                   # Top-p (Nucleus Sampling)
-            top_k=50,                    # Top-k
+            no_repeat_ngram_size=2,  # Tăng lên 2 để tránh lặp từ không tự nhiên
+            temperature=0.6,  # Giảm để tăng tính chính xác
+            top_p=0.85,  # Điều chỉnh để cân bằng sáng tạo và chính xác
+            top_k=40,  # Điều chỉnh để hạn chế lựa chọn từ
             do_sample=True,
-            early_stopping=True
+            early_stopping=True,
+            num_beams=5  # Tăng num_beams để sử dụng beam search, tránh cảnh báo
         )
 
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print(f"Model response: {response}") # Print response to console instead of logging
 
-        # Since transformers do not provide predicted_class and confidence,
-        # we'll return 'N/A' and 0.0 respectively.
-        predicted_class = "N/A"
-        confidence = 0.0
+        # Thêm phản hồi vào lịch sử hội thoại
+        conversation_history.append(f"Assistant: {response}")
 
-        return predicted_class, confidence, response
+        return "N/A", 0.0, response
     except Exception as e:
-        print(f"Error generating response: {e}") # Print error to console instead of logging
-        return "Error", 0.0, "Sorry, I cannot process your request at the moment."
+        print(f"Lỗi khi tạo phản hồi: {e}")
+        return "Error", 0.0, "Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này."

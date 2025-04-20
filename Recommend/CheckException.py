@@ -56,8 +56,8 @@ def check_date_format(date_str, field_name):
 def check_date_logic(start_date, end_date, current_date):
     if start_date < current_date or end_date < current_date:
         return JsonResponse({"error": "Ngày bắt đầu và ngày kết thúc phải không bé hơn ngày hiện tại."}, status=400)
-    if start_date >= end_date:
-        return JsonResponse({"error": "Ngày bắt đầu phải bé hơn ngày kết thúc."}, status=400)
+    if start_date > end_date:
+        return JsonResponse({"error": "Ngày bắt đầu phải bé hơn hoặc bằng ngày kết thúc."}, status=400)
     total_days = (end_date - start_date).days + 1
     if total_days > 30:
         return JsonResponse({"error": "Tổng số ngày của lịch trình không được vượt quá 30 ngày."}, status=400)

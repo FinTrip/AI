@@ -23,7 +23,7 @@ from django.contrib.auth.models import User
 from .CheckException import validate_request, check_missing_fields, check_field_length, check_province_format, check_date_format, check_date_logic
 from .flight import search_flight_service
 from .hotel import process_hotel_data_from_csv, update_hotel_in_csv, delete_hotel_in_csv, show_hotel_in_csv, get_hotel_homepage
-from .processed import load_data, recommend_one_day_trip, recommend_trip_schedule, FOOD_FILE, PLACE_FILE, HOTEL_FILE, normalize_text, get_food_homepage, get_place_homepage, get_city_to_be_miss
+from .processed import load_data, recommend_schedule, FOOD_FILE, PLACE_FILE, HOTEL_FILE, normalize_text
 from .weather import display_forecast, get_weather
 
 # Thiết lập logging
@@ -645,8 +645,8 @@ def recommend_travel_schedule(request):
         if error_response:
             return error_response
 
-        food_df, place_df, _ = load_data("FOOD_FILE", "PLACE_FILE")
-        schedule_result = recommend_trip_schedule(start_day, end_day, province, food_df, place_df)
+        food_df, place_df, _ = load_data(FOOD_FILE, PLACE_FILE)
+        schedule_result = recommend_schedule(start_day, end_day, province, food_df, place_df)
         if "error" in schedule_result:
             return JsonResponse({"error": schedule_result["error"]}, status=400)
 
@@ -674,6 +674,7 @@ def recommend_travel_schedule(request):
             response_data["place"] = selected_place_detail
 
         return JsonResponse(response_data, status=200)
+
     except json.JSONDecodeError:
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
