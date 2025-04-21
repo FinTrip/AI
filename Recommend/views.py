@@ -1,6 +1,8 @@
 import json
 import os
 import re
+from django.core.cache import cache
+
 import pandas as pd
 import uuid
 import traceback
@@ -23,7 +25,8 @@ from django.contrib.auth.models import User
 from .CheckException import validate_request, check_missing_fields, check_field_length, check_province_format, check_date_format, check_date_logic
 from .flight import search_flight_service
 from .hotel import process_hotel_data_from_csv, update_hotel_in_csv, delete_hotel_in_csv, show_hotel_in_csv, get_hotel_homepage
-from .processed import load_data, recommend_schedule, FOOD_FILE, PLACE_FILE, HOTEL_FILE, normalize_text
+from .processed import load_data, recommend_schedule, FOOD_FILE, PLACE_FILE, HOTEL_FILE, normalize_text, \
+    get_food_homepage, get_place_homepage, get_city_to_be_miss
 from .weather import display_forecast, get_weather
 
 # Thiết lập logging
@@ -394,7 +397,7 @@ def recommend_travel_day(request):
             return JsonResponse({"error": "Location không được dài quá 100 ký tự."}, status=400)
 
         food_df, place_df, _ = load_data(FOOD_FILE, PLACE_FILE)
-        recommendations = recommend_one_day_trip(location, food_df, place_df)
+        recommendations = recommend_schedule(location, food_df, place_df)
         if not recommendations:
             return JsonResponse({"error": "Không tìm thấy gợi ý cho địa điểm này."}, status=404)
 
@@ -444,12 +447,13 @@ def set_province(request):
 
         request.session['selected_province'] = province
         request.session.modified = True
+        logger.info(f"Province saved to session: {province}")
         return JsonResponse({"message": "Tỉnh đã được lưu."}, status=200)
     except json.JSONDecodeError:
+        logger.error("Invalid JSON in set_province")
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
 
-
-######## Q&A để lưu thông tin ngày đi và ngày ve
+# API lưu ngày đi và về
 @csrf_exempt
 @require_POST
 def set_dates(request):
@@ -467,12 +471,10 @@ def set_dates(request):
         if error_response:
             return error_response
 
-        # Kiểm tra định dạng ngày
         error = check_date_format(start_day, "start_day") or check_date_format(end_day, "end_day")
         if error:
             return error
 
-        # Chuyển đổi ngày và kiểm tra logic
         fmt = "%Y-%m-%d"
         start_date = datetime.strptime(start_day, fmt).date()
         end_date = datetime.strptime(end_day, fmt).date()
@@ -485,11 +487,13 @@ def set_dates(request):
         request.session['start_day'] = start_day
         request.session['end_day'] = end_day
         request.session.modified = True
+        logger.info(f"Dates saved to session: start_day={start_day}, end_day={end_day}")
         return JsonResponse({"message": "Ngày đã được lưu."}, status=200)
     except json.JSONDecodeError:
+        logger.error("Invalid JSON in set_dates")
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
 
-######## Tim kiem chuyen bay
+# API tìm kiếm chuyến bay
 @csrf_exempt
 @require_POST
 def rcm_flight(request):
@@ -514,40 +518,38 @@ def rcm_flight(request):
 
         return JsonResponse(result, safe=False, status=200)
     except json.JSONDecodeError:
+        logger.error("Invalid JSON in rcm_flight")
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
-        traceback.print_exc()
         logger.error(f"Error in rcm_flight: {str(e)}")
+        traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
-
-######## Lưu thông tin chuyến bay
+# API lưu thông tin chuyến bay
 @csrf_exempt
 @require_POST
 def select_flight(request):
+    from django.core.cache import cache  # Import here to ensure correct object
     try:
         data = json.loads(request.body)
         flight_info = data.get('flight_info')
-
         if not flight_info:
+            logger.error("Missing flight_info in select_flight")
             return JsonResponse({"error": "Missing flight info"}, status=400)
 
-        request.session['selected_flight'] = {
-            'flight_details': flight_info,
-            'origin': flight_info.get('origin', 'N/A'),
-            'destination': flight_info.get('destination', 'N/A'),
-            'departure_time': flight_info.get('departure_time', 'N/A')
-        }
-        request.session.modified = True
+        cache_key = f'selected_flight_{request.session.session_key}'
+        cache.set(cache_key, flight_info, timeout=3600)  # Now uses correct cache object
+        logger.info(f"Flight saved to cache: {flight_info}")
         return JsonResponse({"message": "Flight selected successfully"}, status=200)
     except json.JSONDecodeError:
+        logger.error("Invalid JSON in select_flight")
         return JsonResponse({"error": "Invalid JSON"}, status=400)
     except Exception as e:
-        traceback.print_exc()
         logger.error(f"Error in select_flight: {str(e)}")
+        traceback.print_exc()
         return JsonResponse({"error": f"Error system: {str(e)}"}, status=400)
 
-######## Tim kiem khach san phu hop
+# API tìm kiếm khách sạn
 @csrf_exempt
 @require_POST
 def rcm_hotel(request):
@@ -571,76 +573,73 @@ def rcm_hotel(request):
             "csrf_token": get_token(request)
         }, json_dumps_params={"ensure_ascii": False}, status=200)
     except json.JSONDecodeError:
+        logger.error("Invalid JSON in rcm_hotel")
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
-        traceback.print_exc()
         logger.error(f"Error in rcm_hotel: {str(e)}")
+        traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-######## Lưu khách sạn đã chọn
+# API lưu khách sạn đã chọn
 @csrf_exempt
 @require_POST
 def select_hotel(request):
+    from django.core.cache import cache  # Import here to ensure correct object
     try:
         data = json.loads(request.body)
         hotel_info = data.get('hotel_info')
-
         if not hotel_info:
-            return JsonResponse({"error": "Missing hotel_info"}, status=400)
+            logger.error("Missing hotel_info in select_hotel")
+            return JsonResponse({"error": "Missing hotel info"}, status=400)
 
-        request.session['selected_hotel'] = {
-            'hotel_details': hotel_info,
-            'destination': hotel_info.get('destination', 'N/A'),
-        }
-        request.session.modified = True
+        cache_key = f'selected_hotel_{request.session.session_key}'
+        cache.set(cache_key, hotel_info, timeout=3600)  # Now uses correct cache object
+        logger.info(f"Hotel saved to cache: {hotel_info}")
         return JsonResponse({"message": "Hotel selected successfully"}, status=200)
     except json.JSONDecodeError:
+        logger.error("Invalid JSON in select_hotel")
         return JsonResponse({"error": "Invalid JSON data"}, status=400)
     except Exception as e:
-        traceback.print_exc()
         logger.error(f"Error in select_hotel: {str(e)}")
+        traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-
-# API gợi ý lịch trình nhiều ngày
+# API tạo lịch trình
 @csrf_exempt
 @require_POST
 def recommend_travel_schedule(request):
+    from django.core.cache import cache  # Import here to ensure correct object
     try:
         data = json.loads(request.body)
-        province = data.get("province", request.session.get('selected_province', '')).strip()
-        start_day = data.get("start_day", request.session.get('start_day', '')).strip()
-        end_day = data.get("end_day", request.session.get('end_day', '')).strip()
+        province = data.get('province', request.session.get('selected_province', ''))
+        start_day = data.get('start_day', request.session.get('start_day', ''))
+        end_day = data.get('end_day', request.session.get('end_day', ''))
+        flight_info = data.get('flight_info', None)
+        hotel_info = data.get('hotel_info', None)
 
-        selected_hotel = request.session.get('selected_hotel', {})
-        selected_flight = request.session.get('selected_flight', {})
-        selected_place_detail = request.session.get('selected_place_info', {})
+        if not province or not start_day or not end_day:
+            logger.error("Missing required fields in travel_schedule")
+            return JsonResponse({"error": "Thiếu thông tin tỉnh, ngày đi hoặc ngày về"}, status=400)
 
-        fields = {"province": province, "start_day": start_day, "end_day": end_day}
-        error_response = check_missing_fields(fields)
-        if error_response:
-            return error_response
+        cache_key_prefix = request.session.session_key
+        if flight_info:
+            cache.set(f'selected_flight_{cache_key_prefix}', flight_info, timeout=3600)
+            logger.info(f"Flight info updated in cache: {flight_info}")
+        if hotel_info:
+            cache.set(f'selected_hotel_{cache_key_prefix}', hotel_info, timeout=3600)
+            logger.info(f"Hotel info updated in cache: {hotel_info}")
 
-        error_response = check_field_length(fields)
-        if error_response:
-            return error_response
+        selected_hotel = cache.get(f'selected_hotel_{cache_key_prefix}', {})
+        selected_flight = cache.get(f'selected_flight_{cache_key_prefix}', {})
 
-        error_response = check_province_format(province)
-        if error_response:
-            return error_response
+        if not selected_flight:
+            logger.warning("No flight information found in cache")
+        if not selected_hotel:
+            logger.warning("No hotel information found in cache")
 
-        error_response = check_date_format(start_day, "start_day")
-        if error_response:
-            return error_response
-        error_response = check_date_format(end_day, "end_day")
-        if error_response:
-            return error_response
-
-        fmt = "%Y-%m-%d"
-        start_date = datetime.strptime(start_day, fmt).date()
-        end_date = datetime.strptime(end_day, fmt).date()
+        start_date = datetime.strptime(start_day, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_day, "%Y-%m-%d").date()
         current_date = datetime.now().date()
-
         error_response = check_date_logic(start_date, end_date, current_date)
         if error_response:
             return error_response
@@ -652,36 +651,22 @@ def recommend_travel_schedule(request):
 
         response_data = {
             "schedule": schedule_result,
+            "hotel": selected_hotel,
+            "flight": selected_flight,
+            "province": province,
             "timestamp": datetime.now().isoformat(),
-            "csrf_token": get_token(request)
+            "csrf_token": get_token(request),
         }
 
-        total_days = (end_date - start_date).days + 1
-        if total_days < 14:
-            offset = (start_date - current_date).days
-            required_forecast_days = offset + total_days
-            weather_data = get_weather(province, forecast_days=required_forecast_days)
-            weather_forecast = display_forecast(weather_data, start_day=offset, end_day=offset + total_days)
-            response_data["weather_forecast"] = weather_forecast
-        else:
-            response_data["weather_forecast"] = "Bỏ qua do lịch trình vượt quá giới hạn thời tiết (>= 14 ngày)."
-
-        if selected_hotel:
-            response_data["hotel"] = selected_hotel
-        if selected_flight:
-            response_data["flight"] = selected_flight
-        if selected_place_detail:
-            response_data["place"] = selected_place_detail
-
+        logger.info("Travel schedule generated successfully")
         return JsonResponse(response_data, status=200)
-
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+        logger.error("Invalid JSON in travel_schedule")
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ"}, status=400)
     except Exception as e:
+        logger.error(f"Error in travel_schedule: {str(e)}")
         traceback.print_exc()
-        logger.error(f"Error in recommend_travel_schedule: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
-
 
 '''
 

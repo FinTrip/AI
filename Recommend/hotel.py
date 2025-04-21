@@ -4,19 +4,15 @@ import os
 import unidecode
 import random
 
-
 csv_filename = os.path.join(os.path.dirname(__file__), "data", "all_hotels.csv")
-
 
 def sanitize_input(input_str):
     """Loại bỏ ký tự đặc biệt"""
     return re.sub(r"[^\w\s]", "", input_str.strip())
 
-
 def normalize_text(text):
     """Chuyển đổi chữ có dấu thành không dấu và viết thường"""
     return unidecode.unidecode(text).lower().strip() if text else ""
-
 
 def process_hotel_data_from_csv(search_term):
     """Xử lý dữ liệu khách sạn từ file CSV dựa trên tỉnh hoặc địa danh gần đó"""
@@ -34,7 +30,7 @@ def process_hotel_data_from_csv(search_term):
 
     processed_hotels = [
         {key: str(hotel.get(key, f"No {key}")) for key in
-         ["name", "link", "description", "price", "name_nearby_place", "hotel_class", "img_origin", "location_rating","animates"]}
+         ["name", "link", "description", "price", "name_nearby_place", "hotel_class", "img_origin", "location_rating", "animates"]}
         for hotel in hotels_list
         if search_term in normalize_text(str(hotel.get("province", ""))) or search_term in normalize_text(
             str(hotel.get("name_nearby_place", "")))
@@ -50,7 +46,7 @@ def show_hotel_in_csv():
         hotels_list = df.to_dict(orient="records")
         processed_hotels = [
             {key: str(hotel.get(key, f"No {key}")) for key in
-             ["name", "link", "description", "price", "name_nearby_place", "hotel_class", "img_origin", "location_rating", "province","animates"]}
+             ["name", "link", "description", "price", "name_nearby_place", "hotel_class", "img_origin", "location_rating", "province", "animates"]}
             for hotel in hotels_list
         ]
         return processed_hotels
@@ -61,27 +57,22 @@ def show_hotel_in_csv():
 
 def update_hotel_in_csv(hotel_name, update_data):
     try:
-        # Đọc file CSV
         df = pd.read_csv(csv_filename)
         if df.empty:
             return False
 
-        # Tìm khách sạn dựa trên tên (so sánh không phân biệt hoa thường, bỏ dấu)
         normalized_hotel_name = normalize_text(hotel_name)
         mask = df['name'].apply(normalize_text) == normalized_hotel_name
 
         if not mask.any():
-            return False  # Không tìm thấy khách sạn
+            return False
 
-        # Cập nhật các trường được cung cấp
         for key, value in update_data.items():
-            if value and key in df.columns:  # Chỉ cập nhật nếu giá trị không rỗng và cột tồn tại
+            if value and key in df.columns:
                 df.loc[mask, key] = value
 
-        # Lưu lại file CSV
         df.to_csv(csv_filename, index=False, encoding='utf-8')
         return True
-
     except (FileNotFoundError, pd.errors.EmptyDataError):
         return False
     except Exception as e:
@@ -89,30 +80,23 @@ def update_hotel_in_csv(hotel_name, update_data):
 
 def delete_hotel_in_csv(hotel_name):
     try:
-        # Đọc file CSV
         df = pd.read_csv(csv_filename)
         if df.empty:
             return False
 
-        # Tìm khách sạn dựa trên tên (so sánh không phân biệt hoa thường, bỏ dấu)
         normalized_hotel_name = normalize_text(hotel_name)
         mask = df['name'].apply(normalize_text) == normalized_hotel_name
 
         if not mask.any():
-            return False  # Không tìm thấy khách sạn
+            return False
 
-        # Xóa bản ghi
         df = df[~mask]
-
-        # Lưu lại file CSV
         df.to_csv(csv_filename, index=False, encoding='utf-8')
         return True
-
     except (FileNotFoundError, pd.errors.EmptyDataError):
         return False
     except Exception as e:
         raise Exception(f"Không thể xóa khách sạn: {str(e)}")
-
 
 def get_hotel_homepage(num_item=None):
     if num_item is None:
@@ -152,7 +136,6 @@ def get_hotel_homepage(num_item=None):
             ['name', 'link', 'description', 'price', 'name_nearby_place', 'hotel_class', 'img_origin',
              'location_rating', 'province', 'animates']
         ].fillna('N/A').to_dict('records')
-
     except (FileNotFoundError, pd.errors.EmptyDataError):
         return []
     except Exception as e:

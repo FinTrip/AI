@@ -3,10 +3,8 @@ import requests
 from django.http import JsonResponse
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Airport code mapping
 airport_info = {
     "quảng nam": "VCL", "chu lai": "VCL", "thanh hóa": "THD", "thọ xuân": "THD",
     "quảng bình": "VDH", "đồng hới": "VDH", "điện biên": "DIN", "điện biên phủ": "DIN",
@@ -21,20 +19,17 @@ airport_info = {
 }
 
 def get_access_token():
-    """Retrieve access token from Amadeus API."""
     data = {
         "grant_type": "client_credentials",
         "client_id": os.getenv("AMADEUS_CLIENT_ID"),
         "client_secret": os.getenv("AMADEUS_CLIENT_SECRET")
     }
     response = requests.post(os.getenv("AMADEUS_API_URL"), data=data)
-
     if response.status_code == 200:
         return response.json().get("access_token")
     return None
 
 def process_flight_data(data):
-    """Process flight data returned by Amadeus API."""
     flight_results = []
     if "data" in data:
         for flight in data["data"]:
@@ -48,7 +43,6 @@ def process_flight_data(data):
                 outbound_time = outbound["departure"]["at"]
                 outbound_flight_code = f"{outbound['carrierCode']}{outbound['number']}"
 
-                # Lấy thông tin loại vé & khoang nếu có, mặc định ESP & ECONOMY
                 traveler_pricing = flight.get("travelerPricings", [{}])
                 fare_basis = traveler_pricing[0].get("fareDetailsBySegment", [{}])[0].get("fareBasis", "ESP")
                 cabin = traveler_pricing[0].get("fareDetailsBySegment", [{}])[0].get("cabin", "ECONOMY")
@@ -65,11 +59,9 @@ def process_flight_data(data):
                 flight_results.append(flight_data)
             except (KeyError, IndexError) as e:
                 print(f"Error processing flight data: {e}")
-
     return flight_results
 
 def search_flight_service(origin_city, destination_city, departure_date):
-    """Search for flights using Amadeus API."""
     token = get_access_token()
     if not token:
         return {"error": "Không thể lấy Access Token"}

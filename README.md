@@ -21,8 +21,6 @@ Cơ sở dữ liệu: SQLite, PostgreSQL, hoặc MySQL
     git clone https://github.com/FinTrip/AI.git
 ```
 
-cd AI
-
 2. **Create and activate virtual environment**:
 ```commandline
     python -m venv venv
@@ -34,6 +32,10 @@ cd AI
 #### Đối với Windows
 ```commandline
     venv\Scripts\activate
+```
+Dùng lệnh \
+```
+cd AI
 ```
 
 3. **Install requirements**:
