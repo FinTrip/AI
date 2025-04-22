@@ -43,4 +43,8 @@ urlpatterns = [
     path('homepage-place/', views.get_all_place_homepage, name='get_all_place_homepage'),
     path('select-place/', views.select_place, name='select_place'),
     path('homepage-food/', views.get_all_food_homepage, name='get_all_food_homepage'),
+
+    #todolist
+    path('todolist-create/', views.create_todolist_activity, name='create_todolist_activity'),
+    path('todolist/', views.get_todolist_activities, name='get_todolist_activities'),
 ]

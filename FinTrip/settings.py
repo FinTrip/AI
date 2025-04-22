@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -59,7 +60,7 @@ WSGI_APPLICATION = 'FinTrip.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'FinTrip',
+        'NAME': 'fintripp',
         'USER': 'root',
         'PASSWORD': '123456',
         'HOST': 'localhost',
@@ -161,4 +162,12 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
+}
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BEAT_SCHEDULE = {
+    'send-reminder-every-day': {
+        'task': 'Recommend.tasks.send_reminder_task',
+        'schedule': crontab(hour=0, minute=0),
+    },
 }
