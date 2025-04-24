@@ -580,7 +580,26 @@ air_province = ["quảng nam","thanh hoá", "quảng bình", "điện biên", "p
                 "nghệ an", "bình định", "hải phòng", "lâm đồng", "đồng nai"]
 
 @require_GET
-def check_flight(request):
+def check_flight_di(request):
+    data = json.loads(request.body)
+    selected_province = data.get("departureInput", "").strip()
+
+    if not selected_province:
+        return JsonResponse({
+            "error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."
+        }, status=400)
+    has_airport = selected_province in [province.lower() for province in air_province]
+
+    if not has_airport:
+        message = f"'{selected_province.title()}' hiện tại tỉnh của bạn chưa có sân bay. Vui lòng chọn dịch vụ khách sạn phù hợp."
+
+    return JsonResponse({
+        "has_airport": has_airport,
+        "message": message
+    }, status=200)
+
+@require_GET
+def check_flight_den(request):
     session_key = request.session.session_key
     selected_province = cache.get(f'selected_province_{session_key}', '').strip().lower()
 
@@ -590,9 +609,7 @@ def check_flight(request):
         }, status=400)
     has_airport = selected_province in [province.lower() for province in air_province]
 
-    if has_airport:
-        message = f"'{selected_province.title()}' có sân bay. Bạn có thể đặt vé máy bay."
-    else:
+    if not has_airport:
         message = f"'{selected_province.title()}' hiện chưa có sân bay. Vui lòng chọn dịch vụ khách sạn phù hợp."
 
     return JsonResponse({

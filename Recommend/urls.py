@@ -19,7 +19,8 @@ urlpatterns = [
     path('save-schedule/', views.save_schedule, name='save_schedule'),
 
     #flight
-    path('check-flight/', views.check_flight, name='check_flight'),
+    path('check-flight-di/', views.check_flight_di, name='check_flight_di'),
+    path('check-flight-den/', views.check_flight_den, name='check_flight_den'),
     path('rcm-flight/', views.rcm_flight, name='rcm_flight'),
     path('select-flight/', views.select_flight, name='select_flight'),
 
