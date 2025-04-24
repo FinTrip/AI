@@ -575,6 +575,31 @@ def set_dates(request):
         logger.error("Invalid JSON in set_dates")
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
 
+air_province = ["quảng nam","thanh hoá", "quảng bình", "điện biên", "phú yên", "gia lai", "khánh hoà", "huế", "cần thơ"
+                "đắk lắk", "kiên giang", "cà mau", "vũng tàu", "hà nội", "hồ chí minh", "kiên giang", "đà nẵng", "quảng ninh",
+                "nghệ an", "bình định", "hải phòng", "lâm đồng", "đồng nai"]
+
+@require_GET
+def check_flight(request):
+    session_key = request.session.session_key
+    selected_province = cache.get(f'selected_province_{session_key}', '').strip().lower()
+
+    if not selected_province:
+        return JsonResponse({
+            "error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."
+        }, status=400)
+    has_airport = selected_province in [province.lower() for province in air_province]
+
+    if has_airport:
+        message = f"'{selected_province.title()}' có sân bay. Bạn có thể đặt vé máy bay."
+    else:
+        message = f"'{selected_province.title()}' hiện chưa có sân bay. Vui lòng chọn dịch vụ khách sạn phù hợp."
+
+    return JsonResponse({
+        "has_airport": has_airport,
+        "message": message
+    }, status=200)
+
 # API tìm kiếm chuyến bay
 @csrf_exempt
 @require_POST
