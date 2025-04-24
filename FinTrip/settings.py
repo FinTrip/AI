@@ -11,6 +11,9 @@ DEBUG = True  # Chuyển thành False khi deploy production.
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'your-production-domain.com']
 LOGIN_URL = '/recommend/login-user/'
 
+JWT_SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+JWT_ALGORITHM = "HS256"
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -165,9 +168,13 @@ CACHES = {
 }
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BEAT_SCHEDULE = {
-    'send-reminder-every-day': {
+    'send-reminder-every-minute': {
         'task': 'Recommend.tasks.send_reminder_task',
-        'schedule': crontab(hour=0, minute=0),
+        'schedule': crontab(minute='*'),
     },
 }

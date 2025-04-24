@@ -9,6 +9,7 @@ urlpatterns = [
     path('login-user/', views.login_user, name='login_user'),
     path('delete-user/', views.delete_user, name='delete_user'),
     path('update-user/', views.update_user, name='update_user'),
+    path('verify-token/', views.verify_token, name='verify_token'),
 
     #Recommend travel
     path('set-province/', views.set_province, name='set_province'),

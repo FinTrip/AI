@@ -3,6 +3,7 @@ import jwt
 import re
 from datetime import datetime
 from django.http import JsonResponse
+import bcrypt
 
 MYSQL_HOST = settings.DATABASES['default']['HOST']
 MYSQL_USER = settings.DATABASES['default']['USER']
@@ -18,11 +19,13 @@ def validate_request(data, *required_fields):
             return False, f"Thiếu trường bắt buộc: {field}"
     return True, None
 
-def check_password(plain_password: str, jwt_hashed: str) -> bool:
+def check_password(plain_password: str, hashed_password: str) -> bool:
     try:
-        payload = jwt.decode(jwt_hashed, PASSWORD_SECRET, algorithms=["HS256"])
-        return payload.get("password") == plain_password
-    except jwt.InvalidTokenError:
+        plain_password_bytes = plain_password.encode('utf-8')
+        hashed_password_bytes = hashed_password.encode('utf-8') if isinstance(hashed_password, str) else hashed_password
+        return bcrypt.checkpw(plain_password_bytes, hashed_password_bytes)
+    except Exception as e:
+        print(f"Error checking password: {str(e)}")
         return False
 
 

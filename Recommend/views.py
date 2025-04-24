@@ -6,21 +6,20 @@ from django.core.cache import cache
 import pandas as pd
 import uuid
 import traceback
-from datetime import datetime, date
+from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST, require_GET
-from rest_framework import status
 from django.conf import settings
 import MySQLdb
-import jwt
 import logging
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
+import jwt
+from dotenv import load_dotenv
 
 from .CheckException import validate_request, check_missing_fields, check_field_length, check_province_format, check_date_format, check_date_logic
 from .flight import search_flight_service
@@ -31,6 +30,8 @@ from .weather import display_forecast, get_weather
 
 # Thiết lập logging
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 # Cấu hình MySQL từ settings.py
 MYSQL_HOST = settings.DATABASES['default']['HOST']
@@ -85,14 +86,14 @@ def create_user(request):
         cursor = db.cursor()
 
         # Kiểm tra role_id có tồn tại trong bảng Roles
-        cursor.execute("SELECT id FROM Roles WHERE id = %s", [int(role_id)])
+        cursor.execute("SELECT id FROM roles WHERE id = %s", [int(role_id)])
         if not cursor.fetchone():
             cursor.close()
             db.close()
             return JsonResponse({"error": "Role ID không tồn tại"}, status=400)
 
         # Kiểm tra email trùng lặp trong bảng Users
-        cursor.execute("SELECT id FROM Users WHERE email = %s", [email])
+        cursor.execute("SELECT id FROM users WHERE email = %s", [email])
         if cursor.fetchone():
             cursor.close()
             db.close()
@@ -111,7 +112,7 @@ def create_user(request):
         # Mã hóa mật khẩu cho bảng Users
         hashed_password = hash_password(password)
         cursor.execute(
-            "INSERT INTO Users (id, email, password, full_name, status, role_id) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO users (id, email, password, full_name, status, role_id) VALUES (%s, %s, %s, %s, %s, %s)",
             [django_user_id, email, hashed_password, full_name, status, int(role_id)]
         )
         db.commit()
@@ -152,13 +153,13 @@ def delete_user(request):
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
 
-        cursor.execute("SELECT id FROM Users WHERE id = %s", [user_id])
+        cursor.execute("SELECT id FROM users WHERE id = %s", [user_id])
         if not cursor.fetchone():
             cursor.close()
             db.close()
             return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
 
-        cursor.execute("DELETE FROM Users WHERE id = %s", [user_id])
+        cursor.execute("DELETE FROM users WHERE id = %s", [user_id])
         db.commit()
 
         try:
@@ -213,7 +214,7 @@ def update_user(request):
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
 
-        cursor.execute("SELECT email, password, full_name, status, role_id FROM Users WHERE id = %s", [user_id])
+        cursor.execute("SELECT email, password, full_name, status, role_id FROM users WHERE id = %s", [user_id])
         user = cursor.fetchone()
         if not user:
             cursor.close()
@@ -228,7 +229,7 @@ def update_user(request):
                 cursor.close()
                 db.close()
                 return JsonResponse({"error": "Email không hợp lệ."}, status=400)
-            cursor.execute("SELECT id FROM Users WHERE email = %s AND id != %s", [email, user_id])
+            cursor.execute("SELECT id FROM users WHERE email = %s AND id != %s", [email, user_id])
             if cursor.fetchone():
                 cursor.close()
                 db.close()
@@ -260,7 +261,7 @@ def update_user(request):
         if role_id is not None:
             try:
                 role_id = int(role_id)
-                cursor.execute("SELECT id FROM Roles WHERE id = %s", [role_id])
+                cursor.execute("SELECT id FROM roles WHERE id = %s", [role_id])
                 if not cursor.fetchone():
                     cursor.close()
                     db.close()
@@ -273,7 +274,7 @@ def update_user(request):
             role_id = current_role_id
 
         sql = """
-            UPDATE Users 
+            UPDATE users 
             SET email = %s, password = %s, full_name = %s, status = %s, role_id = %s
             WHERE id = %s
         """
@@ -327,28 +328,56 @@ def login_user(request):
         return JsonResponse({"message": "Vui lòng sử dụng phương thức POST để đăng nhập"}, status=200)
     elif request.method == 'POST':
         try:
+            logger.debug(f"Raw request body: {request.body}")
             data = json.loads(request.body)
+            logger.debug(f"Parsed JSON: {data}")
+
+            # Kiểm tra dữ liệu đầu vào
+            is_valid, error_message = validate_request(data, 'email', 'password')
+            if not is_valid:
+                logger.debug(f"Validation error: {error_message}")
+                return JsonResponse({"error": error_message}, status=400)
+
             email = data.get("email", "").strip()
             password = data.get("password", "").strip()
+            logger.debug(f"Attempting login for email: {email}, password: {'*' * len(password) if password else 'empty'}")
 
-            logger.debug(f"Attempting login for email: {email}")
-            if not email or not password:
-                return JsonResponse({"error": "Thiếu email hoặc password"}, status=400)
-
-            db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                                 db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+            # Kết nối MySQL
+            db = MySQLdb.connect(
+                host='localhost',
+                user='root',
+                passwd='123456',
+                db='fintripp',
+                port=3306,
+                charset='utf8mb4'
+            )
             cursor = db.cursor()
-            cursor.execute("SELECT id, password FROM Users WHERE email = %s", [email])
+            logger.debug("Database connected")
+            cursor.execute("SELECT id, password FROM users WHERE email = %s", [email])
             user = cursor.fetchone()
+            logger.debug(f"Database query result: {user}")
 
-            if not user or not check_password(password, user[1]):
+            if not user:
+                logger.debug("No user found with email")
                 cursor.close()
                 db.close()
-                return JsonResponse({"error": "Email hoặc mật khẩu không đúng"}, status=400)
+                return JsonResponse({"error": "Email không tồn tại"}, status=400)
 
-            user_id = user[0]
+            # Kiểm tra mật khẩu
+            user_id, hashed_password = user
+            if not check_password(password, hashed_password):
+                logger.debug(f"Password check failed. Input: {password}, Hashed: {hashed_password}")
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Mật khẩu không đúng"}, status=400)
+
             cursor.close()
             db.close()
+            logger.debug(f"User found with ID: {user_id}")
+
+            # Tạo JWT token
+            payload = dict(user_id=user_id, email=email, exp=datetime.datetime.utcnow() + datetime.timedelta(hours=24))
+            token = jwt.encode(payload, os.getenv("JWT_SECRET_KEY"), algorithm=os.getenv("JWT_ALGORITHM"))
 
             # Kiểm tra hoặc tạo người dùng trong auth_user
             try:
@@ -357,19 +386,72 @@ def login_user(request):
                     logger.error(f"User ID mismatch: auth_user.id={django_user.id}, Users.id={user_id}")
                     return JsonResponse({"error": "Lỗi đồng bộ người dùng, vui lòng liên hệ quản trị viên"}, status=500)
             except User.DoesNotExist:
+                logger.debug(f"Creating new Django user for email: {email}")
                 django_user = User.objects.create_user(id=user_id, username=email, email=email, password=password)
 
             login(request, django_user)
             request.session['user_id'] = user_id
             logger.debug(f"User logged in: {django_user.username}, Django User ID: {django_user.id}, Custom User ID: {user_id}")
-            return JsonResponse({"message": "Đăng nhập thành công", "user_id": user_id}, status=200)
+            return JsonResponse({
+                "message": "Đăng nhập thành công",
+                "user_id": user_id,
+                "token": token
+            }, status=200)
 
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {str(e)}")
             return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
+        except MySQLdb.Error as e:
+            logger.error(f"Database error: {str(e)}", exc_info=True)
+            return JsonResponse({"error": f"Lỗi cơ sở dữ liệu: {str(e)}"}, status=500)
         except Exception as e:
-            traceback.print_exc()
-            logger.error(f"Login error: {str(e)}")
-            return JsonResponse({"error": str(e)}, status=500)
+            logger.error(f"Unexpected error: {str(e)}", exc_info=True)
+            return JsonResponse({"error": f"Lỗi không xác định: {str(e)}"}, status=500)
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def verify_token(request):
+    try:
+        data = json.loads(request.body)
+        token = data.get("token", "").strip()
+
+        if not token:
+            return JsonResponse({"error": "Thiếu token"}, status=400)
+
+        # Giải mã token
+        payload = jwt.decode(token, os.getenv("JWT_SECRET_KEY"), algorithms=[os.getenv("JWT_ALGORITHM")])
+        email = payload.get("email")
+        if not email:
+            return JsonResponse({"error": "Token không hợp lệ"}, status=400)
+
+        # Truy vấn người dùng bằng email
+        db = MySQLdb.connect(host='localhost', user='root', passwd='123456', db='fintripp', port=3306, charset='utf8mb4')
+        cursor = db.cursor()
+        cursor.execute("SELECT id FROM users WHERE email = %s", [email])
+        user = cursor.fetchone()
+        cursor.close()
+        db.close()
+
+        if not user:
+            return JsonResponse({"error": "Người dùng không tồn tại"}, status=400)
+
+        user_id = user[0]
+
+        # Trả về phản hồi thành công
+        return JsonResponse({"message": "Xác thực token thành công", "user_id": user_id}, status=200)
+
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({"error": "Token đã hết hạn"}, status=401)
+    except jwt.InvalidTokenError:
+        return JsonResponse({"error": "Token không hợp lệ"}, status=401)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
+    except MySQLdb.Error as e:
+        return JsonResponse({"error": f"Lỗi cơ sở dữ liệu: {str(e)}"}, status=500)
+    except Exception as e:
+        return JsonResponse({"error": f"Lỗi không xác định: {str(e)}"}, status=500)
+
+
 
 # Hàm đăng xuất người dùng
 @csrf_exempt
@@ -445,9 +527,9 @@ def set_province(request):
         if error_response:
             return error_response
 
-        request.session['selected_province'] = province
-        request.session.modified = True
-        logger.info(f"Province saved to session: {province}")
+        cache_key = f'selected_province_{request.session.session_key}'
+        cache.set(cache_key, province, timeout=3600)
+        logger.info(f"Province saved to cache: {province}")
         return JsonResponse({"message": "Tỉnh đã được lưu."}, status=200)
     except json.JSONDecodeError:
         logger.error("Invalid JSON in set_province")
@@ -484,10 +566,10 @@ def set_dates(request):
         if error_response:
             return error_response
 
-        request.session['start_day'] = start_day
-        request.session['end_day'] = end_day
-        request.session.modified = True
-        logger.info(f"Dates saved to session: start_day={start_day}, end_day={end_day}")
+        cache_key_prefix = request.session.session_key
+        cache.set(f'start_day_{cache_key_prefix}', start_day, timeout=3600)
+        cache.set(f'end_day_{cache_key_prefix}', end_day, timeout=3600)
+        logger.info(f"Dates saved to cache: start_day={start_day}, end_day={end_day}")
         return JsonResponse({"message": "Ngày đã được lưu."}, status=200)
     except json.JSONDecodeError:
         logger.error("Invalid JSON in set_dates")
@@ -499,9 +581,10 @@ def set_dates(request):
 def rcm_flight(request):
     try:
         data = json.loads(request.body)
+        cache_key_prefix = request.session.session_key
         origin = data.get("origin", "").strip()
-        destination = data.get("destination", request.session.get('selected_province', '')).strip()
-        departure_date = data.get("departure_date", request.session.get('start_day', '')).strip()
+        destination = data.get("destination", cache.get(f'selected_province_{cache_key_prefix}', '')).strip()
+        departure_date = data.get("departure_date", cache.get(f'start_day_{cache_key_prefix}', '')).strip()
 
         if not origin or not destination or not departure_date:
             return JsonResponse({"error": "Thiếu trường bắt buộc: origin, destination, departure_date"}, status=400)
@@ -537,7 +620,7 @@ def select_flight(request):
             return JsonResponse({"error": "Missing flight info"}, status=400)
 
         cache_key = f'selected_flight_{request.session.session_key}'
-        cache.set(cache_key, flight_info, timeout=3600)  # Now uses correct cache object
+        cache.set(cache_key, flight_info, timeout=3600)
         logger.info(f"Flight saved to cache: {flight_info}")
         return JsonResponse({"message": "Flight selected successfully"}, status=200)
     except json.JSONDecodeError:
@@ -554,7 +637,8 @@ def select_flight(request):
 def rcm_hotel(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
-        search_term = data.get("destination", request.session.get('selected_province', '')).strip()
+        cache_key_prefix = request.session.session_key
+        search_term = data.get("destination", cache.get(f'selected_province_{cache_key_prefix}', '')).strip()
 
         if not search_term:
             return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
@@ -591,7 +675,7 @@ def select_hotel(request):
             return JsonResponse({"error": "Missing hotel info"}, status=400)
 
         cache_key = f'selected_hotel_{request.session.session_key}'
-        cache.set(cache_key, hotel_info, timeout=3600)  # Now uses correct cache object
+        cache.set(cache_key, hotel_info, timeout=3600)
         logger.info(f"Hotel saved to cache: {hotel_info}")
         return JsonResponse({"message": "Hotel selected successfully"}, status=200)
     except json.JSONDecodeError:
@@ -608,9 +692,10 @@ def select_hotel(request):
 def recommend_travel_schedule(request):
     try:
         data = json.loads(request.body)
-        province = data.get('province', request.session.get('selected_province', ''))
-        start_day = data.get('start_day', request.session.get('start_day', ''))
-        end_day = data.get('end_day', request.session.get('end_day', ''))
+        cache_key_prefix = request.session.session_key
+        province = data.get('province', cache.get(f'selected_province_{cache_key_prefix}', ''))
+        start_day = data.get('start_day', cache.get(f'start_day_{cache_key_prefix}', ''))
+        end_day = data.get('end_day', cache.get(f'end_day_{cache_key_prefix}', ''))
         flight_info = data.get('flight_info', None)
         hotel_info = data.get('hotel_info', None)
 
@@ -618,7 +703,6 @@ def recommend_travel_schedule(request):
             logger.error("Missing required fields in travel_schedule")
             return JsonResponse({"error": "Thiếu thông tin tỉnh, ngày đi hoặc ngày về"}, status=400)
 
-        cache_key_prefix = request.session.session_key
         if flight_info:
             cache.set(f'selected_flight_{cache_key_prefix}', flight_info, timeout=3600)
             logger.info(f"Flight info updated in cache: {flight_info}")
@@ -997,101 +1081,170 @@ def save_schedule(request):
         )
         cursor = db.cursor()
 
-        cursor.execute("SELECT id FROM Users WHERE id = %s", [user_id])
-        user = cursor.fetchone()
-        if not user:
+        # Kiểm tra người dùng tồn tại
+        cursor.execute("SELECT id FROM users WHERE id = %s", [user_id])
+        if not cursor.fetchone():
             return JsonResponse({"error": "Không tìm thấy thông tin người dùng"}, status=404)
 
+        # Lấy dữ liệu từ request
         schedule_name = data.get("schedule_name", "Lịch trình của tôi").strip()
         days_data = data.get("days", [])
+        hotel_data = data.get("hotel", {})
+        flight_data = data.get("flight", {})
 
-        if not days_data:
-            return JsonResponse({"error": "Danh sách ngày (days) không được rỗng"}, status=400)
+        if not days_data or not isinstance(days_data, list):
+            return JsonResponse({"error": "Danh sách ngày (days) không được rỗng và phải là danh sách"}, status=400)
 
-        cursor.execute("INSERT INTO Schedules (user_id, name) VALUES (%s, %s)", [user_id, schedule_name])
+        # Chèn lịch trình vào bảng schedules
+        cursor.execute("INSERT INTO schedules (user_id, name) VALUES (%s, %s)", [user_id, schedule_name])
         schedule_id = cursor.lastrowid
 
-        # Lấy ngày bắt đầu từ ngày đầu tiên
-        start_date = None
-        for day in sorted(days_data, key=lambda x: x.get("day_index", 1)):
-            date_str = day.get("date_str", "")
-            date_match = re.search(r'\((\d{4}-\d{2}-\d{2})\)', date_str)
-            if date_match:
-                date_str = date_match.group(1)
+        # flight: flight ? {
+        #     outbound_flight_code: flight.outbound_flight_code,
+        #     outbound_time: flight.outbound_time,
+        #     cabin: flight.cabin,
+        #     base_price_vnd: flight.base_price_vnd,
+        #     total_price_vnd: flight.total_price_vnd,
+        #     fare_basis: flight.fare_basis,
+        # }: null,
+
+        if flight_data and isinstance(flight_data, dict):
+            cabin = flight_data.get("cabin", "")
+            fare_basis = flight_data.get("fare_basis", "")
+            flight_code = flight_data.get("outbound_flight_code", "")
+            departure_time_str = flight_data.get("outbound_time", "")
+            total_price_str = flight_data.get("total_price_vnd", "")
+
+            # Chuyển đổi departure_time
+            departure_time = None
+            if departure_time_str:
+                try:
+                    departure_time = datetime.strptime(departure_time_str, "%Y-%m-%dT%H:%M:%S")
+                except ValueError:
+                    logger.error(f"Định dạng outbound_time không hợp lệ: {departure_time_str}")
+
+
+
+            # Chuyển đổi total_price
+            total_price = None
+            if total_price_str:
+                try:
+                    total_price = float(total_price_str.replace(" VNĐ", "").replace(",", ""))
+                except ValueError:
+                    logger.error(f"Định dạng total_price_vnd không hợp lệ: {total_price_str}")
+            cursor.execute(
+                """
+                INSERT INTO flights (schedule_id, fare_basis, cabin, flight_code, departure_time, total_price, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
+                """,
+                [schedule_id, fare_basis, cabin, flight_code, departure_time, total_price]
+            )
+
+        # Xử lý và chèn dữ liệu khách sạn nếu có
+        if hotel_data and isinstance(hotel_data, dict):
+            name = hotel_data.get("name", "")
+            price_str = hotel_data.get("price", "")
+            location_rating_str = hotel_data.get("location_rating", "")
+
+            # Chuyển đổi price
+            price = None
+            if price_str:
+                try:
+                    price = float(price_str.replace(",", ""))
+                except ValueError:
+                    logger.error(f"Định dạng price không hợp lệ: {price_str}")
+
+            # Chuyển đổi location_rating
+            location_rating = None
+            if location_rating_str:
+                try:
+                    location_rating = float(location_rating_str)
+                except ValueError:
+                    logger.error(f"Định dạng location_rating không hợp lệ: {location_rating_str}")
+
+            if name:
+                cursor.execute(
+                    """
+                    INSERT INTO hotels (schedule_id, name, address, description, price, hotel_class, 
+                                       img_origin, location_rating, link, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
+                    """,
+                    [
+                        schedule_id,
+                        name,
+                        hotel_data.get("address", ""),
+                        hotel_data.get("description", ""),
+                        price,
+                        hotel_data.get("hotel_class", ""),
+                        hotel_data.get("img_origin", ""),
+                        location_rating,
+                        hotel_data.get("link", "")
+                    ]
+                )
             else:
-                date_str = date_str[:10]
-            if not start_date:
-                start_date = date_str
-            cursor.execute("INSERT INTO Days (schedule_id, day_index, date_str) VALUES (%s, %s, %s)",
-                           [schedule_id, day.get("day_index", 1), date_str])
+                logger.error("Thiếu tên khách sạn trong hotel_data")
+
+        # Chèn dữ liệu các ngày và lịch trình
+        for day in days_data:
+            date_str = day.get("date_str", "").strip()
+            if not date_str:
+                return JsonResponse({"error": "date_str không được rỗng"}, status=400)
+            try:
+                parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                date_str = parsed_date.strftime("%Y-%m-%d")
+            except ValueError:
+                return JsonResponse({"error": f"Định dạng date_str không hợp lệ: {date_str}"}, status=400)
+
+            cursor.execute(
+                "INSERT INTO days (schedule_id, day_index, date_str) VALUES (%s, %s, %s)",
+                [schedule_id, day.get("day_index", 0), date_str]
+            )
             day_id = cursor.lastrowid
 
-            itinerary_list = day.get("itinerary", [])
-            if not isinstance(itinerary_list, list):
-                return JsonResponse({"error": "Itinerary phải là một danh sách"}, status=400)
-
-            for item in itinerary_list:
-                food_title = item.get("food_title")
-                place_title = item.get("place_title")
-                hotel_name = item.get("hotel_name")
-                if not (food_title and food_title.strip()) and \
-                   not (place_title and place_title.strip()) and \
-                   not (hotel_name and hotel_name.strip()):
+            for item in day.get("itinerary", []):
+                if not isinstance(item, dict):
                     continue
-
-                # Lấy food_time và place_time, cắt bớt nếu cần
-                food_time = item.get("food_time", "")[:255] if item.get("food_time") else None
-                place_time = item.get("place_time", "")[:255] if item.get("place_time") else None
+                food_title = item.get("food_title", "").strip()
+                place_title = item.get("place_title", "").strip()
+                if not food_title and not place_title:
+                    continue
 
                 cursor.execute(
                     """
-                    INSERT INTO Itineraries (
+                    INSERT INTO itineraries (
                         day_id, timeslot, food_title, food_rating, food_price, food_address, 
                         food_phone, food_link, food_image, place_title, place_rating, 
                         place_description, place_address, place_img, place_link, 
-                        hotel_name, hotel_link, hotel_description, hotel_price, 
-                        hotel_class, hotel_img_origin, hotel_location_rating, `order`,
-                        food_time, place_time
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        `order`, food_time, place_time
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     [
                         day_id,
                         item.get("timeslot", "")[:20],
-                        item.get("food_title", "")[:100],
+                        food_title[:100],
                         item.get("food_rating"),
-                        item.get("food_price", "")[:50],
+                        str(item.get("food_price", ""))[:50],
                         item.get("food_address", "")[:200],
                         item.get("food_phone", "")[:20],
                         item.get("food_link", "")[:255],
                         item.get("food_image", "")[:255],
-                        item.get("place_title", "")[:100],
+                        place_title[:100],
                         item.get("place_rating"),
-                        item.get("place_description"),
+                        item.get("place_description", ""),
                         item.get("place_address", "")[:200],
                         item.get("place_img", "")[:255],
                         item.get("place_link", "")[:255],
-                        item.get("hotel_name", "")[:100],
-                        item.get("hotel_link", "")[:255],
-                        item.get("hotel_description"),
-                        item.get("hotel_price", "")[:50],
-                        item.get("hotel_class", "")[:20],
-                        item.get("hotel_img_origin", "")[:255],
-                        item.get("hotel_location_rating"),
-                        item.get("order"),
-                        food_time,
-                        place_time
+                        item.get("order", 0),
+                        item.get("food_time", "")[:255] if item.get("food_time") else None,
+                        item.get("place_time", "")[:255] if item.get("place_time") else None
                     ]
                 )
 
-        # Lưu start_day vào session
-        if start_date:
-            request.session['start_day'] = start_date
-            request.session.modified = True
-
+        # Tạo và lưu share_link
         share_token = str(uuid.uuid4()).lower()
-        share_link = f"http://{request.get_host()}/recommend/view-schedule/{share_token}/"
+        share_link = f"{request.scheme}://{request.get_host()}/recommend/view-schedule/{share_token}/"
         cursor.execute(
-            "INSERT INTO SharedLinks (schedule_id, share_link) VALUES (%s, %s)",
+            "INSERT INTO sharedlinks (schedule_id, share_link, created_at) VALUES (%s, %s, NOW())",
             [schedule_id, share_link]
         )
 
@@ -1104,15 +1257,16 @@ def save_schedule(request):
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ"}, status=400)
+    except ValueError as ve:
+        return JsonResponse({"error": f"Lỗi dữ liệu: {str(ve)}"}, status=400)
     except Exception as e:
         traceback.print_exc()
-        return JsonResponse({"error": "Lỗi không xác định"}, status=500)
+        return JsonResponse({"error": f"Lỗi không xác định: {str(e)}"}, status=500)
     finally:
-        if 'cursor' in locals() and cursor:
+        if cursor:
             cursor.close()
-        if 'db' in locals() and db and db.open:
+        if db and db.open:
             db.close()
-
 
 @csrf_exempt
 @require_POST
@@ -1139,23 +1293,23 @@ def share_schedule(request):
         )
         cursor = db.cursor()
 
-        # Verify schedule exists and belongs to user
-        cursor.execute("SELECT user_id FROM Schedules WHERE id = %s", [schedule_id])
+        # Kiểm tra quyền chia sẻ
+        cursor.execute("SELECT user_id FROM schedules WHERE id = %s", [schedule_id])
         result = cursor.fetchone()
         if not result or result[0] != user_id:
             return JsonResponse({"error": "Không có quyền chia sẻ"}, status=403)
 
-        # Check for existing share link
-        cursor.execute("SELECT share_link FROM SharedLinks WHERE schedule_id = %s", [schedule_id])
+        # Kiểm tra liên kết chia sẻ đã tồn tại chưa
+        cursor.execute("SELECT share_link FROM sharedlinks WHERE schedule_id = %s", [schedule_id])
         existing_link = cursor.fetchone()
         if existing_link:
             return JsonResponse({"message": "Liên kết đã tồn tại", "share_link": existing_link[0]}, status=200)
 
-        # Generate new share link with lowercase UUID and correct path
+        # Tạo và chèn liên kết chia sẻ mới
         share_token = str(uuid.uuid4()).lower()
         share_link = f"http://{request.get_host()}/recommend/view-schedule/{share_token}/"
         cursor.execute(
-            "INSERT INTO SharedLinks (schedule_id, share_link) VALUES (%s, %s)",
+            "INSERT INTO sharedlinks (schedule_id, share_link) VALUES (%s, %s)",
             [schedule_id, share_link]
         )
         db.commit()
@@ -1167,17 +1321,18 @@ def share_schedule(request):
     except MySQLdb.IntegrityError:
         return JsonResponse({"error": "Liên kết chia sẻ đã tồn tại"}, status=409)
     except MySQLdb.Error:
-        if 'db' in locals() and db:
+        if db:
             db.rollback()
         return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
     except Exception:
         traceback.print_exc()
         return JsonResponse({"error": "Lỗi không xác định"}, status=500)
     finally:
-        if 'cursor' in locals() and cursor:
+        if cursor:
             cursor.close()
-        if 'db' in locals() and db and db.open:
+        if db and db.open:
             db.close()
+
 
 @csrf_exempt
 @require_POST
@@ -1207,35 +1362,30 @@ def share_schedule_via_email(request):
         )
         cursor = db.cursor()
 
-        # Verify schedule exists and belongs to user
-        cursor.execute("SELECT user_id FROM Schedules WHERE id = %s", [schedule_id])
+        cursor.execute("SELECT user_id FROM schedules WHERE id = %s", [schedule_id])
         result = cursor.fetchone()
         if not result or result[0] != user_id:
             return JsonResponse({"error": "Không có quyền chia sẻ"}, status=403)
 
-        # Get full_name from Users table
-        cursor.execute("SELECT full_name FROM Users WHERE id = %s", [user_id])
+        cursor.execute("SELECT full_name FROM users WHERE id = %s", [user_id])
         user_result = cursor.fetchone()
         if not user_result:
             return JsonResponse({"error": "Người dùng không tồn tại"}, status=404)
         full_name = user_result[0]
 
-        # Check for existing share link
-        cursor.execute("SELECT share_link FROM SharedLinks WHERE schedule_id = %s", [schedule_id])
+        cursor.execute("SELECT share_link FROM sharedLinks WHERE schedule_id = %s", [schedule_id])
         existing_link = cursor.fetchone()
         if existing_link:
             share_link = existing_link[0]
         else:
-            # Generate new share link with lowercase UUID and correct path
             share_token = str(uuid.uuid4()).lower()
             share_link = f"http://{request.get_host()}/recommend/view-schedule/{share_token}/"
             cursor.execute(
-                "INSERT INTO SharedLinks (schedule_id, share_link) VALUES (%s, %s)",
+                "INSERT INTO sharedLinks (schedule_id, share_link) VALUES (%s, %s)",
                 [schedule_id, share_link]
             )
             db.commit()
 
-        # Send email using Gmail SMTP settings from settings.py
         subject = 'Lịch trình du lịch được chia sẻ từ FinTrip'
         message = f'''Xin chào,
 
@@ -1261,17 +1411,16 @@ Trân trọng,
     except MySQLdb.IntegrityError:
         return JsonResponse({"error": "Liên kết chia sẻ đã tồn tại"}, status=409)
     except MySQLdb.Error:
-        if 'db' in locals() and db:
+        if db:
             db.rollback()
         return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
     except Exception as e:
         return JsonResponse({"error": f"Lỗi không xác định: {str(e)}"}, status=500)
     finally:
-        if 'cursor' in locals() and cursor:
+        if cursor:
             cursor.close()
-        if 'db' in locals() and db and db.open:
+        if db and db.open:
             db.close()
-
 
 @require_GET
 def view_schedule(request, share_token):
@@ -1286,50 +1435,40 @@ def view_schedule(request, share_token):
             port=MYSQL_PORT,
             charset=MYSQL_CHARSET
         )
-
         cursor = db.cursor()
 
-        # Normalize share_token to lowercase
         share_token = share_token.lower()
-
-        # Construct the expected share_link directly
         share_link_with_slash = f"http://127.0.0.1:8000/recommend/view-schedule/{share_token}/"
         share_link_without_slash = f"http://127.0.0.1:8000/recommend/view-schedule/{share_token}"
 
-        # Case-insensitive lookup
         cursor.execute(
             """
-            SELECT schedule_id FROM SharedLinks 
+            SELECT schedule_id FROM sharedLinks 
             WHERE LOWER(share_link) = LOWER(%s) OR LOWER(share_link) = LOWER(%s)
             """,
             [share_link_with_slash, share_link_without_slash]
         )
         result = cursor.fetchone()
-        if result:
-            schedule_id = result[0]
-        else:
+        if not result:
             return JsonResponse({"error": "Liên kết chia sẻ không hợp lệ"}, status=404)
+        schedule_id = result[0]
 
-        # Fetch schedule details
-        cursor.execute("SELECT name FROM Schedules WHERE id = %s", [schedule_id])
+        cursor.execute("SELECT name FROM schedules WHERE id = %s", [schedule_id])
         schedule = cursor.fetchone()
         if not schedule:
             return JsonResponse({"error": "Lịch trình không tồn tại"}, status=404)
 
-        # Fetch flight details if exists
-        cursor.execute("SELECT * FROM Flights WHERE schedule_id = %s", [schedule_id])
+        cursor.execute("SELECT id, departure, arrival FROM flights WHERE schedule_id = %s", [schedule_id])
         flight = cursor.fetchone()
         flight_data = None
         if flight:
-            flight_data = {
-                "flight_id": flight[0],
-                "departure": flight[1],
-                "arrival": flight[2],
-                # Add other flight fields as needed
-            }
+            flight_data = {"flight_id": flight[0], "departure": flight[1], "arrival": flight[2]}
 
-        # Fetch hotel details if exists
-        cursor.execute("SELECT * FROM Hotels WHERE schedule_id = %s", [schedule_id])
+        cursor.execute(
+            "SELECT id, name, address, description, price, hotel_class, img_origin, location_rating, link "
+            "FROM hotels WHERE schedule_id = %s",
+            [schedule_id]
+        )
         hotel = cursor.fetchone()
         hotel_data = None
         if hotel:
@@ -1337,55 +1476,58 @@ def view_schedule(request, share_token):
                 "hotel_id": hotel[0],
                 "name": hotel[1],
                 "address": hotel[2],
-                # Add other hotel fields as needed
+                "description": hotel[3],
+                "price": hotel[4],
+                "hotel_class": hotel[5],
+                "img_origin": hotel[6],
+                "location_rating": hotel[7],
+                "link": hotel[8]
             }
 
-        # Fetch days
-        cursor.execute("SELECT id, day_index, date_str FROM Days WHERE schedule_id = %s ORDER BY day_index", [schedule_id])
+        cursor.execute("SELECT id, day_index, date_str FROM days WHERE schedule_id = %s ORDER BY day_index", [schedule_id])
         days = cursor.fetchall()
 
-        # Construct schedule data
-        schedule_data = {
-            "name": schedule[0],
-            "days": []
-        }
+        schedule_data = {"name": schedule[0], "days": []}
         for day in days:
             day_id, day_index, date_str = day
-            cursor.execute("SELECT * FROM Itineraries WHERE day_id = %s ORDER BY `order`", [day_id])
+            cursor.execute(
+                """
+                SELECT id, timeslot, food_title, food_rating, food_price, food_address, food_phone, 
+                       food_link, food_image, place_title, place_rating, place_description, 
+                       place_address, place_img, place_link, `order`, food_time, place_time
+                FROM itineraries WHERE day_id = %s ORDER BY `order`
+                """,
+                [day_id]
+            )
             itineraries = cursor.fetchall()
             day_plan = {
                 "day_index": day_index,
                 "date_str": date_str,
                 "itineraries": [
                     {
-                        "timeslot": item[2],
-                        "food_title": item[3],
-                        "food_rating": item[4],
-                        "food_price": item[5],
-                        "food_address": item[6],
-                        "food_phone": item[7],
-                        "food_link": item[8],
-                        "food_image": item[9],
-                        "place_title": item[10],
-                        "place_rating": item[11],
-                        "place_description": item[12],
-                        "place_address": item[13],
-                        "place_img": item[14],
-                        "place_link": item[15],
-                        "hotel_name": item[16],
-                        "hotel_link": item[17],
-                        "hotel_description": item[18],
-                        "hotel_price": item[19],
-                        "hotel_class": item[20],
-                        "hotel_img_origin": item[21],
-                        "hotel_location_rating": item[22],
-                        "order": item[23]
+                        "id": item[0],
+                        "timeslot": item[1],
+                        "food_title": item[2],
+                        "food_rating": item[3],
+                        "food_price": item[4],
+                        "food_address": item[5],
+                        "food_phone": item[6],
+                        "food_link": item[7],
+                        "food_image": item[8],
+                        "place_title": item[9],
+                        "place_rating": item[10],
+                        "place_description": item[11],
+                        "place_address": item[12],
+                        "place_img": item[13],
+                        "place_link": item[14],
+                        "order": item[15],
+                        "food_time": item[16],
+                        "place_time": item[17]
                     } for item in itineraries
                 ]
             }
             schedule_data["days"].append(day_plan)
 
-        # Construct response data
         response_data = {}
         if flight_data:
             response_data["flight"] = flight_data
@@ -1401,9 +1543,9 @@ def view_schedule(request, share_token):
         traceback.print_exc()
         return JsonResponse({"error": "Lỗi không xác định"}, status=500)
     finally:
-        if 'cursor' in locals() and cursor:
+        if cursor:
             cursor.close()
-        if 'db' in locals() and db and db.open:
+        if db and db.open:
             db.close()
 
 
@@ -1504,7 +1646,9 @@ def create_todolist_activity(request):
         date_activities_str = data.get("date_activities", "").strip()
         status = data.get("status", 0)  # 0: chưa làm, 1: đã làm
         itinerary_id = data.get("itinerary_id")
-        date_plan_str = data.get("date_plan",request.session.get('start_day', '')).strip()
+        cache_key_prefix = request.session.session_key
+        date_plan_str = data.get("date_plan", cache.get(f'start_day_{cache_key_prefix}', '')).strip()
+
         if not note_activities:
             return JsonResponse({"error": "Thiếu trường note_activities"}, status=400)
 
@@ -1547,12 +1691,12 @@ def create_todolist_activity(request):
                     db.close()
                     return JsonResponse({"error": "Định dạng date_plan không hợp lệ"}, status=400)
             else:
-                # Lấy từ session sau khi save plan
-                start_day = request.session.get('start_day')
+                # Lấy từ cache sau khi save plan
+                start_day = cache.get(f'start_day_{cache_key_prefix}')
                 if not start_day:
                     cursor.close()
                     db.close()
-                    return JsonResponse({"error": "Không tìm thấy ngày bắt đầu trong session"}, status=400)
+                    return JsonResponse({"error": "Không tìm thấy ngày bắt đầu trong cache"}, status=400)
                 date_plan = datetime.strptime(start_day, "%Y-%m-%d").date()
 
             if date_activities_str:
@@ -1628,5 +1772,3 @@ def get_todolist_activities(request):
         traceback.print_exc()
         logger.error(f"Error in get_todolist_activities: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
-
-

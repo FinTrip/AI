@@ -3,7 +3,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
 # Đường dẫn tới thư mục mô hình
-MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model', 'model')
+MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model', '')
 
 # Lịch sử hội thoại toàn cục (có thể thay bằng cơ chế lưu trữ khác nếu cần)
 conversation_history = []
