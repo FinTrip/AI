@@ -1680,92 +1680,92 @@ def create_todolist_activity(request):
     try:
         data = json.loads(request.body)
         user_id = data.get("user_id")
+
         if not user_id:
             return JsonResponse({"error": "Thiếu user_id trong yêu cầu"}, status=400)
 
-        note_activities = data.get("note_activities", "").strip()
-        description = data.get("description", "").strip()
-        date_activities_str = data.get("date_activities", "").strip()
-        status = data.get("status", 0)  # 0: chưa làm, 1: đã làm
-        itinerary_id = data.get("itinerary_id")
-        cache_key_prefix = request.session.session_key
-        date_plan_str = data.get("date_plan", cache.get(f'start_day_{cache_key_prefix}', '')).strip()
-
-        if not note_activities:
-            return JsonResponse({"error": "Thiếu trường note_activities"}, status=400)
+        # Kiểm tra xem payload có chứa mảng activities hay không
+        if "activities" in data:
+            activities = data["activities"]
+            if not activities:
+                return JsonResponse({"error": "Không có hoạt động nào để lưu"}, status=400)
+        else:
+            # Kiểm tra xem payload có chứa các trường của một hoạt động hay không
+            required_fields = ["note_activities"]
+            if all(field in data for field in required_fields):
+                activities = [data]
+            else:
+                return JsonResponse({"error": "Không có hoạt động nào để lưu"}, status=400)
 
         db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
 
-        # Xử lý date_plan và date_activities
-        if itinerary_id:
-            # Trường hợp liên kết với itinerary
-            cursor.execute("SELECT day_id FROM itineraries WHERE id = %s", [itinerary_id])
-            day_id = cursor.fetchone()
-            if not day_id:
-                cursor.close()
-                db.close()
-                return JsonResponse({"error": "Itinerary không tồn tại"}, status=404)
-            day_id = day_id[0]
+        for activity in activities:
+            note_activities = activity.get("note_activities", "").strip()
+            description = activity.get("description", "").strip()
+            date_activities_str = activity.get("date_activities", "").strip()
+            status = activity.get("status", 0)
+            itinerary_id = activity.get("itinerary_id", None)
+            date_plan_str = activity.get("date_plan", "").strip()
 
-            cursor.execute("SELECT schedule_id, date_str FROM days WHERE id = %s", [day_id])
-            result = cursor.fetchone()
-            if not result:
-                cursor.close()
-                db.close()
-                return JsonResponse({"error": "Ngày không tồn tại"}, status=404)
-            schedule_id, date_str = result
-            date_activities = date_str
+            if not note_activities:
+                continue  # Bỏ qua nếu thiếu note_activities
 
-            # Lấy ngày bắt đầu của lịch trình
-            cursor.execute("SELECT MIN(date_str) FROM days WHERE schedule_id = %s", [schedule_id])
-            start_date = cursor.fetchone()[0]
-            date_plan = start_date
-        else:
-            # Trường hợp độc lập (từ trang chủ hoặc sau khi save plan)
-            if date_plan_str:
-                # Người dùng nhập date_plan từ trang chủ
-                try:
-                    date_plan = datetime.strptime(date_plan_str, "%Y-%m-%d").date()
-                except ValueError:
-                    cursor.close()
-                    db.close()
-                    return JsonResponse({"error": "Định dạng date_plan không hợp lệ"}, status=400)
+            # Xử lý date_plan và date_activities
+            if itinerary_id:
+                cursor.execute("SELECT day_id FROM itineraries WHERE id = %s", [itinerary_id])
+                day_id = cursor.fetchone()
+                if not day_id:
+                    continue
+                day_id = day_id[0]
+
+                cursor.execute("SELECT schedule_id, date_str FROM days WHERE id = %s", [day_id])
+                result = cursor.fetchone()
+                if not result:
+                    continue
+                schedule_id, date_str = result
+                date_activities = date_str
+
+                cursor.execute("SELECT MIN(date_str) FROM days WHERE schedule_id = %s", [schedule_id])
+                start_date = cursor.fetchone()[0]
+                date_plan = start_date
             else:
-                # Lấy từ cache sau khi save plan
-                start_day = cache.get(f'start_day_{cache_key_prefix}')
-                if not start_day:
-                    cursor.close()
-                    db.close()
-                    return JsonResponse({"error": "Không tìm thấy ngày bắt đầu trong cache"}, status=400)
-                date_plan = datetime.strptime(start_day, "%Y-%m-%d").date()
+                if date_plan_str:
+                    try:
+                        date_plan = datetime.strptime(date_plan_str, "%Y-%m-%d").date()
+                    except ValueError:
+                        continue
+                else:
+                    cache_key_prefix = request.session.session_key
+                    start_day = cache.get(f'start_day_{cache_key_prefix}')
+                    if not start_day:
+                        date_plan = datetime.now().date()
+                    else:
+                        date_plan = datetime.strptime(start_day, "%Y-%m-%d").date()
 
-            if date_activities_str:
-                try:
-                    date_activities = datetime.strptime(date_activities_str, "%Y-%m-%d").date()
-                except ValueError:
-                    cursor.close()
-                    db.close()
-                    return JsonResponse({"error": "Định dạng date_activities không hợp lệ"}, status=400)
-            else:
-                date_activities = date_plan  # Mặc định bằng date_plan nếu không cung cấp
+                if date_activities_str:
+                    try:
+                        date_activities = datetime.strptime(date_activities_str, "%Y-%m-%d").date()
+                    except ValueError:
+                        continue
+                else:
+                    date_activities = date_plan
 
-        # Chèn dữ liệu vào bảng activities
-        cursor.execute(
-            """
-            INSERT INTO activities (user_id, itinerary_id, note_activities, description, date_activities, status, date_plan)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """,
-            [user_id, itinerary_id if itinerary_id else None, note_activities, description, date_activities, status, date_plan]
-        )
+            # Chèn dữ liệu vào bảng activities
+            cursor.execute(
+                """
+                INSERT INTO activities (user_id, itinerary_id, note_activities, description, date_activities, status, date_plan)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """,
+                [user_id, itinerary_id, note_activities, description, date_activities, status, date_plan]
+            )
+
         db.commit()
-        activity_id = cursor.lastrowid
-
         cursor.close()
         db.close()
 
-        return JsonResponse({"message": "Tạo hoạt động thành công", "activity_id": activity_id}, status=201)
+        return JsonResponse({"message": "Tạo các hoạt động thành công"}, status=201)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
@@ -1813,4 +1813,123 @@ def get_todolist_activities(request):
     except Exception as e:
         traceback.print_exc()
         logger.error(f"Error in get_todolist_activities: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+@require_POST
+def update_todolist_activities(request):
+    try:
+        # Phân tích dữ liệu JSON từ request.body
+        data = json.loads(request.body)
+        activity_id = data.get("activity_id")
+        user_id = data.get("user_id")
+        note_activities = data.get("note_activities")
+        description = data.get("description")
+        date_activities = data.get("date_activities")
+        status = data.get("status")
+        date_plan = data.get("date_plan")
+
+        # Kiểm tra các trường bắt buộc
+        if not activity_id or not user_id:
+            return JsonResponse({"error": "Thiếu activity_id hoặc user_id"}, status=400)
+
+        # Kết nối cơ sở dữ liệu
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        # Kiểm tra hoạt động có tồn tại và thuộc về user không
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM activities WHERE activity_id = %s AND user_id = %s
+            """,
+            [activity_id, user_id]
+        )
+        count = cursor.fetchone()[0]
+        if count == 0:
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Hoạt động không tồn tại hoặc không thuộc về user này"}, status=404)
+
+        # Chuẩn bị câu lệnh UPDATE
+        update_fields = []
+        params = []
+
+        if note_activities is not None:
+            update_fields.append("note_activities = %s")
+            params.append(note_activities)
+        if description is not None:
+            update_fields.append("description = %s")
+            params.append(description)
+        if date_activities is not None:
+            update_fields.append("date_activities = %s")
+            params.append(date_activities)
+        if status is not None:
+            update_fields.append("status = %s")
+            params.append(status)
+        if date_plan is not None:
+            update_fields.append("date_plan = %s")
+            params.append(date_plan)
+
+        if not update_fields:
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Không có trường nào để cập nhật"}, status=400)
+
+        update_query = "UPDATE activities SET " + ", ".join(update_fields) + " WHERE activity_id = %s"
+        params.append(activity_id)
+
+        # Thực thi câu lệnh
+        cursor.execute(update_query, params)
+        db.commit()
+
+        cursor.close()
+        db.close()
+
+        return JsonResponse({"message": "Cập nhật thành công"}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ"}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in update_activity: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+@require_POST
+def delete_todolist_activities(request):
+    try:
+        data = json.loads(request.body)
+        activity_id = data.get("activity_id")
+        user_id = data.get("user_id")
+
+        if not activity_id or not user_id:
+            return JsonResponse({"error": "Thiếu activity_id hoặc user_id"}, status=400)
+
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM activities WHERE activity_id = %s AND user_id = %s
+            """,
+            [activity_id, user_id]
+        )
+        if cursor.rowcount == 0:
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Hoạt động không tồn tại hoặc không thuộc về user này"}, status=404)
+
+        db.commit()
+        cursor.close()
+        db.close()
+
+        return JsonResponse({"message": "Xóa thành công"}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ"}, status=400)
+    except Exception as e:
+        traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)

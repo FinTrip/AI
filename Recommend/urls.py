@@ -49,5 +49,7 @@ urlpatterns = [
 
     #todolist
     path('todolist-create/', views.create_todolist_activity, name='create_todolist_activity'),
-    path('todolist/', views.get_todolist_activities, name='get_todolist_activities'),
+    path('todolist-get/', views.get_todolist_activities, name='get_todolist_activities'),
+    path('todolist-update/', views.update_todolist_activities, name='get_todolist_activities'),
+    path('todolist-delete/', views.delete_todolist_activities, name='delete_todolist_activities'),
 ]
