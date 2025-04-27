@@ -3,7 +3,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
 # Đường dẫn tới thư mục mô hình
-MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model', '')
+MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model', 't5_small_model')
 
 # Lịch sử hội thoại toàn cục (có thể thay bằng cơ chế lưu trữ khác nếu cần)
 conversation_history = []
@@ -47,20 +47,20 @@ def chatbot_response(input_text):
         prompt = " ".join(conversation_history) + " Assistant:"
 
         # Mã hóa prompt
-        inputs = tokenizer.encode(prompt, return_tensors="pt", max_length=512, truncation=True)
+        inputs = tokenizer(prompt, return_tensors="pt", max_length=512, truncation=True)
 
         # Tạo phản hồi với các tham số đã điều chỉnh
         outputs = model.generate(
-            inputs,
-            max_length=100,
+            **inputs,
+            max_length=200,
             pad_token_id=tokenizer.eos_token_id,
-            no_repeat_ngram_size=2,  # Tăng lên 2 để tránh lặp từ không tự nhiên
-            temperature=0.6,  # Giảm để tăng tính chính xác
-            top_p=0.85,  # Điều chỉnh để cân bằng sáng tạo và chính xác
-            top_k=40,  # Điều chỉnh để hạn chế lựa chọn từ
+            no_repeat_ngram_size=2,
+            temperature=0.8,
+            top_p=0.85,
+            top_k=40,
             do_sample=True,
             early_stopping=True,
-            num_beams=5  # Tăng num_beams để sử dụng beam search, tránh cảnh báo
+            num_beams=5
         )
 
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)

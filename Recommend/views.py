@@ -59,264 +59,6 @@ def check_password(plain_password: str, jwt_hashed: str) -> bool:
     except jwt.InvalidTokenError:
         return False
 
-# Hàm tạo người dùng mới
-@csrf_exempt
-@require_POST
-def create_user(request):
-    """Tạo người dùng mới."""
-    try:
-        data = json.loads(request.body)
-        email = data.get("email", "").strip()
-        password = data.get("password", "").strip()
-        full_name = data.get("full_name", "").strip()
-        status = data.get("status", "active").strip()
-        role_id = data.get("role_id")
-
-        if not all([email, password, full_name, role_id]):
-            return JsonResponse({"error": "Thiếu email, password, full_name hoặc role_id"}, status=400)
-
-        if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
-            return JsonResponse({"error": "Email không hợp lệ"}, status=400)
-
-        if status not in ['active', 'inactive', 'banned']:
-            return JsonResponse({"error": "Status không hợp lệ"}, status=400)
-
-        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
-        cursor = db.cursor()
-
-        # Kiểm tra role_id có tồn tại trong bảng Roles
-        cursor.execute("SELECT id FROM roles WHERE id = %s", [int(role_id)])
-        if not cursor.fetchone():
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Role ID không tồn tại"}, status=400)
-
-        # Kiểm tra email trùng lặp trong bảng Users
-        cursor.execute("SELECT id FROM users WHERE email = %s", [email])
-        if cursor.fetchone():
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Email đã tồn tại trong bảng Users"}, status=400)
-
-        # Kiểm tra email trùng lặp trong bảng auth_user
-        if User.objects.filter(username=email).exists():
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Email đã tồn tại trong hệ thống xác thực"}, status=400)
-
-        # Tạo người dùng trong bảng auth_user của Django
-        django_user = User.objects.create_user(username=email, email=email, password=password)
-        django_user_id = django_user.id
-
-        # Mã hóa mật khẩu cho bảng Users
-        hashed_password = hash_password(password)
-        cursor.execute(
-            "INSERT INTO users (id, email, password, full_name, status, role_id) VALUES (%s, %s, %s, %s, %s, %s)",
-            [django_user_id, email, hashed_password, full_name, status, int(role_id)]
-        )
-        db.commit()
-
-        cursor.close()
-        db.close()
-        return JsonResponse({"message": "Tạo người dùng thành công", "user_id": django_user_id}, status=201)
-
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
-    except Exception as e:
-        traceback.print_exc()
-        logger.error(f"Error in create_user: {str(e)}")
-        return JsonResponse({"error": str(e)}, status=500)
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'db' in locals():
-            db.close()
-
-# Hàm xóa người dùng
-@csrf_exempt
-@require_POST
-def delete_user(request):
-    try:
-        data = json.loads(request.body)
-        user_id = data.get("user_id")
-
-        if not user_id:
-            return JsonResponse({"error": "Thiếu trường bắt buộc: user_id"}, status=400)
-
-        try:
-            user_id = int(user_id)
-        except (TypeError, ValueError):
-            return JsonResponse({"error": "User ID phải là một số nguyên."}, status=400)
-
-        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
-        cursor = db.cursor()
-
-        cursor.execute("SELECT id FROM users WHERE id = %s", [user_id])
-        if not cursor.fetchone():
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
-
-        cursor.execute("DELETE FROM users WHERE id = %s", [user_id])
-        db.commit()
-
-        try:
-            django_user = User.objects.get(id=user_id)
-            django_user.delete()
-        except User.DoesNotExist:
-            pass
-
-        cursor.close()
-        db.close()
-
-        return JsonResponse({
-            "message": "Xóa người dùng thành công!",
-            "user_id": user_id
-        }, status=200)
-
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
-    except Exception as e:
-        traceback.print_exc()
-        logger.error(f"Error in delete_user: {str(e)}")
-        return JsonResponse({"error": str(e)}, status=500)
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'db' in locals():
-            db.close()
-
-# Hàm cập nhật người dùng
-@csrf_exempt
-@require_POST
-def update_user(request):
-    try:
-        data = json.loads(request.body)
-        user_id = data.get("user_id")
-
-        if not user_id:
-            return JsonResponse({"error": "Thiếu trường bắt buộc: user_id"}, status=400)
-
-        try:
-            user_id = int(user_id)
-        except (TypeError, ValueError):
-            return JsonResponse({"error": "User ID phải là một số nguyên."}, status=400)
-
-        email = data.get("email", "").strip()
-        password = data.get("password", "").strip()
-        full_name = data.get("full_name", "").strip()
-        status = data.get("status", "").strip()
-        role_id = data.get("role_id")
-
-        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
-        cursor = db.cursor()
-
-        cursor.execute("SELECT email, password, full_name, status, role_id FROM users WHERE id = %s", [user_id])
-        user = cursor.fetchone()
-        if not user:
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
-
-        current_email, current_password, current_full_name, current_status, current_role_id = user
-
-        if email:
-            email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-            if not re.match(email_pattern, email):
-                cursor.close()
-                db.close()
-                return JsonResponse({"error": "Email không hợp lệ."}, status=400)
-            cursor.execute("SELECT id FROM users WHERE email = %s AND id != %s", [email, user_id])
-            if cursor.fetchone():
-                cursor.close()
-                db.close()
-                return JsonResponse({"error": "Email đã tồn tại."}, status=400)
-            if User.objects.filter(username=email).exclude(id=user_id).exists():
-                cursor.close()
-                db.close()
-                return JsonResponse({"error": "Email đã tồn tại trong hệ thống xác thực."}, status=400)
-        else:
-            email = current_email
-
-        if password:
-            hashed_password = hash_password(password)
-        else:
-            hashed_password = current_password
-
-        if not full_name:
-            full_name = current_full_name
-
-        if status:
-            valid_statuses = ['active', 'inactive', 'banned']
-            if status not in valid_statuses:
-                cursor.close()
-                db.close()
-                return JsonResponse({"error": "Status phải là 'active', 'inactive', hoặc 'banned'."}, status=400)
-        else:
-            status = current_status
-
-        if role_id is not None:
-            try:
-                role_id = int(role_id)
-                cursor.execute("SELECT id FROM roles WHERE id = %s", [role_id])
-                if not cursor.fetchone():
-                    cursor.close()
-                    db.close()
-                    return JsonResponse({"error": "Role ID không tồn tại."}, status=400)
-            except (TypeError, ValueError):
-                cursor.close()
-                db.close()
-                return JsonResponse({"error": "Role ID phải là một số nguyên."}, status=400)
-        else:
-            role_id = current_role_id
-
-        sql = """
-            UPDATE users 
-            SET email = %s, password = %s, full_name = %s, status = %s, role_id = %s
-            WHERE id = %s
-        """
-        cursor.execute(sql, [email, hashed_password, full_name, status, role_id, user_id])
-        db.commit()
-
-        try:
-            django_user = User.objects.get(id=user_id)
-            django_user.username = email
-            django_user.email = email
-            if password:
-                django_user.set_password(password)
-            django_user.save()
-        except User.DoesNotExist:
-            pass
-
-        cursor.close()
-        db.close()
-
-        return JsonResponse({
-            "message": "Cập nhật thông tin người dùng thành công!",
-            "user_id": user_id,
-            "updated_info": {
-                "email": email,
-                "full_name": full_name,
-                "status": status,
-                "role_id": role_id
-            }
-        }, status=200)
-
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
-    except Exception as e:
-        traceback.print_exc()
-        logger.error(f"Error in update_user: {str(e)}")
-        return JsonResponse({"error": str(e)}, status=500)
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'db' in locals():
-            db.close()
-
 # Hàm đăng nhập người dùng
 @csrf_exempt
 @require_http_methods(['GET', 'POST'])
@@ -344,12 +86,12 @@ def login_user(request):
 
             # Kết nối MySQL
             db = MySQLdb.connect(
-                host='localhost',
-                user='root',
-                passwd='123456',
-                db='fintripp',
-                port=3306,
-                charset='utf8mb4'
+                host=MYSQL_HOST,
+                user=MYSQL_USER,
+                passwd=MYSQL_PASSWORD,
+                db=MYSQL_DB,
+                port=MYSQL_PORT,
+                charset=MYSQL_CHARSET
             )
             cursor = db.cursor()
             logger.debug("Database connected")
@@ -424,8 +166,14 @@ def verify_token(request):
         if not email:
             return JsonResponse({"error": "Token không hợp lệ"}, status=400)
 
-        # Truy vấn người dùng bằng email
-        db = MySQLdb.connect(host='localhost', user='root', passwd='123456', db='fintripp', port=3306, charset='utf8mb4')
+        db = MySQLdb.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            passwd=MYSQL_PASSWORD,
+            db=MYSQL_DB,
+            port=MYSQL_PORT,
+            charset=MYSQL_CHARSET
+        )
         cursor = db.cursor()
         cursor.execute("SELECT id FROM users WHERE email = %s", [email])
         user = cursor.fetchone()
@@ -889,6 +637,435 @@ def delete_hotel(request):
         traceback.print_exc()
         logger.error(f"Error in delete_hotel: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+@require_GET
+def search_hotels_by_province(request):
+    try:
+        province = request.GET.get("province", "").strip()
+        if not province:
+            return JsonResponse({"error": "Vui lòng cung cấp tên tỉnh (province)."}, status=400)
+
+        hotels = process_hotel_data_from_csv(province)
+        if not hotels:
+            return JsonResponse({"error": f"Không tìm thấy khách sạn nào ở tỉnh {province} hoặc file CSV không tồn tại."}, status=404)
+
+        return JsonResponse({
+            "hotels": hotels,
+            "timestamp": datetime.now().isoformat(),
+            "csrf_token": get_token(request)
+        }, json_dumps_params={"ensure_ascii": False}, status=200)
+
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in search_hotels_by_province: {str(e)}")
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+
+def is_admin(request, cursor):
+    if not request.user.is_authenticated:
+        return False
+    cursor.execute("""
+        SELECT r.role_name 
+        FROM users u 
+        JOIN roles r ON u.role_id = r.id 
+        WHERE u.id = %s
+    """, [request.user.id])
+    result = cursor.fetchone()
+    return result and result[0] == 'admin'
+
+
+# Hàm tạo người dùng mới
+@csrf_exempt
+@require_POST
+def create_user(request):
+    """Tạo người dùng mới."""
+    try:
+        data = json.loads(request.body)
+        email = data.get("email", "").strip()
+        password = data.get("password", "").strip()
+        full_name = data.get("full_name", "").strip()
+        status = data.get("status", "active").strip()
+        role_id = data.get("role_id")
+
+        if not all([email, password, full_name, role_id]):
+            return JsonResponse({"error": "Thiếu email, password, full_name hoặc role_id"}, status=400)
+
+        if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
+            return JsonResponse({"error": "Email không hợp lệ"}, status=400)
+
+        if status not in ['active', 'inactive', 'banned']:
+            return JsonResponse({"error": "Status không hợp lệ"}, status=400)
+
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        # Kiểm tra role_id có tồn tại trong bảng Roles
+        cursor.execute("SELECT id FROM roles WHERE id = %s", [int(role_id)])
+        if not cursor.fetchone():
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Role ID không tồn tại"}, status=400)
+
+        # Kiểm tra email trùng lặp trong bảng Users
+        cursor.execute("SELECT id FROM users WHERE email = %s", [email])
+        if cursor.fetchone():
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Email đã tồn tại trong bảng Users"}, status=400)
+
+        # Kiểm tra email trùng lặp trong bảng auth_user
+        if User.objects.filter(username=email).exists():
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Email đã tồn tại trong hệ thống xác thực"}, status=400)
+
+        # Tạo người dùng trong bảng auth_user của Django
+        django_user = User.objects.create_user(username=email, email=email, password=password)
+        django_user_id = django_user.id
+
+        # Mã hóa mật khẩu cho bảng Users
+        hashed_password = hash_password(password)
+        cursor.execute(
+            "INSERT INTO users (id, email, password, full_name, status, role_id) VALUES (%s, %s, %s, %s, %s, %s)",
+            [django_user_id, email, hashed_password, full_name, status, int(role_id)]
+        )
+        db.commit()
+
+        cursor.close()
+        db.close()
+        return JsonResponse({"message": "Tạo người dùng thành công", "user_id": django_user_id}, status=201)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in create_user: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'db' in locals():
+            db.close()
+
+
+
+# Hàm xóa người dùng
+@csrf_exempt
+@require_POST
+def delete_user(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get("user_id")
+
+        if not user_id:
+            return JsonResponse({"error": "Thiếu trường bắt buộc: user_id"}, status=400)
+
+        try:
+            user_id = int(user_id)
+        except (TypeError, ValueError):
+            return JsonResponse({"error": "User ID phải là một số nguyên."}, status=400)
+
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        if not is_admin(request, cursor):
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
+
+        cursor.execute("SELECT id FROM users WHERE id = %s", [user_id])
+        if not cursor.fetchone():
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
+
+        cursor.execute("DELETE FROM users WHERE id = %s", [user_id])
+        db.commit()
+
+        try:
+            django_user = User.objects.get(id=user_id)
+            django_user.delete()
+        except User.DoesNotExist:
+            pass
+
+        cursor.close()
+        db.close()
+
+        return JsonResponse({
+            "message": "Xóa người dùng thành công!",
+            "user_id": user_id
+        }, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+
+# Hàm cập nhật người dùng
+@csrf_exempt
+@require_POST
+def update_user(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get("user_id")
+
+        if not user_id:
+            return JsonResponse({"error": "Thiếu trường bắt buộc: user_id"}, status=400)
+
+        try:
+            user_id = int(user_id)
+        except (TypeError, ValueError):
+            return JsonResponse({"error": "User ID phải là một số nguyên."}, status=400)
+
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        if not is_admin(request, cursor):
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
+
+        email = data.get("email", "").strip()
+        full_name = data.get("full_name", "").strip()
+        status = data.get("status", "").strip()
+        role_name = data.get("role_name", "").strip()
+
+        cursor.execute("SELECT email, full_name, status, role_id FROM users WHERE id = %s", [user_id])
+        user = cursor.fetchone()
+        if not user:
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
+
+        current_email, current_full_name, current_status, current_role_id = user
+
+        if email:
+            email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+            if not re.match(email_pattern, email):
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Email không hợp lệ."}, status=400)
+            cursor.execute("SELECT id FROM users WHERE email = %s AND id != %s", [email, user_id])
+            if cursor.fetchone():
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Email đã tồn tại."}, status=400)
+            if User.objects.filter(username=email).exclude(id=user_id).exists():
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Email đã tồn tại trong hệ thống xác thực."}, status=400)
+        else:
+            email = current_email
+
+        if not full_name:
+            full_name = current_full_name
+
+        if status:
+            valid_statuses = ['active', 'inactive', 'banned']
+            if status not in valid_statuses:
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Status phải là 'active', 'inactive', hoặc 'banned'."}, status=400)
+        else:
+            status = current_status
+
+        if role_name:
+            cursor.execute("SELECT id FROM roles WHERE role_name = %s", [role_name])
+            role = cursor.fetchone()
+            if not role:
+                cursor.close()
+                db.close()
+                return JsonResponse({"error": "Role name không tồn tại."}, status=400)
+            role_id = role[0]
+        else:
+            role_id = current_role_id
+
+        sql = """
+            UPDATE users 
+            SET email = %s, full_name = %s, status = %s, role_id = %s
+            WHERE id = %s
+        """
+        cursor.execute(sql, [email, full_name, status, role_id, user_id])
+        db.commit()
+
+        try:
+            django_user = User.objects.get(id=user_id)
+            django_user.username = email
+            django_user.email = email
+            django_user.save()
+        except User.DoesNotExist:
+            pass
+
+        cursor.close()
+        db.close()
+
+        return JsonResponse({
+            "message": "Cập nhật thông tin người dùng thành công!",
+            "user_id": user_id,
+            "updated_info": {
+                "email": email,
+                "full_name": full_name,
+                "status": status,
+                "role_name": role_name if role_name else None
+            }
+        }, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@require_GET
+def user_manage(request):
+    try:
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        if not is_admin(request, cursor):
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
+
+        query = """
+            SELECT u.id, u.full_name, u.email, r.role_name, u.status
+            FROM users u
+            JOIN roles r ON u.role_id = r.id
+        """
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        users = [{"id": row[0], "full_name": row[1], "email": row[2], "role_name": row[3], "status": row[4]} for row in results]
+
+        cursor.close()
+        db.close()
+
+        return JsonResponse({"users": users}, status=200)
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@require_GET
+def search_user(request):
+    try:
+        search_term = request.GET.get("userinfo", "").strip()
+        if not search_term:
+            return JsonResponse({"error": "Thiếu tham số tìm kiếm 'q'."}, status=400)
+
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        if not is_admin(request, cursor):
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
+
+        query = """
+            SELECT u.id, u.full_name, u.email, r.role_name, u.status
+            FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE u.full_name LIKE %s OR u.email LIKE %s
+        """
+        cursor.execute(query, [f'%{search_term}%', f'%{search_term}%'])
+        results = cursor.fetchall()
+
+        users = [{"id": row[0], "full_name": row[1], "email": row[2], "role_name": row[3], "status": row[4]} for row in results]
+
+        cursor.close()
+        db.close()
+
+        return JsonResponse({"users": users}, status=200)
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
+@require_GET
+def filter_by_role(request):
+    try:
+        role_name = request.GET.get("role", "").strip()
+        if not role_name:
+            return JsonResponse({"error": "Thiếu tham số 'role'."}, status=400)
+
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        if not is_admin(request, cursor):
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
+
+        query = """
+            SELECT u.id, u.full_name, u.email, r.role_name, u.status
+            FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE r.role_name = %s
+        """
+        cursor.execute(query, [role_name])
+        results = cursor.fetchall()
+
+        users = [{"id": row[0], "full_name": row[1], "email": row[2], "role_name": row[3], "status": row[4]} for row in results]
+
+        cursor.close()
+        db.close()
+
+        return JsonResponse({"users": users}, status=200)
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
+@require_GET
+def filter_by_status(request):
+    try:
+        status = request.GET.get("status", "").strip()
+        if not status:
+            return JsonResponse({"error": "Thiếu tham số 'status'."}, status=400)
+
+        valid_statuses = ['active', 'inactive', 'banned']
+        if status not in valid_statuses:
+            return JsonResponse({"error": "Status phải là 'active', 'inactive', hoặc 'banned'."}, status=400)
+
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        if not is_admin(request, cursor):
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
+
+        query = """
+            SELECT u.id, u.full_name, u.email, r.role_name, u.status
+            FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE u.status = %s
+        """
+        cursor.execute(query, [status])
+        results = cursor.fetchall()
+
+        users = [{"id": row[0], "full_name": row[1], "email": row[2], "role_name": row[3], "status": row[4]} for row in results]
+
+        cursor.close()
+        db.close()
+
+        return JsonResponse({"users": users}, status=200)
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
 '''
 end Admin để quản ly khách sạn
 '''
