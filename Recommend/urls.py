@@ -55,15 +55,17 @@ urlpatterns = [
 
     #Admin
     path('update-hotel/', views.update_hotel, name='update_hotel'),
+    path('hotels/<str:name>/', views.get_hotel_by_name, name='get_hotel_by_name'),
     path('delete-hotel/', views.delete_hotel, name='delete_hotel'),
     path('get-all-hotels/', views.get_all_hotels, name='get_all_hotels'),
     path('search-hotels/', views.search_hotels_by_province, name='search_hotels_by_province'),
 
 
-    path('delete-user/', views.delete_user, name='delete_user'),
+    path('delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
     path('update-user/', views.update_user, name='update_user'),
     path('create-user/', views.create_user, name='create_user'),
     path('user-management/', views.user_manage, name='user_manage'),
+    path('user/<int:user_id>/', views.get_user, name='get_user'),
     path('search-user/', views.search_user, name='search_user'),
     path('filter-role-user/', views.filter_by_role, name='filter_by_role'),
     path('filter-status-user/', views.filter_by_status, name='filter_by_status'),

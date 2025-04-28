@@ -323,47 +323,62 @@ def set_dates(request):
         logger.error("Invalid JSON in set_dates")
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
 
-air_province = ["quảng nam","thanh hoá", "quảng bình", "điện biên", "phú yên", "gia lai", "khánh hoà", "huế", "cần thơ"
+air_province = ["quảng nam", "thanh hoá", "quảng bình", "điện biên", "phú yên", "gia lai", "khánh hoà", "huế", "cần thơ",
                 "đắk lắk", "kiên giang", "cà mau", "vũng tàu", "hà nội", "hồ chí minh", "kiên giang", "đà nẵng", "quảng ninh",
                 "nghệ an", "bình định", "hải phòng", "lâm đồng", "đồng nai"]
 
 @require_GET
 def check_flight_di(request):
-    data = json.loads(request.body)
-    selected_province = data.get("departureInput", "").strip()
+    try:
+        data = json.loads(request.body)
+        selected_province = data.get("departureInput", "").strip()
 
-    if not selected_province:
+        if not selected_province:
+            return JsonResponse({
+                "error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."
+            }, status=400)
+        has_airport = selected_province.lower() in [province.lower() for province in air_province]
+
+        message = ""
+        if not has_airport:
+            message = f"'{selected_province.title()}' hiện tại tỉnh của bạn chưa có sân bay. Vui lòng chọn dịch vụ khách sạn phù hợp."
+
         return JsonResponse({
-            "error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."
-        }, status=400)
-    has_airport = selected_province in [province.lower() for province in air_province]
-
-    if not has_airport:
-        message = f"'{selected_province.title()}' hiện tại tỉnh của bạn chưa có sân bay. Vui lòng chọn dịch vụ khách sạn phù hợp."
-
-    return JsonResponse({
-        "has_airport": has_airport,
-        "message": message
-    }, status=200)
+            "has_airport": has_airport,
+            "message": message
+        }, status=200)
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON in check_flight_di")
+        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+    except Exception as e:
+        logger.error(f"Error in check_flight_di: {str(e)}")
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
 @require_GET
 def check_flight_den(request):
-    session_key = request.session.session_key
-    selected_province = cache.get(f'selected_province_{session_key}', '').strip().lower()
+    try:
+        session_key = request.session.session_key
+        selected_province = cache.get(f'selected_province_{session_key}', '').strip().lower()
 
-    if not selected_province:
+        if not selected_province:
+            return JsonResponse({
+                "error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."
+            }, status=400)
+        has_airport = selected_province in [province.lower() for province in air_province]
+
+        message = ""
+        if not has_airport:
+            message = f"'{selected_province.title()}' hiện chưa có sân bay. Vui lòng chọn dịch vụ khách sạn phù hợp."
+
         return JsonResponse({
-            "error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."
-        }, status=400)
-    has_airport = selected_province in [province.lower() for province in air_province]
-
-    if not has_airport:
-        message = f"'{selected_province.title()}' hiện chưa có sân bay. Vui lòng chọn dịch vụ khách sạn phù hợp."
-
-    return JsonResponse({
-        "has_airport": has_airport,
-        "message": message
-    }, status=200)
+            "has_airport": has_airport,
+            "message": message
+        }, status=200)
+    except Exception as e:
+        logger.error(f"Error in check_flight_den: {str(e)}")
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
 # API tìm kiếm chuyến bay
 @csrf_exempt
@@ -405,11 +420,15 @@ def select_flight(request):
     try:
         data = json.loads(request.body)
         flight_info = data.get('flight_info')
-        if not flight_info:
-            logger.error("Missing flight_info in select_flight")
-            return JsonResponse({"error": "Missing flight info"}, status=400)
-
         cache_key = f'selected_flight_{request.session.session_key}'
+
+        if not flight_info:
+            # If no flight_info is provided, clear the cache
+            cache.delete(cache_key)
+            logger.info("Flight cache cleared due to missing flight_info")
+            return JsonResponse({"message": "Flight selection cleared"}, status=200)
+
+        # Save flight_info to cache if provided
         cache.set(cache_key, flight_info, timeout=3600)
         logger.info(f"Flight saved to cache: {flight_info}")
         return JsonResponse({"message": "Flight selected successfully"}, status=200)
@@ -419,7 +438,7 @@ def select_flight(request):
     except Exception as e:
         logger.error(f"Error in select_flight: {str(e)}")
         traceback.print_exc()
-        return JsonResponse({"error": f"Error system: {str(e)}"}, status=400)
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
 # API tìm kiếm khách sạn
 @csrf_exempt
@@ -460,11 +479,15 @@ def select_hotel(request):
     try:
         data = json.loads(request.body)
         hotel_info = data.get('hotel_info')
-        if not hotel_info:
-            logger.error("Missing hotel_info in select_hotel")
-            return JsonResponse({"error": "Missing hotel info"}, status=400)
-
         cache_key = f'selected_hotel_{request.session.session_key}'
+
+        if not hotel_info:
+            # If no hotel_info is provided, clear the cache
+            cache.delete(cache_key)
+            logger.info("Hotel cache cleared due to missing hotel_info")
+            return JsonResponse({"message": "Hotel selection cleared"}, status=200)
+
+        # Save hotel_info to cache if provided
         cache.set(cache_key, hotel_info, timeout=3600)
         logger.info(f"Hotel saved to cache: {hotel_info}")
         return JsonResponse({"message": "Hotel selected successfully"}, status=200)
@@ -555,31 +578,83 @@ Admin để quản ly khách sạn
 @require_GET
 def get_all_hotels(request):
     try:
-        hotels = show_hotel_in_csv()
-        if not hotels:
-            return JsonResponse({"error": "Không có khách sạn nào trong danh sách hoặc file CSV không tồn tại."}, status=404)
+        hotels = show_hotel_in_csv()  # Giả sử hàm này trả về danh sách khách sạn
+        if hotels is None or not hotels:  # Kiểm tra cả trường hợp None và danh sách rỗng
+            return JsonResponse(
+                {"error": "Không có khách sạn nào trong danh sách hoặc file CSV không tồn tại."},
+                status=404
+            )
 
-        return JsonResponse({
-            "hotels": hotels,
-            "timestamp": datetime.now().isoformat(),
-            "csrf_token": get_token(request)
-        }, json_dumps_params={"ensure_ascii": False}, status=200)
+        return JsonResponse(
+            {
+                "hotels": hotels,
+                "timestamp": datetime.now().isoformat(),
+                "csrf_token": get_token(request)  # Giữ lại để hỗ trợ front-end nếu cần
+            },
+            json_dumps_params={"ensure_ascii": False},
+            status=200
+        )
 
     except Exception as e:
         traceback.print_exc()
         logger.error(f"Error in get_all_hotels: {str(e)}")
-        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+        return JsonResponse(
+            {"error": f"Lỗi hệ thống: {str(e)}"},
+            status=500
+        )
+
+
+@require_GET
+def get_hotel_by_name(request, name):
+    try:
+        hotels = show_hotel_in_csv()
+        if hotels is None:
+            return JsonResponse(
+                {"error": "File CSV không tồn tại."},
+                status=404
+            )
+
+        hotel = next((h for h in hotels if h["name"] == name), None)
+        if not hotel:
+            return JsonResponse(
+                {"error": f"Không tìm thấy khách sạn với tên '{name}'."},
+                status=404
+            )
+
+        return JsonResponse(
+            {
+                "hotel": hotel,
+                "timestamp": datetime.now().isoformat(),
+                "csrf_token": get_token(request)
+            },
+            json_dumps_params={"ensure_ascii": False},
+            status=200
+        )
+
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error in get_hotel_by_name: {str(e)}")
+        return JsonResponse(
+            {"error": f"Lỗi hệ thống: {str(e)}"},
+            status=500
+        )
 
 @csrf_exempt
 @require_POST
 def update_hotel(request):
     try:
-        data = json.loads(request.body.decode('utf-8'))
+        # Giải mã dữ liệu JSON từ request body
+        data = json.loads(request.body.decode("utf-8"))
         hotel_name = data.get("name", "").strip()
 
+        # Kiểm tra tên khách sạn có được cung cấp không
         if not hotel_name:
-            return JsonResponse({"error": "Vui lòng cung cấp tên khách sạn (name)."}, status=400)
+            return JsonResponse(
+                {"error": "Vui lòng cung cấp tên khách sạn (name)."},
+                status=400
+            )
 
+        # Tạo dictionary chứa dữ liệu cập nhật
         update_data = {
             "name": hotel_name,
             "link": data.get("link", "").strip(),
@@ -592,23 +667,51 @@ def update_hotel(request):
             "province": data.get("province", "").strip()
         }
 
+        # Kiểm tra dữ liệu đầu vào (validation)
+        try:
+            if update_data["price"]:  # Chỉ kiểm tra nếu price không rỗng
+                float(update_data["price"])  # Đảm bảo price có thể là số
+            if update_data["location_rating"]:
+                float(update_data["location_rating"])  # Đảm bảo rating là số
+        except ValueError:
+            return JsonResponse(
+                {"error": "Giá (price) hoặc đánh giá vị trí (location_rating) phải là số."},
+                status=400
+            )
+
+        # Cập nhật thông tin trong CSV
         updated = update_hotel_in_csv(hotel_name, update_data)
         if not updated:
-            return JsonResponse({"error": "Không tìm thấy khách sạn để cập nhật."}, status=404)
+            return JsonResponse(
+                {"error": f"Không tìm thấy khách sạn '{hotel_name}' để cập nhật."},
+                status=404
+            )
 
-        return JsonResponse({
-            "message": "Cập nhật thông tin khách sạn thành công!",
-            "updated_hotel": update_data,
-            "timestamp": datetime.now().isoformat(),
-            "csrf_token": get_token(request)
-        }, json_dumps_params={"ensure_ascii": False}, status=200)
+        return JsonResponse(
+            {
+                "message": "Cập nhật thông tin khách sạn thành công!",
+                "updated_hotel": update_data,
+                "timestamp": datetime.now().isoformat(),
+                "csrf_token": get_token(request)  # Giữ lại cho nhất quán
+            },
+            json_dumps_params={"ensure_ascii": False},
+            status=200
+        )
 
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+        return JsonResponse(
+            {"error": "Dữ liệu JSON không hợp lệ."},
+            status=400
+        )
     except Exception as e:
         traceback.print_exc()
         logger.error(f"Error in update_hotel: {str(e)}")
-        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+        return JsonResponse(
+            {"error": f"Lỗi hệ thống: {str(e)}"},
+            status=500
+        )
+
+
 
 @csrf_exempt
 @require_POST
@@ -660,20 +763,7 @@ def search_hotels_by_province(request):
         logger.error(f"Error in search_hotels_by_province: {str(e)}")
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-def is_admin(request, cursor):
-    if not request.user.is_authenticated:
-        return False
-    cursor.execute("""
-        SELECT r.role_name 
-        FROM users u 
-        JOIN roles r ON u.role_id = r.id 
-        WHERE u.id = %s
-    """, [request.user.id])
-    result = cursor.fetchone()
-    return result and result[0] == 'admin'
 
-
-# Hàm tạo người dùng mới
 @csrf_exempt
 @require_POST
 def create_user(request):
@@ -748,61 +838,123 @@ def create_user(request):
             db.close()
 
 
-
 # Hàm xóa người dùng
 @csrf_exempt
-@require_POST
-def delete_user(request):
+@require_http_methods(["DELETE"])
+def delete_user(request, user_id):
+    """Delete a user and their related records from the database."""
     try:
-        data = json.loads(request.body)
-        user_id = data.get("user_id")
-
-        if not user_id:
-            return JsonResponse({"error": "Thiếu trường bắt buộc: user_id"}, status=400)
-
+        # Validate user_id
         try:
             user_id = int(user_id)
         except (TypeError, ValueError):
-            return JsonResponse({"error": "User ID phải là một số nguyên."}, status=400)
+            return JsonResponse({"error": "User ID must be an integer."}, status=400)
 
-        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
-                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        # Establish database connection
+        db = MySQLdb.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            passwd=MYSQL_PASSWORD,
+            db=MYSQL_DB,
+            port=MYSQL_PORT,
+            charset=MYSQL_CHARSET
+        )
         cursor = db.cursor()
 
-        if not is_admin(request, cursor):
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
-
+        # Check if the user exists
         cursor.execute("SELECT id FROM users WHERE id = %s", [user_id])
         if not cursor.fetchone():
             cursor.close()
             db.close()
-            return JsonResponse({"error": "Người dùng không tồn tại."}, status=404)
+            return JsonResponse({"error": "User not found."}, status=404)
 
+        # List of tables with foreign keys referencing users.id
+        tables_with_user_id = [
+            "schedules",
+            "travel_plan",
+            "blog_post",
+            "comments",
+            "notifications",
+            "password_reset_tokens",
+            "recommendation",
+            "replies",
+            "room_members",
+            "travel_groups",
+            "activities"
+        ]
+
+        # Delete records from tables with a single user_id foreign key
+        for table in tables_with_user_id:
+            cursor.execute(f"DELETE FROM {table} WHERE user_id = %s", [user_id])
+
+        # Delete records from tables with multiple foreign keys related to users.id
+        cursor.execute("DELETE FROM friendships WHERE sender_id = %s OR receiver_id = %s", [user_id, user_id])
+        cursor.execute("DELETE FROM group_messages WHERE sender_id = %s", [user_id])
+        cursor.execute("DELETE FROM messages WHERE sender_id = %s OR receiver_id = %s", [user_id, user_id])
+        cursor.execute("DELETE FROM chat_room WHERE created_by = %s", [user_id])
+
+        # Finally, delete the user from the users table
         cursor.execute("DELETE FROM users WHERE id = %s", [user_id])
-        db.commit()
 
-        try:
-            django_user = User.objects.get(id=user_id)
-            django_user.delete()
-        except User.DoesNotExist:
-            pass
+        # Commit the transaction
+        db.commit()
 
         cursor.close()
         db.close()
 
         return JsonResponse({
-            "message": "Xóa người dùng thành công!",
+            "message": "User deleted successfully!",
             "user_id": user_id
         }, status=200)
 
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
+    finally:
+        # Ensure database resources are closed
+        if 'cursor' in locals():
+            cursor.close()
+        if 'db' in locals():
+            db.close()
+
+
+
+@require_GET
+def get_user(request, user_id):
+    try:
+        db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
+                             db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
+        cursor = db.cursor()
+
+        query = """
+            SELECT u.id, u.full_name, u.email, r.role_name, u.status
+            FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE u.id = %s
+        """
+        cursor.execute(query, (user_id,))
+        row = cursor.fetchone()
+
+        if row:
+            user = {
+                "id": row[0],
+                "full_name": row[1],
+                "email": row[2],
+                "role_name": row[3],
+                "status": row[4]
+            }
+            cursor.close()
+            db.close()
+            return JsonResponse({"user": user}, status=200)
+        else:
+            cursor.close()
+            db.close()
+            return JsonResponse({"error": "User not found"}, status=404)
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 # Hàm cập nhật người dùng
@@ -811,30 +963,16 @@ def delete_user(request):
 def update_user(request):
     try:
         data = json.loads(request.body)
-        user_id = data.get("user_id")
+        user_id = data.get("id")
 
         if not user_id:
             return JsonResponse({"error": "Thiếu trường bắt buộc: user_id"}, status=400)
-
-        try:
-            user_id = int(user_id)
-        except (TypeError, ValueError):
-            return JsonResponse({"error": "User ID phải là một số nguyên."}, status=400)
 
         db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
 
-        if not is_admin(request, cursor):
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
-
-        email = data.get("email", "").strip()
-        full_name = data.get("full_name", "").strip()
-        status = data.get("status", "").strip()
-        role_name = data.get("role_name", "").strip()
-
+        # Lấy thông tin người dùng hiện tại
         cursor.execute("SELECT email, full_name, status, role_id FROM users WHERE id = %s", [user_id])
         user = cursor.fetchone()
         if not user:
@@ -844,27 +982,24 @@ def update_user(request):
 
         current_email, current_full_name, current_status, current_role_id = user
 
+        # Xử lý email: không kiểm tra trùng lặp, chỉ kiểm tra định dạng nếu có
+        email = data.get("email", "").strip()
         if email:
             email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
             if not re.match(email_pattern, email):
                 cursor.close()
                 db.close()
                 return JsonResponse({"error": "Email không hợp lệ."}, status=400)
-            cursor.execute("SELECT id FROM users WHERE email = %s AND id != %s", [email, user_id])
-            if cursor.fetchone():
-                cursor.close()
-                db.close()
-                return JsonResponse({"error": "Email đã tồn tại."}, status=400)
-            if User.objects.filter(username=email).exclude(id=user_id).exists():
-                cursor.close()
-                db.close()
-                return JsonResponse({"error": "Email đã tồn tại trong hệ thống xác thực."}, status=400)
         else:
-            email = current_email
+            email = current_email  # Giữ nguyên email hiện tại nếu không cung cấp
 
+        # Xử lý full_name
+        full_name = data.get("full_name", "").strip()
         if not full_name:
             full_name = current_full_name
 
+        # Xử lý status
+        status = data.get("status", "").strip()
         if status:
             valid_statuses = ['active', 'inactive', 'banned']
             if status not in valid_statuses:
@@ -874,6 +1009,8 @@ def update_user(request):
         else:
             status = current_status
 
+        # Xử lý role_name
+        role_name = data.get("role_name", "").strip()
         if role_name:
             cursor.execute("SELECT id FROM roles WHERE role_name = %s", [role_name])
             role = cursor.fetchone()
@@ -885,6 +1022,7 @@ def update_user(request):
         else:
             role_id = current_role_id
 
+        # Cập nhật thông tin người dùng trong bảng users
         sql = """
             UPDATE users 
             SET email = %s, full_name = %s, status = %s, role_id = %s
@@ -893,6 +1031,7 @@ def update_user(request):
         cursor.execute(sql, [email, full_name, status, role_id, user_id])
         db.commit()
 
+        # Cập nhật người dùng trong Django (nếu tồn tại)
         try:
             django_user = User.objects.get(id=user_id)
             django_user.username = email
@@ -929,11 +1068,6 @@ def user_manage(request):
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
 
-        if not is_admin(request, cursor):
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
-
         query = """
             SELECT u.id, u.full_name, u.email, r.role_name, u.status
             FROM users u
@@ -942,7 +1076,8 @@ def user_manage(request):
         cursor.execute(query)
         results = cursor.fetchall()
 
-        users = [{"id": row[0], "full_name": row[1], "email": row[2], "role_name": row[3], "status": row[4]} for row in results]
+        users = [{"id": row[0], "full_name": row[1], "email": row[2], "role_name": row[3], "status": row[4]} for row in
+                 results]
 
         cursor.close()
         db.close()
@@ -953,22 +1088,16 @@ def user_manage(request):
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
-
 @require_GET
 def search_user(request):
     try:
         search_term = request.GET.get("userinfo", "").strip()
         if not search_term:
-            return JsonResponse({"error": "Thiếu tham số tìm kiếm 'q'."}, status=400)
+            return JsonResponse({"error": "Thiếu tham số tìm kiếm 'userinfo'."}, status=400)
 
         db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
-
-        if not is_admin(request, cursor):
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
 
         query = """
             SELECT u.id, u.full_name, u.email, r.role_name, u.status
@@ -990,6 +1119,7 @@ def search_user(request):
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
+
 @require_GET
 def filter_by_role(request):
     try:
@@ -1000,11 +1130,6 @@ def filter_by_role(request):
         db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
-
-        if not is_admin(request, cursor):
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
 
         query = """
             SELECT u.id, u.full_name, u.email, r.role_name, u.status
@@ -1041,11 +1166,6 @@ def filter_by_status(request):
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
 
-        if not is_admin(request, cursor):
-            cursor.close()
-            db.close()
-            return JsonResponse({"error": "Chỉ admin mới có quyền thực hiện hành động này."}, status=403)
-
         query = """
             SELECT u.id, u.full_name, u.email, r.role_name, u.status
             FROM users u
@@ -1065,6 +1185,7 @@ def filter_by_status(request):
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
+
 
 '''
 end Admin để quản ly khách sạn
@@ -1290,13 +1411,14 @@ def save_schedule(request):
         if not user_id:
             return JsonResponse({"error": "Thiếu user_id trong yêu cầu"}, status=400)
 
+        # Đảm bảo charset là utf8mb4 trong cấu hình
         db = MySQLdb.connect(
             host=MYSQL_HOST,
             user=MYSQL_USER,
             passwd=MYSQL_PASSWORD,
             db=MYSQL_DB,
             port=MYSQL_PORT,
-            charset=MYSQL_CHARSET
+            charset='utf8mb4'  # Thay MYSQL_CHARSET bằng giá trị cố định hoặc đảm bảo MYSQL_CHARSET='utf8mb4'
         )
         cursor = db.cursor()
 
@@ -1318,15 +1440,7 @@ def save_schedule(request):
         cursor.execute("INSERT INTO schedules (user_id, name) VALUES (%s, %s)", [user_id, schedule_name])
         schedule_id = cursor.lastrowid
 
-        # flight: flight ? {
-        #     outbound_flight_code: flight.outbound_flight_code,
-        #     outbound_time: flight.outbound_time,
-        #     cabin: flight.cabin,
-        #     base_price_vnd: flight.base_price_vnd,
-        #     total_price_vnd: flight.total_price_vnd,
-        #     fare_basis: flight.fare_basis,
-        # }: null,
-
+        # Xử lý dữ liệu chuyến bay
         if flight_data and isinstance(flight_data, dict):
             cabin = flight_data.get("cabin", "")
             fare_basis = flight_data.get("fare_basis", "")
@@ -1334,7 +1448,6 @@ def save_schedule(request):
             departure_time_str = flight_data.get("outbound_time", "")
             total_price_str = flight_data.get("total_price_vnd", "")
 
-            # Chuyển đổi departure_time
             departure_time = None
             if departure_time_str:
                 try:
@@ -1342,9 +1455,6 @@ def save_schedule(request):
                 except ValueError:
                     logger.error(f"Định dạng outbound_time không hợp lệ: {departure_time_str}")
 
-
-
-            # Chuyển đổi total_price
             total_price = None
             if total_price_str:
                 try:
@@ -1359,13 +1469,12 @@ def save_schedule(request):
                 [schedule_id, fare_basis, cabin, flight_code, departure_time, total_price]
             )
 
-        # Xử lý và chèn dữ liệu khách sạn nếu có
+        # Xử lý dữ liệu khách sạn (không lưu nếu thiếu tên)
         if hotel_data and isinstance(hotel_data, dict):
             name = hotel_data.get("name", "")
             price_str = hotel_data.get("price", "")
             location_rating_str = hotel_data.get("location_rating", "")
 
-            # Chuyển đổi price
             price = None
             if price_str:
                 try:
@@ -1373,7 +1482,6 @@ def save_schedule(request):
                 except ValueError:
                     logger.error(f"Định dạng price không hợp lệ: {price_str}")
 
-            # Chuyển đổi location_rating
             location_rating = None
             if location_rating_str:
                 try:
@@ -1855,25 +1963,23 @@ To do list
 @require_POST
 def create_todolist_activity(request):
     try:
+        # Parse dữ liệu từ request body
         data = json.loads(request.body)
         user_id = data.get("user_id")
 
+        # Kiểm tra user_id
         if not user_id:
             return JsonResponse({"error": "Thiếu user_id trong yêu cầu"}, status=400)
 
-        # Kiểm tra xem payload có chứa mảng activities hay không
-        if "activities" in data:
-            activities = data["activities"]
-            if not activities:
-                return JsonResponse({"error": "Không có hoạt động nào để lưu"}, status=400)
-        else:
-            # Kiểm tra xem payload có chứa các trường của một hoạt động hay không
-            required_fields = ["note_activities"]
-            if all(field in data for field in required_fields):
-                activities = [data]
-            else:
-                return JsonResponse({"error": "Không có hoạt động nào để lưu"}, status=400)
+        # Lấy danh sách activities (trong trường hợp này chỉ có 1 activity)
+        activities = data.get("activities", [])
+        if not isinstance(activities, list):
+            activities = [data]  # Chuyển thành list nếu chỉ có 1 activity
 
+        if not activities:
+            return JsonResponse({"error": "Không có hoạt động nào để lưu"}, status=400)
+
+        # Kết nối database
         db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
@@ -1886,11 +1992,12 @@ def create_todolist_activity(request):
             itinerary_id = activity.get("itinerary_id", None)
             date_plan_str = activity.get("date_plan", "").strip()
 
+            # Kiểm tra note_activities
             if not note_activities:
-                continue  # Bỏ qua nếu thiếu note_activities
+                continue
 
-            # Xử lý date_plan và date_activities
             if itinerary_id:
+                # Xử lý khi có itinerary_id
                 cursor.execute("SELECT day_id FROM itineraries WHERE id = %s", [itinerary_id])
                 day_id = cursor.fetchone()
                 if not day_id:
@@ -1908,26 +2015,22 @@ def create_todolist_activity(request):
                 start_date = cursor.fetchone()[0]
                 date_plan = start_date
             else:
+                # Xử lý khi itinerary_id là null
                 if date_plan_str:
                     try:
                         date_plan = datetime.strptime(date_plan_str, "%Y-%m-%d").date()
                     except ValueError:
-                        continue
+                        return JsonResponse({"error": "Định dạng date_plan không hợp lệ"}, status=400)
                 else:
-                    cache_key_prefix = request.session.session_key
-                    start_day = cache.get(f'start_day_{cache_key_prefix}')
-                    if not start_day:
-                        date_plan = datetime.now().date()
-                    else:
-                        date_plan = datetime.strptime(start_day, "%Y-%m-%d").date()
+                    date_plan = datetime.now().date()  # Giá trị mặc định là ngày hiện tại
 
                 if date_activities_str:
                     try:
                         date_activities = datetime.strptime(date_activities_str, "%Y-%m-%d").date()
                     except ValueError:
-                        continue
+                        return JsonResponse({"error": "Định dạng date_activities không hợp lệ"}, status=400)
                 else:
-                    date_activities = date_plan
+                    date_activities = date_plan  # Gán bằng date_plan nếu không có date_activities
 
             # Chèn dữ liệu vào bảng activities
             cursor.execute(
@@ -1938,18 +2041,17 @@ def create_todolist_activity(request):
                 [user_id, itinerary_id, note_activities, description, date_activities, status, date_plan]
             )
 
+        # Commit và đóng kết nối
         db.commit()
         cursor.close()
         db.close()
 
-        return JsonResponse({"message": "Tạo các hoạt động thành công"}, status=201)
+        return JsonResponse({"message": "Tạo hoạt động thành công"}, status=201)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
     except Exception as e:
-        traceback.print_exc()
-        logger.error(f"Error in create_todolist_activity: {str(e)}")
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": f"Lỗi server: {str(e)}"}, status=500)
 
 @csrf_exempt
 @require_GET
@@ -1965,7 +2067,7 @@ def get_todolist_activities(request):
 
         cursor.execute(
             """
-            SELECT activity_id, itinerary_id, note_activities, description, date_activities, status, date_plan
+            SELECT activity_id, itinerary_id, note_activities, description, date_activities, status,date_plan
             FROM activities WHERE user_id = %s
             """,
             [user_id]
@@ -1974,7 +2076,7 @@ def get_todolist_activities(request):
 
         activity_list = [{
             "activity_id": row[0],
-            "itinerary_id": row[1],
+            "itinerary_id": row[1] if row[1] is not None else None,
             "note_activities": row[2],
             "description": row[3],
             "date_activities": row[4].isoformat() if row[4] else None,
@@ -1996,7 +2098,6 @@ def get_todolist_activities(request):
 @require_POST
 def update_todolist_activities(request):
     try:
-        # Phân tích dữ liệu JSON từ request.body
         data = json.loads(request.body)
         activity_id = data.get("activity_id")
         user_id = data.get("user_id")
@@ -2005,17 +2106,15 @@ def update_todolist_activities(request):
         date_activities = data.get("date_activities")
         status = data.get("status")
         date_plan = data.get("date_plan")
+        itinerary_id = data.get("itinerary_id", None)  # Cho phép null
 
-        # Kiểm tra các trường bắt buộc
         if not activity_id or not user_id:
             return JsonResponse({"error": "Thiếu activity_id hoặc user_id"}, status=400)
 
-        # Kết nối cơ sở dữ liệu
         db = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD,
                              db=MYSQL_DB, port=MYSQL_PORT, charset=MYSQL_CHARSET)
         cursor = db.cursor()
 
-        # Kiểm tra hoạt động có tồn tại và thuộc về user không
         cursor.execute(
             """
             SELECT COUNT(*) FROM activities WHERE activity_id = %s AND user_id = %s
@@ -2028,7 +2127,6 @@ def update_todolist_activities(request):
             db.close()
             return JsonResponse({"error": "Hoạt động không tồn tại hoặc không thuộc về user này"}, status=404)
 
-        # Chuẩn bị câu lệnh UPDATE
         update_fields = []
         params = []
 
@@ -2047,6 +2145,11 @@ def update_todolist_activities(request):
         if date_plan is not None:
             update_fields.append("date_plan = %s")
             params.append(date_plan)
+        if itinerary_id is not None:
+            update_fields.append("itinerary_id = %s")
+            params.append(itinerary_id)
+        else:
+            update_fields.append("itinerary_id = NULL")
 
         if not update_fields:
             cursor.close()
@@ -2056,7 +2159,6 @@ def update_todolist_activities(request):
         update_query = "UPDATE activities SET " + ", ".join(update_fields) + " WHERE activity_id = %s"
         params.append(activity_id)
 
-        # Thực thi câu lệnh
         cursor.execute(update_query, params)
         db.commit()
 
@@ -2071,7 +2173,6 @@ def update_todolist_activities(request):
         traceback.print_exc()
         logger.error(f"Error in update_activity: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
-
 
 @csrf_exempt
 @require_POST
