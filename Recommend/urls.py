@@ -12,8 +12,10 @@ urlpatterns = [
     #Schedule
     ###
     #Cache province and date
+    path('start-survey/', views.start_survey, name='start_survey'),
     path('set-province/', views.set_province, name='set_province'),
     path('set-dates/', views.set_dates, name='set_dates'),
+    path('set-budget/', views.set_budget, name='set_budget'),
 
     #flight
     path('check-flight-di/', views.check_flight_di, name='check_flight_di'),
@@ -70,5 +72,14 @@ urlpatterns = [
     path('filter-role-user/', views.filter_by_role, name='filter_by_role'),
     path('filter-status-user/', views.filter_by_status, name='filter_by_status'),
 
-
+    #Place
+    path('get-place-admin/', views.get_all_place_admin, name='get_all_place_admin'),
+    path('add-place/', views.add_place, name='add_place'),
+    path('delete-place/', views.delete_place, name='delete_place'),
+    path('update-place/', views.update_place, name='update_place'),
+    #Food
+    path('get-food-admin/', views.get_all_food_admin, name='get_all_food_admin'),
+    path('add-food/', views.add_food, name='add_food'),
+    path('delete-food/', views.delete_food, name='delete_food'),
+    path('update-food/', views.update_food, name='update_food'),
 ]

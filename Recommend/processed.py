@@ -561,3 +561,29 @@ def get_city_to_be_miss(num_cities=10):
 
     except Exception as e:
         return {"error": f"Lỗi hệ thống: {str(e)}"}
+
+
+
+def food_exists(province, title):
+    """Kiểm tra xem món ăn đã tồn tại chưa dựa trên province và title."""
+    try:
+        df = pd.read_csv(FOOD_FILE)
+        normalized_province = normalize_text(province)
+        normalized_title = normalize_text(title)
+        return not df[(df['province'].apply(normalize_text) == normalized_province) &
+                      (df['title'].apply(normalize_text) == normalized_title)].empty
+    except Exception as e:
+        print(f"Error checking food existence: {e}")
+        return False
+
+def place_exists(province, title):
+    """Kiểm tra xem địa điểm đã tồn tại chưa dựa trên province và title."""
+    try:
+        df = pd.read_excel(PLACE_FILE)
+        normalized_province = normalize_text(province)
+        normalized_title = normalize_text(title)
+        return not df[(df['province'].apply(normalize_text) == normalized_province) &
+                      (df['title'].apply(normalize_text) == normalized_title)].empty
+    except Exception as e:
+        print(f"Error checking place existence: {e}")
+        return False

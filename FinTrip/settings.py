@@ -161,6 +161,7 @@ LOGGING = {
         '': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
     },
 }
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -173,8 +174,12 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BEAT_SCHEDULE = {
-    'send-reminder-every-minute': {
-        'task': 'Recommend.tasks.send_reminder_task',
-        'schedule': crontab(minute='*'),
+    'send-activity-reminder-every-minute': {
+        'task': 'Recommend.tasks.send_activity_reminder_task',
+        'schedule': 60.0,  # Chạy mỗi phút
+    },
+    'send-trip-reminder-every-minute': {
+        'task': 'Recommend.tasks.send_trip_reminder_task',
+        'schedule': 60.0,  # Chạy mỗi phút
     },
 }
