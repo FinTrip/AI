@@ -278,7 +278,6 @@ def clear_session_cache(session_key):
 
 
 # Endpoint để bắt đầu khảo sát mới
-@csrf_exempt
 @require_GET
 def start_survey(request):
     session_key = request.session.session_key
@@ -602,14 +601,14 @@ def save_schedule(request):
     db = None
     cursor = None
     try:
-        # Parse JSON từ request
+        # **Parse JSON từ request**
         data = json.loads(request.body)
         user_id = data.get("user_id")
         if not user_id:
             logger.error("Thiếu user_id trong request")
             return JsonResponse({"error": "Thiếu user_id"}, status=400)
 
-        # Kết nối database
+        # **Kết nối database**
         db = MySQLdb.connect(
             host=MYSQL_HOST,
             user=MYSQL_USER,
@@ -621,13 +620,13 @@ def save_schedule(request):
         cursor = db.cursor()
         logger.info(f"Kết nối database thành công cho user_id: {user_id}")
 
-        # Kiểm tra user_id có tồn tại không
+        # **Kiểm tra user_id có tồn tại không**
         cursor.execute("SELECT id FROM users WHERE id = %s", [user_id])
         if not cursor.fetchone():
             logger.error(f"Không tìm thấy user với id: {user_id}")
             return JsonResponse({"error": "Không tìm thấy người dùng"}, status=404)
 
-        # Lấy dữ liệu từ request
+        # **Lấy dữ liệu từ request**
         schedule_name = data.get("schedule_name", "Lịch trình của tôi").strip()
         days_data = data.get("days", [])
         hotel_data = data.get("hotel", {})
@@ -636,70 +635,72 @@ def save_schedule(request):
             logger.error("Danh sách ngày rỗng hoặc không hợp lệ")
             return JsonResponse({"error": "Danh sách ngày rỗng hoặc không hợp lệ"}, status=400)
 
-        # Chèn dữ liệu vào bảng schedules
-        cursor.execute("INSERT INTO schedules (user_id, name) VALUES (%s, %s)", [user_id, schedule_name])
+        # **Chèn dữ liệu vào bảng schedules**
+        now = datetime.now()
+        cursor.execute("INSERT INTO schedules (user_id, name, created_at) VALUES (%s, %s, %s)",
+                       [user_id, schedule_name, now])
         schedule_id = cursor.lastrowid
         logger.info(f"Đã chèn schedule với id: {schedule_id}")
 
-        # Chèn dữ liệu vào bảng hotels
+        # **Chèn dữ liệu vào bảng hotels**
         if hotel_data and isinstance(hotel_data, dict):
             name = hotel_data.get("name", "").strip()
-            price_str = hotel_data.get("price", "")
-            location_rating_str = hotel_data.get("location_rating", "")
-
-            price = None
-            if price_str:
-                try:
-                    price = float(price_str.replace(",", ""))
-                except ValueError:
-                    logger.warning(f"Price không hợp lệ: {price_str}")
-
-            location_rating = None
-            if location_rating_str:
-                try:
-                    location_rating = float(location_rating_str)
-                except ValueError:
-                    logger.warning(f"Location_rating không hợp lệ: {location_rating_str}")
-
-            # Xử lý hotel_class
-            hotel_class_raw = hotel_data.get("hotel_class")
-            hotel_class = extract_hotel_class(hotel_class_raw)
-            if hotel_class is None and hotel_class_raw:
-                logger.warning(f"Không thể trích xuất hotel_class từ: {hotel_class_raw}")
-
             if name:
+                # Xử lý price
+                price_str = hotel_data.get("price", "")
+                price = None
+                if price_str:
+                    try:
+                        price = float(price_str.replace(",", ""))
+                    except ValueError:
+                        logger.warning(f"Price không hợp lệ: {price_str}")
+
+                # Xử lý location_rating
+                location_rating_str = hotel_data.get("location_rating", "")
+                location_rating = None
+                if location_rating_str:
+                    try:
+                        location_rating = float(location_rating_str)
+                    except ValueError:
+                        logger.warning(f"Location_rating không hợp lệ: {location_rating_str}")
+                else:
+                    location_rating = 3
+
+                # Xử lý hotel_class
+                hotel_class_raw = hotel_data.get("hotel_class")
+                hotel_class = extract_hotel_class(hotel_class_raw) if hotel_class_raw else None
+
+                # Chèn dữ liệu với đúng 9 tham số
                 cursor.execute(
                     """
                     INSERT INTO hotels (schedule_id, name, address, description, price, hotel_class,
-                                       img_origin, location_rating, link, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
+                                       img_origin, location_rating, link,created_at,updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     [
                         schedule_id,
-                        hotel_data.get("name", ""),
+                        name,
+                        "",  # Address không có trong hotel_data, dùng chuỗi rỗng
                         hotel_data.get("description", ""),
-                        hotel_data.get("price", ""),
-                        hotel_data.get("location_rating", ""),
-                        hotel_data.get("hotel_class", ""),
+                        price,
+                        hotel_class,
                         hotel_data.get("img_origin", ""),
+                        location_rating,
                         hotel_data.get("link", ""),
-                        hotel_data.get("animates", ""),
-                        hotel_data.get("name_nearby_place", "")
+                        now,now
                     ]
                 )
                 logger.info(f"Đã chèn hotel cho schedule_id: {schedule_id}")
             else:
                 logger.warning("Thiếu tên khách sạn, không chèn hotel")
 
-        # Chèn dữ liệu vào bảng days và itineraries
+        # **Chèn dữ liệu vào bảng days và itineraries**
         for day in days_data:
             date_str = day.get("date_str", "").strip()
             if not date_str:
-                # Nếu date_str không có, sử dụng ngày hiện tại
                 date_str = datetime.now().strftime("%Y-%m-%d")
                 logger.info(f"date_str không được cung cấp, sử dụng ngày hiện tại: {date_str}")
             else:
-                # Nếu date_str được cung cấp, kiểm tra định dạng
                 try:
                     parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
                     date_str = parsed_date.strftime("%Y-%m-%d")
@@ -771,7 +772,7 @@ def save_schedule(request):
                 )
                 logger.info(f"Đã chèn itinerary cho day_id: {day_id}")
 
-        # Chèn dữ liệu vào bảng sharedlinks
+        # **Chèn dữ liệu vào bảng sharedlinks**
         share_token = str(uuid.uuid4()).lower()
         share_link = f"{request.scheme}://{request.get_host()}/recommend/view-schedule/{share_token}/"
         cursor.execute(
@@ -780,7 +781,7 @@ def save_schedule(request):
         )
         logger.info(f"Đã chèn sharedlink cho schedule_id: {schedule_id}")
 
-        # Commit tất cả thay đổi
+        # **Commit tất cả thay đổi**
         db.commit()
         logger.info("Đã commit tất cả thay đổi thành công")
 
@@ -811,6 +812,8 @@ def save_schedule(request):
         if db and db.open:
             db.close()
             logger.info("Đã đóng kết nối database")
+
+
 
 @csrf_exempt
 @require_POST
