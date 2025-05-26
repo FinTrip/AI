@@ -676,14 +676,15 @@ def save_schedule(request):
                     """,
                     [
                         schedule_id,
-                        name,
-                        hotel_data.get("address", ""),
+                        hotel_data.get("name", ""),
                         hotel_data.get("description", ""),
-                        price,
-                        hotel_class,
+                        hotel_data.get("price", ""),
+                        hotel_data.get("location_rating", ""),
+                        hotel_data.get("hotel_class", ""),
                         hotel_data.get("img_origin", ""),
-                        location_rating,
-                        hotel_data.get("link", "")
+                        hotel_data.get("link", ""),
+                        hotel_data.get("animates", ""),
+                        hotel_data.get("name_nearby_place", "")
                     ]
                 )
                 logger.info(f"Đã chèn hotel cho schedule_id: {schedule_id}")

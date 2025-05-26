@@ -13,7 +13,7 @@ from sklearn.linear_model import LinearRegression
 # Đường dẫn tới các file dữ liệu
 FOOD_FILE = os.path.join(os.path.dirname(__file__), "data", "food.csv")
 PLACE_FILE = os.path.join(os.path.dirname(__file__), "data", "place2.xlsx")
-HOTEL_FILE = os.path.join(os.path.dirname(__file__), "data", "all_hotels.csv")
+HOTEL_FILE = os.path.join(os.path.dirname(__file__), "data", "hotels.csv")
 
 # Danh sách các tỉnh lân cận (chuẩn hóa không dấu và viết thường)
 NEARBY_PROVINCES = {

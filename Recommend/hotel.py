@@ -4,7 +4,7 @@ import os
 import unidecode
 import random
 
-csv_filename = os.path.join(os.path.dirname(__file__), "data", "all_hotels.csv")
+csv_filename = os.path.join(os.path.dirname(__file__), "data", "hotelss.csv")
 
 def sanitize_input(input_str):
     """Loại bỏ ký tự đặc biệt"""
