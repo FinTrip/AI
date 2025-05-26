@@ -63,7 +63,7 @@ WSGI_APPLICATION = 'FinTrip.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fintripp',
+        'NAME': 'FinnTrip',
         'USER': 'root',
         'PASSWORD': '123456',
         'HOST': 'localhost',

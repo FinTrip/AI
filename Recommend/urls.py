@@ -15,7 +15,6 @@ urlpatterns = [
     path('start-survey/', views.start_survey, name='start_survey'),
     path('set-province/', views.set_province, name='set_province'),
     path('set-dates/', views.set_dates, name='set_dates'),
-    path('set-budget/', views.set_budget, name='set_budget'),
 
     #flight
     path('check-flight-di/', views.check_flight_di, name='check_flight_di'),
@@ -36,7 +35,8 @@ urlpatterns = [
     #share schedule
     path('share-schedule/', views.share_schedule, name='share_schedule'),
     path('share-schedule-via-email/', views.share_schedule_via_email, name='share_schedule_via_email'),
-    re_path(r'^view-schedule/(?P<share_token>[0-9a-f-]{36})/?$', views.view_schedule, name='view_schedule'),
+    path('get-schedule/', views.get_schedule, name='get_schedule'),
+    path('view-schedule/<int:schedule_id>/', views.view_schedule, name='view_schedule'),
 
     #Homepage
     path('homepage-hotels/', views.get_all_hotels_homepage, name='get_all_hotels_homepage'),

@@ -289,25 +289,33 @@ def start_survey(request):
     clear_session_cache(session_key)
     return JsonResponse({"message": "Bắt đầu khảo sát mới, dữ liệu cũ đã được xóa."}, status=200)
 
-
 @csrf_exempt
 @require_POST
 def set_province(request):
     try:
         data = json.loads(request.body)
-        selected_province = data.get("selected_province", "").strip()
+        province = data.get("province", "").strip()
 
-        if not selected_province:
-            return JsonResponse({"error": "Thiếu trường bắt buộc: selected_province"}, status=400)
+        fields = {"province": province}
+        error_response = check_missing_fields(fields)
+        if error_response:
+            return error_response
+
+        error_response = check_field_length(fields)
+        if error_response:
+            return error_response
+
+        error_response = check_province_format(province)
+        if error_response:
+            return error_response
 
         cache_key = f'selected_province_{request.session.session_key}'
-        cache.set(cache_key, selected_province, timeout=3600)
-        logger.info(f"Tỉnh đã được lưu: {selected_province}")
+        cache.set(cache_key, province, timeout=3600)
+        logger.info(f"Province saved to cache: {province}")
         return JsonResponse({"message": "Tỉnh đã được lưu."}, status=200)
     except json.JSONDecodeError:
         logger.error("Invalid JSON in set_province")
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
-
 
 @csrf_exempt
 @require_POST
@@ -317,162 +325,132 @@ def set_dates(request):
         start_day = data.get("start_day", "").strip()
         end_day = data.get("end_day", "").strip()
 
-        if not start_day or not end_day:
-            return JsonResponse({"error": "Thiếu trường bắt buộc: start_day hoặc end_day"}, status=400)
+        fields = {"start_day": start_day, "end_day": end_day}
+        error_response = check_missing_fields(fields)
+        if error_response:
+            return error_response
 
-        error_message = check_date_logic(start_day, end_day)
-        if error_message:
-            return JsonResponse({"error": error_message}, status=400)
+        error_response = check_field_length(fields)
+        if error_response:
+            return error_response
+
+        error = check_date_format(start_day, "start_day") or check_date_format(end_day, "end_day")
+        if error:
+            return error
+
+        fmt = "%Y-%m-%d"
+        start_date = datetime.strptime(start_day, fmt).date()
+        end_date = datetime.strptime(end_day, fmt).date()
+        current_date = datetime.now().date()
+
+        error_response = check_date_logic(start_date, end_date, current_date)
+        if error_response:
+            return error_response
 
         cache_key_prefix = request.session.session_key
         cache.set(f'start_day_{cache_key_prefix}', start_day, timeout=3600)
         cache.set(f'end_day_{cache_key_prefix}', end_day, timeout=3600)
-        logger.info(f"Ngày đi: {start_day}, Ngày về: {end_day}")
-        return JsonResponse({"message": "Ngày đi và ngày về đã được lưu."}, status=200)
+        logger.info(f"Dates saved to cache: start_day={start_day}, end_day={end_day}")
+        return JsonResponse({"message": "Ngày đã được lưu."}, status=200)
     except json.JSONDecodeError:
         logger.error("Invalid JSON in set_dates")
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
 
-
-@csrf_exempt
-@require_POST
-def set_budget(request):
-    try:
-        data = json.loads(request.body)
-        budget = data.get("budget", "").strip()
-
-        if not budget:
-            return JsonResponse({"error": "Thiếu trường bắt buộc: budget"}, status=400)
-
-        try:
-            budget = float(budget)
-            if budget <= 0:
-                return JsonResponse({"error": "Ngân sách phải là số dương."}, status=400)
-        except ValueError:
-            return JsonResponse({"error": "Ngân sách phải là số."}, status=400)
-
-        cache_key = f'budget_{request.session.session_key}'
-        cache.set(cache_key, budget, timeout=3600)
-        logger.info(f"Ngân sách đã được lưu: {budget}")
-        return JsonResponse({"message": "Ngân sách đã được lưu."}, status=200)
-    except json.JSONDecodeError:
-        logger.error("Invalid JSON in set_budget")
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
-
-
 @require_GET
 def check_flight_di(request):
-    try:
-        data = json.loads(request.body)
-        selected_province = data.get("departureInput", "").strip()
-        budget = cache.get(f'budget_{request.session.session_key}', 0)
+    data = json.loads(request.body)
+    selected_province = data.get("departureInput", "").strip()
 
-        if not selected_province:
-            return JsonResponse({"error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."}, status=400)
-
-        has_airport = selected_province.lower() in [province.lower() for province in air_province]
-        can_afford_flight = budget >= 2000000
-
-        message = ""
-        if not has_airport:
-            message = f"'{selected_province.title()}' hiện tại tỉnh của bạn chưa có sân bay."
-        elif not can_afford_flight:
-            message = "Ngân sách của bạn không đủ để chọn phương tiện máy bay."
-
+    if not selected_province:
         return JsonResponse({
-            "has_airport": has_airport,
-            "can_afford_flight": can_afford_flight,
-            "message": message
-        }, status=200)
-    except json.JSONDecodeError:
-        logger.error("Invalid JSON in check_flight_di")
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
-    except Exception as e:
-        logger.error(f"Error in check_flight_di: {str(e)}")
-        traceback.print_exc()
-        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+            "error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."
+        }, status=400)
+    has_airport = selected_province in [province.lower() for province in air_province]
 
+    if not has_airport:
+        message = f"'{selected_province.title()}' hiện tại tỉnh của bạn chưa có sân bay. Vui lòng chọn dịch vụ khách sạn phù hợp."
+
+    return JsonResponse({
+        "has_airport": has_airport,
+        "message": message
+    }, status=200)
 
 @require_GET
 def check_flight_den(request):
-    try:
-        session_key = request.session.session_key
-        selected_province = cache.get(f'selected_province_{session_key}', '').strip().lower()
-        budget = cache.get(f'budget_{session_key}', 0)
+    session_key = request.session.session_key
+    selected_province = cache.get(f'selected_province_{session_key}', '').strip().lower()
 
-        if not selected_province:
-            return JsonResponse({"error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."}, status=400)
-
-        has_airport = selected_province in [province.lower() for province in air_province]
-        can_afford_flight = budget >= 2000000
-
-        message = ""
-        if not has_airport:
-            message = f"'{selected_province.title()}' hiện chưa có sân bay."
-        elif not can_afford_flight:
-            message = "Ngân sách của bạn không đủ để chọn phương tiện máy bay."
-
+    if not selected_province:
         return JsonResponse({
-            "has_airport": has_airport,
-            "can_afford_flight": can_afford_flight,
-            "message": message
-        }, status=200)
-    except Exception as e:
-        logger.error(f"Error in check_flight_den: {str(e)}")
-        traceback.print_exc()
-        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+            "error": "Bạn chưa chọn tỉnh/thành phố. Vui lòng chọn để tiếp tục."
+        }, status=400)
+    has_airport = selected_province in [province.lower() for province in air_province]
 
+    if not has_airport:
+        message = f"'{selected_province.title()}' hiện chưa có sân bay. Vui lòng chọn dịch vụ khách sạn phù hợp."
 
+    return JsonResponse({
+        "has_airport": has_airport,
+        "message": message
+    }, status=200)
+
+# API tìm kiếm chuyến bay
 @csrf_exempt
 @require_POST
 def rcm_flight(request):
     try:
-        data = json.loads(request.body.decode('utf-8'))
+        data = json.loads(request.body)
         cache_key_prefix = request.session.session_key
-        start_day = cache.get(f'start_day_{cache_key_prefix}', '')
-        departure = data.get('departure', '')
-        destination = data.get('destination', cache.get(f'selected_province_{cache_key_prefix}', ''))
+        origin = data.get("origin", "").strip()
+        destination = data.get("destination", cache.get(f'selected_province_{cache_key_prefix}', '')).strip()
+        departure_date = data.get("departure_date", cache.get(f'start_day_{cache_key_prefix}', '')).strip()
 
-        if not start_day or not departure or not destination:
-            return JsonResponse({"error": "Thiếu thông tin ngày đi, điểm đi hoặc điểm đến."}, status=400)
+        if not origin or not destination or not departure_date:
+            return JsonResponse({"error": "Thiếu trường bắt buộc: origin, destination, departure_date"}, status=400)
 
-        result = search_flight_service(departure, destination, start_day)
-        if not result:
-            return JsonResponse({"error": "Không tìm thấy chuyến bay."}, status=404)
+        if any(len(value) > 50 for value in [origin, destination, departure_date]):
+            return JsonResponse({"error": "Dữ liệu đầu vào quá dài."}, status=400)
 
-        return JsonResponse({
-            "flights": result,
-            "timestamp": datetime.now().isoformat(),
-            "csrf_token": get_token(request)
-        }, json_dumps_params={"ensure_ascii": False}, status=200)
+        if any(char in origin + destination for char in "<>\"'{}[]()|&;"):
+            return JsonResponse({"error": "Dữ liệu chứa ký tự không hợp lệ."}, status=400)
+
+        result = search_flight_service(origin, destination, departure_date)
+        if "error" in result:
+            return JsonResponse({"error": result["error"]}, status=400)
+
+        return JsonResponse(result, safe=False, status=200)
     except json.JSONDecodeError:
         logger.error("Invalid JSON in rcm_flight")
         return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
     except Exception as e:
         logger.error(f"Error in rcm_flight: {str(e)}")
         traceback.print_exc()
-        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
 
-
+# API lưu thông tin chuyến bay
 @csrf_exempt
 @require_POST
 def select_flight(request):
     try:
         data = json.loads(request.body)
-        flight_info = data.get("flight_info", None)
-
+        flight_info = data.get('flight_info')
         if not flight_info:
-            return JsonResponse({"error": "Thiếu thông tin chuyến bay."}, status=400)
+            logger.error("Missing flight_info in select_flight")
+            return JsonResponse({"error": "Missing flight info"}, status=400)
 
         cache_key = f'selected_flight_{request.session.session_key}'
         cache.set(cache_key, flight_info, timeout=3600)
-        logger.info(f"Chuyến bay đã được chọn: {flight_info}")
-        return JsonResponse({"message": "Chuyến bay đã được lưu."}, status=200)
+        logger.info(f"Flight saved to cache: {flight_info}")
+        return JsonResponse({"message": "Flight selected successfully"}, status=200)
     except json.JSONDecodeError:
         logger.error("Invalid JSON in select_flight")
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        logger.error(f"Error in select_flight: {str(e)}")
+        traceback.print_exc()
+        return JsonResponse({"error": f"Error system: {str(e)}"}, status=400)
 
-
+# API tìm kiếm khách sạn
 @csrf_exempt
 @require_POST
 def rcm_hotel(request):
@@ -480,7 +458,6 @@ def rcm_hotel(request):
         data = json.loads(request.body.decode('utf-8'))
         cache_key_prefix = request.session.session_key
         search_term = data.get("destination", cache.get(f'selected_province_{cache_key_prefix}', '')).strip()
-        budget = cache.get(f'budget_{cache_key_prefix}', 0)
 
         if not search_term:
             return JsonResponse({"error": "Vui lòng cung cấp tỉnh/thành phố."}, status=400)
@@ -492,25 +469,8 @@ def rcm_hotel(request):
         if not result:
             return JsonResponse({"error": "Không tìm thấy khách sạn."}, status=404)
 
-        if budget < 2000000:
-            star_range = (2, 3)
-        elif 2000000 <= budget < 5000000:
-            star_range = (2, 3)
-        elif 5000000 <= budget < 10000000:
-            star_range = (3, 4)
-        else:
-            star_range = (3, 5)
-
-        filtered_hotels = [
-            hotel for hotel in result
-            if star_range[0] <= float(hotel.get('hotel_class', 0)) <= star_range[1]
-        ]
-
-        if not filtered_hotels:
-            return JsonResponse({"error": "Không có khách sạn phù hợp với ngân sách của bạn."}, status=404)
-
         return JsonResponse({
-            "hotels": filtered_hotels,
+            "hotels": result,
             "timestamp": datetime.now().isoformat(),
             "csrf_token": get_token(request)
         }, json_dumps_params={"ensure_ascii": False}, status=200)
@@ -522,26 +482,30 @@ def rcm_hotel(request):
         traceback.print_exc()
         return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-
+# API lưu khách sạn đã chọn
 @csrf_exempt
 @require_POST
 def select_hotel(request):
     try:
         data = json.loads(request.body)
-        hotel_info = data.get("hotel_info", None)
-
+        hotel_info = data.get('hotel_info')
         if not hotel_info:
-            return JsonResponse({"error": "Thiếu thông tin khách sạn."}, status=400)
+            logger.error("Missing hotel_info in select_hotel")
+            return JsonResponse({"error": "Missing hotel info"}, status=400)
 
         cache_key = f'selected_hotel_{request.session.session_key}'
         cache.set(cache_key, hotel_info, timeout=3600)
-        logger.info(f"Khách sạn đã được chọn: {hotel_info}")
-        return JsonResponse({"message": "Khách sạn đã được lưu."}, status=200)
+        logger.info(f"Hotel saved to cache: {hotel_info}")
+        return JsonResponse({"message": "Hotel selected successfully"}, status=200)
     except json.JSONDecodeError:
         logger.error("Invalid JSON in select_hotel")
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ."}, status=400)
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except Exception as e:
+        logger.error(f"Error in select_hotel: {str(e)}")
+        traceback.print_exc()
+        return JsonResponse({"error": f"Lỗi hệ thống: {str(e)}"}, status=500)
 
-
+# API tạo lịch trình
 @csrf_exempt
 @require_POST
 def recommend_travel_schedule(request):
@@ -551,53 +515,34 @@ def recommend_travel_schedule(request):
         province = data.get('province', cache.get(f'selected_province_{cache_key_prefix}', ''))
         start_day = data.get('start_day', cache.get(f'start_day_{cache_key_prefix}', ''))
         end_day = data.get('end_day', cache.get(f'end_day_{cache_key_prefix}', ''))
-        budget = cache.get(f'budget_{cache_key_prefix}', 0)
-        flight_info = cache.get(f'selected_flight_{cache_key_prefix}', None)
-        hotel_info = cache.get(f'selected_hotel_{cache_key_prefix}', None)
+        flight_info = data.get('flight_info', None)
+        hotel_info = data.get('hotel_info', None)
 
-        if not province or not start_day or not end_day or not budget:
+        if not province or not start_day or not end_day:
             logger.error("Missing required fields in travel_schedule")
-            return JsonResponse({"error": "Thiếu thông tin tỉnh, ngày đi, ngày về hoặc ngân sách"}, status=400)
+            return JsonResponse({"error": "Thiếu thông tin tỉnh, ngày đi hoặc ngày về"}, status=400)
+
+        if flight_info:
+            cache.set(f'selected_flight_{cache_key_prefix}', flight_info, timeout=3600)
+            logger.info(f"Flight info updated in cache: {flight_info}")
+        if hotel_info:
+            cache.set(f'selected_hotel_{cache_key_prefix}', hotel_info, timeout=3600)
+            logger.info(f"Hotel info updated in cache: {hotel_info}")
+
+        selected_hotel = cache.get(f'selected_hotel_{cache_key_prefix}', {})
+        selected_flight = cache.get(f'selected_flight_{cache_key_prefix}', {})
+
+        if not selected_flight:
+            logger.warning("No flight information found in cache")
+        if not selected_hotel:
+            logger.warning("No hotel information found in cache")
 
         start_date = datetime.strptime(start_day, "%Y-%m-%d").date()
         end_date = datetime.strptime(end_day, "%Y-%m-%d").date()
-        total_days = (end_date - start_date).days + 1
-
-        if total_days < 1:
-            return JsonResponse({"error": "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu."}, status=400)
-
-        if budget < 2000000:
-            if hotel_info and not flight_info:
-                max_days = 3
-            elif not hotel_info and not flight_info:
-                max_days = 5
-            else:
-                max_days = 0
-        elif 2000000 <= budget < 5000000:
-            if hotel_info and flight_info:
-                max_days = 3
-            elif flight_info and not hotel_info:
-                max_days = 5
-            elif not flight_info and hotel_info:
-                max_days = 3
-            else:
-                max_days = 7
-        elif 5000000 <= budget < 10000000:
-            if hotel_info and flight_info:
-                max_days = 5
-            elif flight_info and not hotel_info:
-                max_days = 7
-            elif not flight_info and hotel_info:
-                max_days = 5
-            else:
-                max_days = 10
-        else:
-            max_days = float('inf')
-
-        if total_days > max_days:
-            return JsonResponse({
-                "error": f"Số ngày của chuyến đi ({total_days} ngày) vượt quá số ngày tối đa cho phép ({max_days} ngày) với ngân sách và các lựa chọn hiện tại."
-            }, status=400)
+        current_date = datetime.now().date()
+        error_response = check_date_logic(start_date, end_date, current_date)
+        if error_response:
+            return error_response
 
         food_df, place_df, _ = load_data(FOOD_FILE, PLACE_FILE)
         schedule_result = recommend_schedule(start_day, end_day, province, food_df, place_df)
@@ -606,8 +551,8 @@ def recommend_travel_schedule(request):
 
         response_data = {
             "schedule": schedule_result,
-            "hotel": hotel_info,
-            "flight": flight_info,
+            "hotel": selected_hotel,
+            "flight": selected_flight,
             "province": province,
             "timestamp": datetime.now().isoformat(),
             "csrf_token": get_token(request),
@@ -623,6 +568,8 @@ def recommend_travel_schedule(request):
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
+
+
 '''
 
 Kết thúc lịch trinh
@@ -633,6 +580,21 @@ Kết thúc lịch trinh
 '''
 Save share view
 '''
+def extract_hotel_class(hotel_class_raw):
+    if hotel_class_raw is None:
+        return None
+    if isinstance(hotel_class_raw, (int, float)):
+        return int(hotel_class_raw)
+    elif isinstance(hotel_class_raw, str):
+        match = re.search(r'\d+', hotel_class_raw)
+        if match:
+            return int(match.group())
+        else:
+            return None  # Hoặc có thể trả về giá trị mặc định như 0 nếu cột không cho phép NULL
+    else:
+        return None
+
+
 # API lưu lịch trình
 @csrf_exempt
 @require_POST
@@ -640,72 +602,48 @@ def save_schedule(request):
     db = None
     cursor = None
     try:
+        # Parse JSON từ request
         data = json.loads(request.body)
         user_id = data.get("user_id")
         if not user_id:
-            return JsonResponse({"error": "Thiếu user_id trong yêu cầu"}, status=400)
+            logger.error("Thiếu user_id trong request")
+            return JsonResponse({"error": "Thiếu user_id"}, status=400)
 
-        # Đảm bảo charset là utf8mb4 trong cấu hình
+        # Kết nối database
         db = MySQLdb.connect(
             host=MYSQL_HOST,
             user=MYSQL_USER,
             passwd=MYSQL_PASSWORD,
             db=MYSQL_DB,
             port=MYSQL_PORT,
-            charset='utf8mb4'  # Thay MYSQL_CHARSET bằng giá trị cố định hoặc đảm bảo MYSQL_CHARSET='utf8mb4'
+            charset=MYSQL_CHARSET
         )
         cursor = db.cursor()
+        logger.info(f"Kết nối database thành công cho user_id: {user_id}")
 
-        # Kiểm tra người dùng tồn tại
+        # Kiểm tra user_id có tồn tại không
         cursor.execute("SELECT id FROM users WHERE id = %s", [user_id])
         if not cursor.fetchone():
-            return JsonResponse({"error": "Không tìm thấy thông tin người dùng"}, status=404)
+            logger.error(f"Không tìm thấy user với id: {user_id}")
+            return JsonResponse({"error": "Không tìm thấy người dùng"}, status=404)
 
         # Lấy dữ liệu từ request
         schedule_name = data.get("schedule_name", "Lịch trình của tôi").strip()
         days_data = data.get("days", [])
         hotel_data = data.get("hotel", {})
-        flight_data = data.get("flight", {})
 
         if not days_data or not isinstance(days_data, list):
-            return JsonResponse({"error": "Danh sách ngày (days) không được rỗng và phải là danh sách"}, status=400)
+            logger.error("Danh sách ngày rỗng hoặc không hợp lệ")
+            return JsonResponse({"error": "Danh sách ngày rỗng hoặc không hợp lệ"}, status=400)
 
-        # Chèn lịch trình vào bảng schedules
+        # Chèn dữ liệu vào bảng schedules
         cursor.execute("INSERT INTO schedules (user_id, name) VALUES (%s, %s)", [user_id, schedule_name])
         schedule_id = cursor.lastrowid
+        logger.info(f"Đã chèn schedule với id: {schedule_id}")
 
-        # Xử lý dữ liệu chuyến bay
-        if flight_data and isinstance(flight_data, dict):
-            cabin = flight_data.get("cabin", "")
-            fare_basis = flight_data.get("fare_basis", "")
-            flight_code = flight_data.get("outbound_flight_code", "")
-            departure_time_str = flight_data.get("outbound_time", "")
-            total_price_str = flight_data.get("total_price_vnd", "")
-
-            departure_time = None
-            if departure_time_str:
-                try:
-                    departure_time = datetime.strptime(departure_time_str, "%Y-%m-%dT%H:%M:%S")
-                except ValueError:
-                    logger.error(f"Định dạng outbound_time không hợp lệ: {departure_time_str}")
-
-            total_price = None
-            if total_price_str:
-                try:
-                    total_price = float(total_price_str.replace(" VNĐ", "").replace(",", ""))
-                except ValueError:
-                    logger.error(f"Định dạng total_price_vnd không hợp lệ: {total_price_str}")
-            cursor.execute(
-                """
-                INSERT INTO flights (schedule_id, fare_basis, cabin, flight_code, departure_time, total_price, created_at, updated_at)
-                VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
-                """,
-                [schedule_id, fare_basis, cabin, flight_code, departure_time, total_price]
-            )
-
-        # Xử lý dữ liệu khách sạn (không lưu nếu thiếu tên)
+        # Chèn dữ liệu vào bảng hotels
         if hotel_data and isinstance(hotel_data, dict):
-            name = hotel_data.get("name", "")
+            name = hotel_data.get("name", "").strip()
             price_str = hotel_data.get("price", "")
             location_rating_str = hotel_data.get("location_rating", "")
 
@@ -714,19 +652,25 @@ def save_schedule(request):
                 try:
                     price = float(price_str.replace(",", ""))
                 except ValueError:
-                    logger.error(f"Định dạng price không hợp lệ: {price_str}")
+                    logger.warning(f"Price không hợp lệ: {price_str}")
 
             location_rating = None
             if location_rating_str:
                 try:
                     location_rating = float(location_rating_str)
                 except ValueError:
-                    logger.error(f"Định dạng location_rating không hợp lệ: {location_rating_str}")
+                    logger.warning(f"Location_rating không hợp lệ: {location_rating_str}")
+
+            # Xử lý hotel_class
+            hotel_class_raw = hotel_data.get("hotel_class")
+            hotel_class = extract_hotel_class(hotel_class_raw)
+            if hotel_class is None and hotel_class_raw:
+                logger.warning(f"Không thể trích xuất hotel_class từ: {hotel_class_raw}")
 
             if name:
                 cursor.execute(
                     """
-                    INSERT INTO hotels (schedule_id, name, address, description, price, hotel_class, 
+                    INSERT INTO hotels (schedule_id, name, address, description, price, hotel_class,
                                        img_origin, location_rating, link, created_at, updated_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
                     """,
@@ -736,98 +680,136 @@ def save_schedule(request):
                         hotel_data.get("address", ""),
                         hotel_data.get("description", ""),
                         price,
-                        hotel_data.get("hotel_class", ""),
+                        hotel_class,
                         hotel_data.get("img_origin", ""),
                         location_rating,
                         hotel_data.get("link", "")
                     ]
                 )
+                logger.info(f"Đã chèn hotel cho schedule_id: {schedule_id}")
             else:
-                logger.error("Thiếu tên khách sạn trong hotel_data")
+                logger.warning("Thiếu tên khách sạn, không chèn hotel")
 
-        # Chèn dữ liệu các ngày và lịch trình
+        # Chèn dữ liệu vào bảng days và itineraries
         for day in days_data:
             date_str = day.get("date_str", "").strip()
             if not date_str:
-                return JsonResponse({"error": "date_str không được rỗng"}, status=400)
-            try:
-                parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-                date_str = parsed_date.strftime("%Y-%m-%d")
-            except ValueError:
-                return JsonResponse({"error": f"Định dạng date_str không hợp lệ: {date_str}"}, status=400)
+                # Nếu date_str không có, sử dụng ngày hiện tại
+                date_str = datetime.now().strftime("%Y-%m-%d")
+                logger.info(f"date_str không được cung cấp, sử dụng ngày hiện tại: {date_str}")
+            else:
+                # Nếu date_str được cung cấp, kiểm tra định dạng
+                try:
+                    parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                    date_str = parsed_date.strftime("%Y-%m-%d")
+                except ValueError:
+                    logger.error(f"Định dạng date_str không hợp lệ: {date_str}")
+                    return JsonResponse({"error": f"Định dạng date_str không hợp lệ: {date_str}"}, status=400)
 
             cursor.execute(
                 "INSERT INTO days (schedule_id, day_index, date_str) VALUES (%s, %s, %s)",
                 [schedule_id, day.get("day_index", 0), date_str]
             )
             day_id = cursor.lastrowid
+            logger.info(f"Đã chèn day với id: {day_id}")
 
             for item in day.get("itinerary", []):
                 if not isinstance(item, dict):
+                    logger.warning(f"Item không phải dict: {item}")
                     continue
                 food_title = item.get("food_title", "").strip()
                 place_title = item.get("place_title", "").strip()
                 if not food_title and not place_title:
+                    logger.info("Bỏ qua item vì thiếu cả food_title và place_title")
                     continue
+
+                food_rating = item.get("food_rating")
+                if food_rating:
+                    try:
+                        food_rating = float(food_rating)
+                    except (ValueError, TypeError):
+                        food_rating = None
+
+                place_rating = item.get("place_rating")
+                if place_rating:
+                    try:
+                        place_rating = float(place_rating)
+                    except (ValueError, TypeError):
+                        place_rating = None
 
                 cursor.execute(
                     """
                     INSERT INTO itineraries (
-                        day_id, timeslot, food_title, food_rating, food_price, food_address, 
-                        food_phone, food_link, food_image, place_title, place_rating, 
-                        place_description, place_address, place_img, place_link, 
-                        `order`, food_time, place_time
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        day_id, timeslot, food_title, food_rating, food_price, food_address,
+                        food_phone, food_link, food_image, food_time, place_title, place_rating,
+                        place_description, place_address, place_img, place_link, place_time,
+                        `order`, schedule_id
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     [
                         day_id,
                         item.get("timeslot", "")[:20],
                         food_title[:100],
-                        item.get("food_rating"),
+                        food_rating,
                         str(item.get("food_price", ""))[:50],
                         item.get("food_address", "")[:200],
                         item.get("food_phone", "")[:20],
                         item.get("food_link", "")[:255],
                         item.get("food_image", "")[:255],
+                        item.get("food_time", "")[:255] if item.get("food_time") else None,
                         place_title[:100],
-                        item.get("place_rating"),
+                        place_rating,
                         item.get("place_description", ""),
                         item.get("place_address", "")[:200],
                         item.get("place_img", "")[:255],
                         item.get("place_link", "")[:255],
+                        item.get("place_time", "")[:255] if item.get("place_time") else None,
                         item.get("order", 0),
-                        item.get("food_time", "")[:255] if item.get("food_time") else None,
-                        item.get("place_time", "")[:255] if item.get("place_time") else None
+                        schedule_id
                     ]
                 )
+                logger.info(f"Đã chèn itinerary cho day_id: {day_id}")
 
-        # Tạo và lưu share_link
+        # Chèn dữ liệu vào bảng sharedlinks
         share_token = str(uuid.uuid4()).lower()
         share_link = f"{request.scheme}://{request.get_host()}/recommend/view-schedule/{share_token}/"
         cursor.execute(
             "INSERT INTO sharedlinks (schedule_id, share_link, created_at) VALUES (%s, %s, NOW())",
             [schedule_id, share_link]
         )
+        logger.info(f"Đã chèn sharedlink cho schedule_id: {schedule_id}")
 
+        # Commit tất cả thay đổi
         db.commit()
+        logger.info("Đã commit tất cả thay đổi thành công")
+
         return JsonResponse({
-            "message": "Lịch trình đã được lưu thành công",
+            "message": "Lịch trình lưu thành công",
             "schedule_id": schedule_id,
             "share_link": share_link
         }, status=201)
 
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Dữ liệu JSON không hợp lệ"}, status=400)
-    except ValueError as ve:
-        return JsonResponse({"error": f"Lỗi dữ liệu: {str(ve)}"}, status=400)
-    except Exception as e:
+        logger.error("JSON không hợp lệ trong request")
+        return JsonResponse({"error": "JSON không hợp lệ"}, status=400)
+    except MySQLdb.Error as e:
+        if db:
+            db.rollback()
+        logger.error(f"Lỗi database: {str(e)}")
         traceback.print_exc()
-        return JsonResponse({"error": f"Lỗi không xác định: {str(e)}"}, status=500)
+        return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
+    except Exception as e:
+        if db:
+            db.rollback()
+        logger.error(f"Lỗi không xác định: {str(e)}")
+        traceback.print_exc()
+        return JsonResponse({"error": "Lỗi server"}, status=500)
     finally:
         if cursor:
             cursor.close()
         if db and db.open:
             db.close()
+            logger.info("Đã đóng kết nối database")
 
 @csrf_exempt
 @require_POST
@@ -983,11 +965,77 @@ Trân trọng,
         if db and db.open:
             db.close()
 
+
+@csrf_exempt
 @require_GET
-def view_schedule(request, share_token):
+def get_schedule(request):
+    # Lấy user_id từ query string
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({"error": "Thiếu user_id"}, status=400)
+
+    # Xác thực user_id là số nguyên
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return JsonResponse({"error": "user_id phải là số nguyên"}, status=400)
+
+    try:
+        with MySQLdb.connect(
+                host=MYSQL_HOST,
+                user=MYSQL_USER,
+                passwd=MYSQL_PASSWORD,
+                db=MYSQL_DB,
+                port=MYSQL_PORT,
+                charset=MYSQL_CHARSET
+        ) as db:
+            with db.cursor() as cursor:
+                # Kiểm tra user tồn tại
+                cursor.execute("SELECT id FROM users WHERE id = %s", [user_id])
+                if not cursor.fetchone():
+                    return JsonResponse({"error": "Không tìm thấy người dùng"}, status=404)
+
+                # Lấy schedules
+                cursor.execute("SELECT * FROM schedules WHERE user_id = %s", [user_id])
+                columns = [desc[0] for desc in cursor.description]
+                schedules = cursor.fetchall()
+
+                # Chuyển đổi dữ liệu
+                schedule_list = []
+                for schedule in schedules:
+                    schedule_dict = dict(zip(columns, schedule))
+                    if 'created_at' in schedule_dict and schedule_dict['created_at']:
+                        schedule_dict['created_at'] = schedule_dict['created_at'].isoformat()
+                    schedule_list.append(schedule_dict)
+
+                # Chuẩn bị response
+                if not schedule_list:
+                    response_data = {
+                        "status": "success",
+                        "data": {"schedules": []},
+                        "message": "Không có lịch trình nào cho người dùng này"
+                    }
+                else:
+                    response_data = {
+                        "status": "success",
+                        "data": {"schedules": schedule_list},
+                        "message": "Lấy lịch trình thành công"
+                    }
+                logger.info("Travel schedule generated successfully")
+                return JsonResponse(response_data, status=200)
+
+    except MySQLdb.Error as e:
+        logger.error(f"Database error: {e}")
+        return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
+
+
+
+@require_GET
+def view_schedule(request, schedule_id):
     db = None
     cursor = None
     try:
+        # Kết nối đến cơ sở dữ liệu
         db = MySQLdb.connect(
             host=MYSQL_HOST,
             user=MYSQL_USER,
@@ -998,65 +1046,48 @@ def view_schedule(request, share_token):
         )
         cursor = db.cursor()
 
-        share_token = share_token.lower()
-        share_link_with_slash = f"http://127.0.0.1:8000/recommend/view-schedule/{share_token}/"
-        share_link_without_slash = f"http://127.0.0.1:8000/recommend/view-schedule/{share_token}"
-
-        cursor.execute(
-            """
-            SELECT schedule_id FROM sharedLinks 
-            WHERE LOWER(share_link) = LOWER(%s) OR LOWER(share_link) = LOWER(%s)
-            """,
-            [share_link_with_slash, share_link_without_slash]
-        )
-        result = cursor.fetchone()
-        if not result:
-            return JsonResponse({"error": "Liên kết chia sẻ không hợp lệ"}, status=404)
-        schedule_id = result[0]
-
-        cursor.execute("SELECT name FROM schedules WHERE id = %s", [schedule_id])
+        # Lấy thông tin lịch trình từ bảng schedules
+        cursor.execute("SELECT name, created_at FROM schedules WHERE id = %s", [schedule_id])
         schedule = cursor.fetchone()
         if not schedule:
             return JsonResponse({"error": "Lịch trình không tồn tại"}, status=404)
 
-        cursor.execute("SELECT id, departure, arrival FROM flights WHERE schedule_id = %s", [schedule_id])
-        flight = cursor.fetchone()
-        flight_data = None
-        if flight:
-            flight_data = {"flight_id": flight[0], "departure": flight[1], "arrival": flight[2]}
-
+        # Lấy thông tin khách sạn từ bảng hotels
         cursor.execute(
-            "SELECT id, name, address, description, price, hotel_class, img_origin, location_rating, link "
-            "FROM hotels WHERE schedule_id = %s",
+            """
+            SELECT id, address, created_at, description, hotel_class, img_origin, link, location_rating, 
+                   name, price, updated_at 
+            FROM hotels 
+            WHERE schedule_id = %s
+            """,
             [schedule_id]
         )
         hotel = cursor.fetchone()
         hotel_data = None
         if hotel:
-            hotel_data = {
-                "hotel_id": hotel[0],
-                "name": hotel[1],
-                "address": hotel[2],
-                "description": hotel[3],
-                "price": hotel[4],
-                "hotel_class": hotel[5],
-                "img_origin": hotel[6],
-                "location_rating": hotel[7],
-                "link": hotel[8]
-            }
+            # Xây dựng từ điển dữ liệu khách sạn
+            columns = [desc[0] for desc in cursor.description]
+            hotel_data = dict(zip(columns, hotel))
 
-        cursor.execute("SELECT id, day_index, date_str FROM days WHERE schedule_id = %s ORDER BY day_index", [schedule_id])
+        # Lấy thông tin các ngày trong lịch trình từ bảng days
+        cursor.execute(
+            "SELECT id, day_index, date_str FROM days WHERE schedule_id = %s ORDER BY day_index",
+            [schedule_id]
+        )
         days = cursor.fetchall()
 
-        schedule_data = {"name": schedule[0], "days": []}
+        # Tạo dữ liệu lịch trình
+        schedule_data = {"name": schedule[0], "created_at": schedule[1], "days": []}
         for day in days:
             day_id, day_index, date_str = day
+            # Lấy thông tin hành trình chi tiết từ bảng itineraries
             cursor.execute(
                 """
                 SELECT id, timeslot, food_title, food_rating, food_price, food_address, food_phone, 
                        food_link, food_image, place_title, place_rating, place_description, 
                        place_address, place_img, place_link, `order`, food_time, place_time
-                FROM itineraries WHERE day_id = %s ORDER BY `order`
+                FROM itineraries
+                WHERE day_id = %s
                 """,
                 [day_id]
             )
@@ -1064,46 +1095,31 @@ def view_schedule(request, share_token):
             day_plan = {
                 "day_index": day_index,
                 "date_str": date_str,
-                "itineraries": [
-                    {
-                        "id": item[0],
-                        "timeslot": item[1],
-                        "food_title": item[2],
-                        "food_rating": item[3],
-                        "food_price": item[4],
-                        "food_address": item[5],
-                        "food_phone": item[6],
-                        "food_link": item[7],
-                        "food_image": item[8],
-                        "place_title": item[9],
-                        "place_rating": item[10],
-                        "place_description": item[11],
-                        "place_address": item[12],
-                        "place_img": item[13],
-                        "place_link": item[14],
-                        "order": item[15],
-                        "food_time": item[16],
-                        "place_time": item[17]
-                    } for item in itineraries
-                ]
+                "itineraries": []
             }
+            for item in itineraries:
+                columns = [desc[0] for desc in cursor.description]
+                itinerary_data = dict(zip(columns, item))
+                day_plan["itineraries"].append(itinerary_data)
             schedule_data["days"].append(day_plan)
 
+        # Tạo dữ liệu phản hồi
         response_data = {}
-        if flight_data:
-            response_data["flight"] = flight_data
         if hotel_data:
             response_data["hotel"] = hotel_data
         response_data["schedule"] = schedule_data
 
         return JsonResponse(response_data, status=200)
 
-    except MySQLdb.Error:
+    except MySQLdb.Error as e:
+        logger.error(f"Database error: {e}")
         return JsonResponse({"error": "Lỗi cơ sở dữ liệu"}, status=500)
-    except Exception:
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
         traceback.print_exc()
         return JsonResponse({"error": "Lỗi không xác định"}, status=500)
     finally:
+        # Đóng kết nối cơ sở dữ liệu
         if cursor:
             cursor.close()
         if db and db.open:
