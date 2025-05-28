@@ -173,13 +173,25 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_BEAT_SCHEDULE = {
+#     'send-activity-reminder-every-minute': {
+#         'task': 'Recommend.tasks.send_activity_reminder_task',
+#         'schedule': 60.0,  # Chạy mỗi phút
+#     },
+#     'send-trip-reminder-every-minute': {
+#         'task': 'Recommend.tasks.send_trip_reminder_task',
+#         'schedule': 60.0,  # Chạy mỗi phút
+#     },
+# }
+
+
 CELERY_BEAT_SCHEDULE = {
-    'send-activity-reminder-every-minute': {
+    'send_activity_reminder_every_minute': {
         'task': 'Recommend.tasks.send_activity_reminder_task',
-        'schedule': 60.0,  # Chạy mỗi phút
+        'schedule': crontab(),  # Chạy mỗi phút
     },
-    'send-trip-reminder-every-minute': {
+    'send_trip_reminder_every_minute': {
         'task': 'Recommend.tasks.send_trip_reminder_task',
-        'schedule': 60.0,  # Chạy mỗi phút
+        'schedule': crontab(),  # Chạy mỗi phút
     },
 }

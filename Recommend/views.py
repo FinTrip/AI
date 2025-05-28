@@ -567,8 +567,6 @@ def recommend_travel_schedule(request):
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
-
-
 '''
 
 Kết thúc lịch trinh
@@ -2334,7 +2332,7 @@ def create_todolist_activity(request):
 
             cursor.execute(
                 """
-                INSERT INTO activities (user_id, itinerary_id, note_activities, description, date_activities, status, date_plan)
+                INSERT INTO todolist (user_id, itinerary_id, note_activities, description, date_activities, status, date_plan)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
                 [user_id, itinerary_id, note_activities, description, date_activities, status, date_plan]
@@ -2366,7 +2364,7 @@ def get_todolist_activities(request):
         cursor.execute(
             """
             SELECT activity_id, itinerary_id, note_activities, description, date_activities, status, date_plan
-            FROM activities WHERE user_id = %s
+            FROM todolist WHERE user_id = %s
             """,
             [user_id]
         )
@@ -2415,7 +2413,7 @@ def update_todolist_activities(request):
 
         cursor.execute(
             """
-            SELECT COUNT(*) FROM activities WHERE activity_id = %s AND user_id = %s
+            SELECT COUNT(*) FROM todolist WHERE activity_id = %s AND user_id = %s
             """,
             [activity_id, user_id]
         )
@@ -2430,13 +2428,11 @@ def update_todolist_activities(request):
 
         # Xóa các khóa Redis nếu thay đổi các trường liên quan
         if date_activities is not None or status is not None:
-            # Xóa khóa activity_reminder
             activity_reminder_key = f"activity_reminder:{activity_id}:*"
             for key in redis_client.keys(activity_reminder_key):
                 redis_client.delete(key)
 
         if date_plan is not None or status is not None:
-            # Xóa khóa trip_reminder
             trip_reminder_key = f"trip_reminder:{activity_id}:*"
             for key in redis_client.keys(trip_reminder_key):
                 redis_client.delete(key)
@@ -2453,7 +2449,6 @@ def update_todolist_activities(request):
         if status is not None:
             update_fields.append("status = %s")
             params.append(status)
-            # Nếu status không còn là 0, ngăn gửi email
             if status != 0:
                 activity_reminder_key = f"activity_reminder:{activity_id}:*"
                 for key in redis_client.keys(activity_reminder_key):
@@ -2477,7 +2472,7 @@ def update_todolist_activities(request):
             db.close()
             return JsonResponse({"error": "Không có trường nào để cập nhật"}, status=400)
 
-        update_query = "UPDATE activities SET " + ", ".join(update_fields) + " WHERE activity_id = %s"
+        update_query = "UPDATE todolist SET " + ", ".join(update_fields) + " WHERE activity_id = %s"
         params.append(activity_id)
 
         cursor.execute(update_query, params)
@@ -2494,6 +2489,7 @@ def update_todolist_activities(request):
         traceback.print_exc()
         logger.error(f"Error in update_activity: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
+
 
 @csrf_exempt
 @require_POST
@@ -2512,7 +2508,7 @@ def delete_todolist_activities(request):
 
         cursor.execute(
             """
-            DELETE FROM activities WHERE activity_id = %s AND user_id = %s
+            DELETE FROM todolist WHERE activity_id = %s AND user_id = %s
             """,
             [activity_id, user_id]
         )
@@ -2540,3 +2536,4 @@ def delete_todolist_activities(request):
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
+

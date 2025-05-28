@@ -80,7 +80,7 @@ def search_flight_service(origin_city, destination_city, departure_date):
         "destinationLocationCode": destination,
         "departureDate": departure_date,
         "adults": 1,
-        "max": 8
+        "max": 20
     }
 
     response = requests.get(url, headers=header, params=params)

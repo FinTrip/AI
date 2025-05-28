@@ -26,11 +26,6 @@ def send_activity_reminder_task(self):
         now = datetime.now()
         today = date.today()
 
-        # Chỉ chạy trong khoảng 8:00 đến 8:05 sáng
-        if not (now.hour == 8 and 0 <= now.minute <= 5):
-            logger.info("Không phải 8:00-8:05 sáng, bỏ qua send_activity_reminder_task")
-            return
-
         # Kiểm tra xem đã gửi email cho ngày hôm nay chưa
         last_sent_key = f"last_sent_activity_reminder:{today}"
         if redis_client.exists(last_sent_key):
@@ -45,14 +40,14 @@ def send_activity_reminder_task(self):
         cursor.execute(
             """
             SELECT a.activity_id, a.note_activities, a.date_activities, u.email, u.full_name
-            FROM activities a
+            FROM todolist a
             JOIN users u ON a.user_id = u.id
             WHERE a.status = 0 AND a.date_activities = %s
             """,
             [today]
         )
         activities = cursor.fetchall()
-        logger.info(f"Tìm thấy {len(activities)} hoạt động để nhắc nhở vào 8h sáng")
+        logger.info(f"Tìm thấy {len(activities)} hoạt động để nhắc nhở")
 
         for activity in activities:
             activity_id, note_activities, date_activities, email, full_name = activity
@@ -99,11 +94,6 @@ def send_trip_reminder_task(self):
         now = datetime.now()
         today = date.today()
 
-        # Chỉ chạy trong khoảng 7:00 đến 7:05 sáng
-        if not (now.hour == 7 and 0 <= now.minute <= 5):
-            logger.info("Không phải 7:00-7:05 sáng, bỏ qua send_trip_reminder_task")
-            return
-
         # Kiểm tra xem đã gửi email cho ngày hôm nay chưa
         last_sent_key = f"last_sent_trip_reminder:{today}"
         if redis_client.exists(last_sent_key):
@@ -118,7 +108,7 @@ def send_trip_reminder_task(self):
         cursor.execute(
             """
             SELECT a.activity_id, a.date_plan, u.email, u.full_name
-            FROM activities a
+            FROM todolist a
             JOIN users u ON a.user_id = u.id
             WHERE a.status = 0
             """
